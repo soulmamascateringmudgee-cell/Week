@@ -2,8 +2,10 @@
 (function () {
   "use strict";
 
-  // Where responses go. Change this one line to point somewhere else.
-  var TO_EMAIL = "hello@countrysmartai.com.au";
+  // Web3Forms — responses are emailed to the address this key is registered to
+  // (hello@countrysmartai.com.au). This key is safe to be public.
+  var ACCESS_KEY = "e8f05fe6-2742-4283-aa85-605939258c26";
+  var ENDPOINT = "https://api.web3forms.com/submit";
 
   // Current year in footer
   var yearEl = document.getElementById("year");
@@ -11,6 +13,7 @@
 
   var form = document.getElementById("leadForm");
   var note = document.getElementById("formNote");
+  var button = form ? form.querySelector('button[type="submit"]') : null;
   if (!form) return;
 
   form.addEventListener("submit", function (e) {
@@ -29,44 +32,68 @@
       return;
     }
 
-    // Gather ticked "time-sink" tasks
+    // Honeypot — if a bot filled this hidden field, silently pretend success
+    if (form.botcheck && form.botcheck.checked) return;
+
     var tasks = Array.prototype.slice
       .call(form.querySelectorAll('input[name="tasks"]:checked'))
       .map(function (c) { return c.value.replace(/&amp;/g, "&"); });
 
     var business = get("business");
-    var line = function (label, val) { return val ? label + ": " + val + "\n" : ""; };
 
-    var body =
-      "Hi Jessmyn,\n\n" +
-      "I filled in the Country Smart AI form — here are my answers:\n\n" +
-      "— ABOUT ME —\n" +
-      line("Name", name) +
-      line("Business", business) +
-      line("Email", email) +
-      line("Phone", get("phone")) +
-      line("What the business does", get("does")) +
-      "\n— WHERE MY TIME GOES —\n" +
-      line("What eats up most of the week", get("timedrain")) +
-      line("Hours a week lost to admin/repetitive work", get("hours")) +
-      (tasks.length ? "Time-sink tasks: " + tasks.join(", ") + "\n" : "") +
-      line("One task I'd love to stop doing", get("stop")) +
-      line("What I'd do with the time back", get("free")) +
-      "\n— LAST THING —\n" +
-      line("How I feel about AI right now", get("comfort")) +
-      line("Anything else", get("notes")) +
-      "\nThanks!\n" + name;
+    var payload = {
+      access_key: ACCESS_KEY,
+      subject: "Country Smart AI — " + (business || name),
+      from_name: "Country Smart AI website",
+      replyto: email,
+      "Name": name,
+      "Business": business,
+      "Email": email,
+      "Phone": get("phone"),
+      "What the business does": get("does"),
+      "What eats up most of the week": get("timedrain"),
+      "Hours a week lost to admin/repetitive work": get("hours"),
+      "Time-sink tasks": tasks.join(", "),
+      "One task they'd love to stop": get("stop"),
+      "What they'd do with the time back": get("free"),
+      "How they feel about AI": get("comfort"),
+      "Anything else": get("notes")
+    };
 
-    var subject = "Country Smart AI — " + (business || name);
+    setBusy(true);
+    showNote("Sending…", "");
 
-    var mailto =
-      "mailto:" + TO_EMAIL +
-      "?subject=" + encodeURIComponent(subject) +
-      "&body=" + encodeURIComponent(body);
-
-    window.location.href = mailto;
-    showNote("Opening your email app now — just press send and it comes straight to me. Thank you!", "ok");
+    fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.success) {
+          form.reset();
+          showNote("Sent! Thank you — I'll be in touch soon. 🌿", "ok");
+        } else {
+          showNote(
+            "Sorry, something went wrong sending that. Please email me directly at hello@countrysmartai.com.au.",
+            "err"
+          );
+        }
+      })
+      .catch(function () {
+        showNote(
+          "Couldn't send just now — please check your connection, or email me at hello@countrysmartai.com.au.",
+          "err"
+        );
+      })
+      .finally(function () { setBusy(false); });
   });
+
+  function setBusy(busy) {
+    if (!button) return;
+    button.disabled = busy;
+    button.textContent = busy ? "Sending…" : "Send it to me →";
+  }
 
   function showNote(msg, type) {
     if (!note) return;
