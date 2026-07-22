@@ -1,4 +1,4 @@
-// ===== Smart Country AI — interactions =====
+// ===== Country Smart AI — interactions =====
 (function () {
   "use strict";
 
@@ -39,7 +39,7 @@
 
     var body =
       "Hi Jessmyn,\n\n" +
-      "I filled in the Smart Country AI form — here are my answers:\n\n" +
+      "I filled in the Country Smart AI form — here are my answers:\n\n" +
       "— ABOUT ME —\n" +
       line("Name", name) +
       line("Business", business) +
@@ -57,7 +57,7 @@
       line("Anything else", get("notes")) +
       "\nThanks!\n" + name;
 
-    var subject = "Smart Country AI — " + (business || name);
+    var subject = "Country Smart AI — " + (business || name);
 
     var mailto =
       "mailto:" + TO_EMAIL +

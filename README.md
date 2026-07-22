@@ -1,11 +1,12 @@
-# Smart Country AI
+# Country Smart AI
 
 A single-page landing site to send to business-owner friends. They fill in a
 short form about their business and where their time goes, and it comes back to
 you as a tidy, pre-filled email so you can send them a simple plan for putting
 AI to work.
 
-**Get your week back.**
+**Practical AI systems for rural women running everything.**
+Save time · Grow income · Lighten the load.
 
 ## What's here
 
@@ -13,8 +14,9 @@ A fast, zero-dependency static site — no build step, no accounts, no backend.
 
 ```
 index.html   # The whole page (hero, how it works, why, the form)
-styles.css   # Warm country styling (green / gold / cream)
+styles.css   # Brand styling (olive green / terracotta / sage / cream)
 script.js    # Builds a pre-filled email from the form answers
+assets/      # The Country Smart AI logo (and banner)
 ```
 
 ## How the form works
@@ -44,15 +46,15 @@ just ask and it's a small change.
 - **Questions** — the form fields are in the `<form id="leadForm">` section.
   Add or remove a field in `index.html`, then add its `id` to the list in
   `script.js` so it's included in the email.
-- **Colours** — tweak the variables at the top of `styles.css`.
+- **Colours** — tweak the brand variables at the top of `styles.css`.
+- **Logo** — replace `assets/logo.png`.
 
 ## Publishing it
 
-It's a plain static site, so it deploys anywhere with zero config:
-
-- **Netlify / Vercel** — drag the folder in, or connect this repo. Framework
-  preset: **Other**; leave build command and output directory empty.
-- Then share the link with your friends.
+It's a plain static site, so it deploys anywhere with zero config. This repo is
+already connected to Vercel, so each push builds a preview automatically. To go
+live, promote the deployment to production in Vercel (or drag the folder into
+Netlify). Then share the link with your friends.
 
 ## Contact
 
