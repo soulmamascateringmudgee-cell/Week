@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coffee Kingdom Rewards — Scan QR</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Nunito:wght@600;700;800&family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --espresso:#2b1a12; --cream:#f7f0e6; --paper:#fbf7f0; --gold:#c9a24b; --gold-deep:#a9843a; --muted:#7a6455;
+      --font-head:"Playfair Display",Georgia,serif; --font-body:"Nunito",system-ui,sans-serif; --font-script:"Dancing Script",cursive;
+    }
+    *{box-sizing:border-box;}
+    html,body{margin:0;}
+    body{
+      font-family:var(--font-body); color:var(--espresso);
+      background:linear-gradient(160deg,#3a2519,#241009);
+      min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px 16px;
+    }
+    .toolbar{ display:flex; gap:12px; margin-bottom:20px; }
+    .btn{ font-family:var(--font-body); font-weight:800; font-size:.95rem; padding:12px 22px; border-radius:999px; border:2px solid var(--gold); background:var(--gold); color:var(--espresso); cursor:pointer; }
+    .btn.secondary{ background:transparent; color:var(--cream); }
+
+    .card{
+      background:var(--paper); width:100%; max-width:420px; border-radius:24px; padding:38px 34px 34px;
+      text-align:center; box-shadow:0 30px 70px -30px #000; border:1px solid #e6dccc;
+    }
+    .crown{ color:var(--gold-deep); font-size:2.6rem; line-height:1; }
+    .name{ font-family:var(--font-head); font-weight:800; font-size:1.5rem; margin:4px 0 2px; }
+    .name small{ display:block; font-family:var(--font-body); font-weight:800; letter-spacing:.3em; font-size:.62rem; text-transform:uppercase; color:var(--gold-deep); margin-top:4px; }
+    .headline{ font-family:var(--font-head); font-size:1.7rem; margin:20px 0 4px; }
+    .script{ font-family:var(--font-script); color:var(--gold-deep); font-size:1.7rem; margin:0 0 18px; }
+
+    .qr{ background:#fff; padding:16px; border-radius:16px; display:inline-block; border:1px solid #e6dccc; }
+    .qr canvas, .qr img, .qr svg{ display:block; width:230px; height:230px; }
+    .qr-fallback{ font-size:.8rem; color:var(--muted); padding:40px 10px; max-width:230px; }
+
+    .steps{ list-style:none; padding:0; margin:20px 0 8px; text-align:left; display:inline-block; }
+    .steps li{ font-weight:700; color:#4a3a30; padding:4px 0 4px 26px; position:relative; font-size:.98rem; }
+    .steps li::before{ content:"☕"; position:absolute; left:0; }
+    .offer{ display:inline-block; background:#efe2cf; color:var(--gold-deep); font-weight:800; padding:6px 16px; border-radius:999px; font-size:.92rem; margin-top:10px; }
+    .url{ margin:14px 0 0; font-size:.8rem; color:var(--muted); word-break:break-all; }
+
+    @media print{
+      body{ background:#fff; padding:0; }
+      .toolbar{ display:none; }
+      .card{ box-shadow:none; border:none; max-width:none; }
+      @page{ margin:14mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button class="btn" id="print">🖨️ Print</button>
+    <button class="btn secondary" id="download">⬇ Download PNG</button>
+  </div>
+
+  <div class="card" id="card">
+    <div class="crown" aria-hidden="true">♔</div>
+    <div class="name">Coffee Kingdom<small>Rewards</small></div>
+
+    <h1 class="headline">Check your coffee balance</h1>
+    <p class="script">Buy 5, get 7</p>
+
+    <div class="qr" id="qr"><div class="qr-fallback" id="qr-fallback">Loading QR…</div></div>
+
+    <ol class="steps">
+      <li>Scan this code with your phone camera</li>
+      <li>Sign in (or join — it's free)</li>
+      <li>See your coffees &amp; add to home screen</li>
+    </ol>
+    <div class="offer">Pay for 5 coffees · Get 7 ☕</div>
+    <p class="url" id="url"></p>
+  </div>
+
+  <script src="/app/vendor/qrcode-generator.js"></script>
+  <script>
+    (function () {
+      // The QR always points to the app on whatever domain this page is served from.
+      // (For local file preview, location.origin is "null" — the real domain is used once deployed.)
+      var origin = location.origin && location.origin !== 'null' ? location.origin : '';
+      var appUrl = (origin || 'https://your-site') + '/app/';
+      document.getElementById('url').textContent = appUrl.replace(/^https?:\/\//, '');
+
+      var box = document.getElementById('qr');
+      var svgMarkup = '';
+      try {
+        var qr = qrcode(0, 'M');       // type 0 = auto-size, error-correction level M
+        qr.addData(appUrl);
+        qr.make();
+        svgMarkup = qr.createSvgTag({ cellSize: 6, margin: 0, scalable: true });
+        box.innerHTML = svgMarkup;
+      } catch (e) {
+        document.getElementById('qr-fallback').textContent = 'Open ' + appUrl;
+      }
+
+      document.getElementById('print').addEventListener('click', function () { window.print(); });
+
+      // Download a crisp PNG rasterised from the QR SVG.
+      document.getElementById('download').addEventListener('click', function () {
+        if (!svgMarkup) return;
+        var size = 900;
+        var svg = svgMarkup
+          .replace('<svg ', '<svg width="' + size + '" height="' + size + '" ')
+          .replace(/width="100%"/, '').replace(/height="100%"/, '');
+        var img = new Image();
+        img.onload = function () {
+          var c = document.createElement('canvas');
+          c.width = c.height = size;
+          var ctx = c.getContext('2d');
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
+          ctx.drawImage(img, 0, 0, size, size);
+          var a = document.createElement('a');
+          a.href = c.toDataURL('image/png');
+          a.download = 'coffee-kingdom-rewards-qr.png'; a.click();
+        };
+        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "coffee-kingdom-loyalty",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Serverless API for the Coffee Kingdom loyalty app (buy 5, get 7).",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4"
+  }
+}
