@@ -1,66 +1,104 @@
-// ===== Bomber Boxing — interactions =====
+// ===== Country Smart AI — interactions =====
 (function () {
   "use strict";
 
-  // Mobile nav toggle
-  var toggle = document.getElementById("navToggle");
-  var mobileNav = document.getElementById("mobileNav");
-  if (toggle && mobileNav) {
-    toggle.addEventListener("click", function () {
-      var open = mobileNav.classList.toggle("open");
-      toggle.setAttribute("aria-expanded", open ? "true" : "false");
-    });
-    mobileNav.querySelectorAll("a").forEach(function (link) {
-      link.addEventListener("click", function () {
-        mobileNav.classList.remove("open");
-        toggle.setAttribute("aria-expanded", "false");
-      });
-    });
-  }
+  // Web3Forms — responses are emailed to the address this key is registered to
+  // (hello@countrysmartai.com.au). This key is safe to be public.
+  var ACCESS_KEY = "e8f05fe6-2742-4283-aa85-605939258c26";
+  var ENDPOINT = "https://api.web3forms.com/submit";
 
   // Current year in footer
   var yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // Contact form — opens the user's email client with a prefilled enquiry
-  var form = document.getElementById("signupForm");
+  var form = document.getElementById("leadForm");
   var note = document.getElementById("formNote");
-  if (form) {
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var name = form.name.value.trim();
-      var email = form.email.value.trim();
-      var phone = form.phone.value.trim();
-      var interest = form.interest.value;
+  var button = form ? form.querySelector('button[type="submit"]') : null;
+  if (!form) return;
 
-      if (!name || !email) {
-        showNote("Please add your name and email so we can get back to you.", "err");
-        return;
-      }
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-      var subject = "Bomber Boxing enquiry — " + interest;
-      var body =
-        "Hi Bomber Boxing team,\n\n" +
-        "I'd like to find out more about: " + interest + "\n\n" +
-        "Name: " + name + "\n" +
-        "Email: " + email + "\n" +
-        (phone ? "Phone: " + phone + "\n" : "") +
-        "\nThanks!";
+    var get = function (id) {
+      var el = document.getElementById(id);
+      return el ? el.value.trim() : "";
+    };
 
-      var mailto =
-        "mailto:bomberboxing@outlook.com" +
-        "?subject=" + encodeURIComponent(subject) +
-        "&body=" + encodeURIComponent(body);
+    var name = get("name");
+    var email = get("email");
 
-      window.location.href = mailto;
-      showNote("Opening your email app — hit send and we'll be in touch!", "ok");
-      form.reset();
-    });
+    if (!name || !email) {
+      showNote("Please add your name and email so I can get back to you.", "err");
+      return;
+    }
+
+    // Honeypot — if a bot filled this hidden field, silently pretend success
+    if (form.botcheck && form.botcheck.checked) return;
+
+    var tasks = Array.prototype.slice
+      .call(form.querySelectorAll('input[name="tasks"]:checked'))
+      .map(function (c) { return c.value.replace(/&amp;/g, "&"); });
+
+    var business = get("business");
+
+    var payload = {
+      access_key: ACCESS_KEY,
+      subject: "Country Smart AI — " + (business || name),
+      from_name: "Country Smart AI website",
+      replyto: email,
+      "Name": name,
+      "Business": business,
+      "Email": email,
+      "Phone": get("phone"),
+      "What the business does": get("does"),
+      "What eats up most of the week": get("timedrain"),
+      "Hours a week lost to admin/repetitive work": get("hours"),
+      "Time-sink tasks": tasks.join(", "),
+      "One task they'd love to stop": get("stop"),
+      "What they'd do with the time back": get("free"),
+      "How they feel about AI": get("comfort"),
+      "Anything else": get("notes")
+    };
+
+    setBusy(true);
+    showNote("Sending…", "");
+
+    fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.success) {
+          form.reset();
+          showNote("Sent! Thank you — I'll be in touch soon. 🌿", "ok");
+        } else {
+          showNote(
+            "Sorry, something went wrong sending that. Please email me directly at hello@countrysmartai.com.au.",
+            "err"
+          );
+        }
+      })
+      .catch(function () {
+        showNote(
+          "Couldn't send just now — please check your connection, or email me at hello@countrysmartai.com.au.",
+          "err"
+        );
+      })
+      .finally(function () { setBusy(false); });
+  });
+
+  function setBusy(busy) {
+    if (!button) return;
+    button.disabled = busy;
+    button.textContent = busy ? "Sending…" : "Send it to me →";
   }
 
   function showNote(msg, type) {
     if (!note) return;
     note.textContent = msg;
     note.className = "form-note " + type;
+    note.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 })();
