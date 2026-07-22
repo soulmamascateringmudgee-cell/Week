@@ -1,55 +1,59 @@
-# Bomber Boxing — Mudgee
+# Smart Country AI
 
-Marketing website for **Bomber Boxing**, Mudgee's community boxing gym.
+A single-page landing site to send to business-owner friends. They fill in a
+short form about their business and where their time goes, and it comes back to
+you as a tidy, pre-filled email so you can send them a simple plan for putting
+AI to work.
 
-**Train · Fit · Fight · Win**
+**Get your week back.**
 
 ## What's here
 
-A fast, zero-dependency static site — no build step required.
+A fast, zero-dependency static site — no build step, no accounts, no backend.
 
 ```
-index.html      # Single-page site (hero, about, classes, schedule, fight night, gallery, contact)
-styles.css      # Brand styling (black / red / white)
-script.js       # Mobile nav + contact form (opens a prefilled email)
-assets/         # Logo and photos
+index.html   # The whole page (hero, how it works, why, the form)
+styles.css   # Warm country styling (green / gold / cream)
+script.js    # Builds a pre-filled email from the form answers
 ```
 
-## Sections
+## How the form works
 
-- **Hero** — brand statement and calls to action
-- **About** — the four pillars (Train Hard, Get Fit, Fight Strong, Win Together)
-- **Classes** — kids, boxing fitness, S&C, sparring, fighters, open gym
-- **Schedule** — full weekly timetable
-- **Fight Night** — Mudgee Madness event (Sat 12 Sep 2026, Parklands Mudgee)
-- **Gallery** — photos from inside the gym
-- **Contact** — location, phone, email and an enquiry form
+When someone fills in the form and hits **Send it to me**, their email app
+opens with every answer neatly laid out and addressed to you. They just press
+send and it lands in your inbox — nothing is stored anywhere else, and no
+third-party service is involved.
 
-## Deploying to Vercel
+- **Change where responses go:** edit the one line at the top of `script.js`:
+  ```js
+  var TO_EMAIL = "jessmyn.toovey@hotmail.com";
+  ```
+  (also update the address shown in the footer of `index.html`).
 
-This is a plain static site, so it deploys with **zero configuration**.
+### Want responses to arrive automatically instead?
 
-**Option A — Git (recommended)**
-1. Push this repo to GitHub.
-2. In Vercel, *Add New → Project* and import the repo.
-3. Framework preset: **Other**. Leave build command and output directory empty.
-4. Deploy.
-
-**Option B — Vercel CLI**
-```bash
-npm i -g vercel
-vercel        # preview
-vercel --prod # production
-```
+The email approach needs the person to press "send" in their own mail app,
+which is occasionally fiddly on phones. If you'd rather answers arrive on their
+own (no send step), the page can be switched to a free form service like
+[Web3Forms](https://web3forms.com) or [Netlify Forms](https://docs.netlify.com/manage/forms/setup/) —
+just ask and it's a small change.
 
 ## Editing content
 
-- **Schedule** — edit the `<table class="schedule-table">` in `index.html`.
-- **Contact details** — search `index.html` for the phone/email/address.
-- **Fight night** — update the `#event` section and swap the poster in `assets/`.
-- **Photos** — drop new images in `assets/` and update the `<img>` `src` paths.
+- **Wording** — all copy lives in `index.html`; edit the text directly.
+- **Questions** — the form fields are in the `<form id="leadForm">` section.
+  Add or remove a field in `index.html`, then add its `id` to the list in
+  `script.js` so it's included in the email.
+- **Colours** — tweak the variables at the top of `styles.css`.
+
+## Publishing it
+
+It's a plain static site, so it deploys anywhere with zero config:
+
+- **Netlify / Vercel** — drag the folder in, or connect this repo. Framework
+  preset: **Other**; leave build command and output directory empty.
+- Then share the link with your friends.
 
 ## Contact
 
-Unit 7, 22–26 Sydney Road, Mudgee (behind Mudgee Camping & 4WD)
-0411 042 757 · bomberboxing@outlook.com
+jessmyn.toovey@hotmail.com
