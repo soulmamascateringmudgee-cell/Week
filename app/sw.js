@@ -1,13 +1,13 @@
 /* Coffee Kingdom Rewards — service worker (network-first, offline fallback) */
 const CACHE = 'ck-rewards-v2';
 const ASSETS = [
-  './',
-  './index.html',
-  './app.css',
-  './app.js',
-  './manifest.webmanifest',
-  './icon-192.png',
-  './icon-512.png',
+  '/app/',
+  '/app/index.html',
+  '/app/app.css',
+  '/app/app.js',
+  '/app/manifest.webmanifest',
+  '/app/icon-192.png',
+  '/app/icon-512.png',
 ];
 
 self.addEventListener('install', (e) => {
