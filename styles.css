@@ -117,13 +117,10 @@ legend {
 }
 .hero-inner { position: relative; max-width: 760px; }
 .hero-logo {
-  width: 168px;
+  width: 200px;
   height: auto;
-  margin: 0 auto 1.4rem;
-  border-radius: 20px;
-  background: var(--white);
-  padding: 8px;
-  box-shadow: var(--shadow);
+  margin: 0 auto 1.1rem;
+  filter: drop-shadow(0 10px 22px rgba(43, 51, 29, 0.16));
 }
 .hero-title {
   font-size: clamp(3rem, 8vw, 5rem);
