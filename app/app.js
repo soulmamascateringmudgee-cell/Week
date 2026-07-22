@@ -43,7 +43,7 @@
     $('note-get').textContent = cfg.bundleCoffees;
     $('buy-price').textContent = money(cfg.priceCents, cfg.currency);
 
-    // handle Stripe return
+    // handle return from Square checkout
     const params = new URLSearchParams(location.search);
     const paid = params.get('paid');
     if (paid) {

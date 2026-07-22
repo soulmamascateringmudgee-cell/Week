@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   return send(res, 200, {
     configured: Boolean(supabaseUrl && supabaseAnonKey),
-    paymentsConfigured: Boolean(process.env.STRIPE_SECRET_KEY),
+    paymentsConfigured: Boolean(process.env.SQUARE_ACCESS_TOKEN && process.env.SQUARE_LOCATION_ID),
     supabaseUrl,
     supabaseAnonKey,
     payCoffees: cfg.payCoffees,

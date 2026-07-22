@@ -24,7 +24,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   // Never cache API or auth calls — always hit the network.
-  if (url.pathname.startsWith('/api/') || url.hostname.includes('supabase') || url.hostname.includes('stripe')) {
+  if (url.pathname.startsWith('/api/') || url.hostname.includes('supabase') || url.hostname.includes('square')) {
     return;
   }
   if (e.request.method !== 'GET') return;

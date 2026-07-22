@@ -27,7 +27,7 @@ create table if not exists public.transactions (
   kind              text not null check (kind in ('purchase', 'redeem', 'adjust')),
   coffees           int  not null,          -- +7 on purchase, -1 on redeem
   amount_cents      int,                    -- money paid (purchases only)
-  stripe_session_id text,
+  external_ref      text,                   -- payment id from Square (idempotency)
   staff_note        text,
   created_at        timestamptz not null default now()
 );
@@ -110,7 +110,7 @@ end;
 $$;
 
 -- ---------- Atomic credit helper ------------------------------------
--- Adds a purchased bundle. Called by the Stripe webhook (service role).
+-- Adds a purchased bundle. Called by the Square payment webhook (service role).
 
 create or replace function public.add_credit(
   p_user uuid, p_coffees int, p_amount_cents int, p_session text)
@@ -121,8 +121,8 @@ as $$
 declare
   new_balance int;
 begin
-  -- Idempotency: ignore a Stripe session we've already processed
-  if exists (select 1 from public.transactions where stripe_session_id = p_session) then
+  -- Idempotency: ignore a payment we've already processed
+  if exists (select 1 from public.transactions where external_ref = p_session) then
     select balance into new_balance from public.credits where user_id = p_user;
     return new_balance;
   end if;
@@ -133,7 +133,7 @@ begin
     do update set balance = public.credits.balance + p_coffees, updated_at = now()
   returning balance into new_balance;
 
-  insert into public.transactions (user_id, kind, coffees, amount_cents, stripe_session_id)
+  insert into public.transactions (user_id, kind, coffees, amount_cents, external_ref)
     values (p_user, 'purchase', p_coffees, p_amount_cents, p_session);
 
   return new_balance;

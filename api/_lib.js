@@ -29,6 +29,21 @@ export async function userFromRequest(req) {
   return data.user;
 }
 
+// ---- Square helpers -------------------------------------------------
+export function squareBase() {
+  return process.env.SQUARE_ENVIRONMENT === 'production'
+    ? 'https://connect.squareup.com'
+    : 'https://connect.squareupsandbox.com';
+}
+
+export function squareHeaders() {
+  return {
+    'Authorization': `Bearer ${process.env.SQUARE_ACCESS_TOKEN}`,
+    'Square-Version': process.env.SQUARE_VERSION || '2024-10-17',
+    'Content-Type': 'application/json',
+  };
+}
+
 export function send(res, status, body) {
   res.status(status).setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify(body));
