@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Coffee Kingdom Rewards</title>
+  <meta name="description" content="Coffee Kingdom Rewards — buy 5 coffees, get 7. Track your balance and redeem at either Mudgee café." />
+  <meta name="theme-color" content="#2b1a12" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+  <div class="app" id="app">
+
+    <!-- Loading -->
+    <section class="screen is-active" id="screen-loading">
+      <div class="loader">
+        <span class="crown">♔</span>
+        <p>Loading Coffee Kingdom Rewards…</p>
+      </div>
+    </section>
+
+    <!-- Not-configured notice (shown until Supabase/Stripe env vars are set) -->
+    <section class="screen" id="screen-setup">
+      <div class="card card--center">
+        <span class="crown crown--lg">♔</span>
+        <h1>Almost ready</h1>
+        <p class="muted">The rewards app is deployed but not yet connected to its accounts. Follow <strong>LOYALTY-APP-SETUP.md</strong> to add your Supabase &amp; Stripe keys, then reload.</p>
+      </div>
+    </section>
+
+    <!-- Auth (sign in / sign up) -->
+    <section class="screen" id="screen-auth">
+      <header class="brand">
+        <span class="crown">♔</span>
+        <div class="brand__name">Coffee Kingdom<small>Rewards</small></div>
+      </header>
+
+      <div class="card">
+        <h1 id="auth-title">Welcome back</h1>
+        <p class="offer-pill">Pay for <b id="auth-pay">5</b> · Get <b id="auth-get">7</b> ☕</p>
+
+        <form id="auth-form" novalidate>
+          <div class="field" id="field-name" hidden>
+            <label for="name">Your name</label>
+            <input type="text" id="name" autocomplete="name" placeholder="Jane Smith" />
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" autocomplete="email" placeholder="you@email.com" required />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" autocomplete="current-password" placeholder="••••••••" required minlength="6" />
+          </div>
+          <p class="form-error" id="auth-error" hidden></p>
+          <button type="submit" class="btn btn--gold btn--block" id="auth-submit">Sign in</button>
+        </form>
+
+        <p class="switch">
+          <span id="switch-text">New here?</span>
+          <a href="#" id="switch-link">Create an account</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- Main card / balance -->
+    <section class="screen" id="screen-main">
+      <header class="brand brand--row">
+        <div class="brand__left">
+          <span class="crown">♔</span>
+          <div class="brand__name">Coffee Kingdom<small>Rewards</small></div>
+        </div>
+        <button class="linkbtn" id="signout">Sign out</button>
+      </header>
+
+      <div class="loyalty">
+        <p class="loyalty__hello" id="hello">Hi there 👋</p>
+        <div class="loyalty__balance">
+          <span class="loyalty__num" id="balance">0</span>
+          <span class="loyalty__label">coffees left</span>
+        </div>
+        <div class="cups" id="cups" aria-hidden="true"></div>
+
+        <div class="loyalty__actions">
+          <button class="btn btn--gold btn--block" id="buy">Buy a bundle · <span id="buy-price">$27.50</span></button>
+          <button class="btn btn--ghost btn--block" id="redeem" disabled>Use a coffee</button>
+        </div>
+        <p class="offer-note">Pay for <b id="note-pay">5</b>, get <b id="note-get">7</b>. Redeem at either Mudgee café.</p>
+      </div>
+
+      <div class="card history">
+        <h2>Recent activity</h2>
+        <ul id="history-list"><li class="muted">No activity yet.</li></ul>
+      </div>
+
+      <p class="applink"><a href="../index.html">← Back to the Coffee Kingdom website</a></p>
+    </section>
+
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- Redeem modal (staff PIN) -->
+  <div class="modal" id="modal-redeem" hidden>
+    <div class="modal__box">
+      <h2>Staff redemption</h2>
+      <p class="muted">Hand your phone to the barista — they'll enter the café PIN to take one coffee off your balance.</p>
+      <div class="field">
+        <label for="pin">Staff PIN</label>
+        <input type="tel" id="pin" inputmode="numeric" autocomplete="one-time-code" placeholder="••••" />
+      </div>
+      <p class="form-error" id="redeem-error" hidden></p>
+      <div class="modal__actions">
+        <button class="btn btn--ghost" id="redeem-cancel">Cancel</button>
+        <button class="btn btn--gold" id="redeem-confirm">Redeem 1 coffee</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

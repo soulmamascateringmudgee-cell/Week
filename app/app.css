@@ -1,0 +1,114 @@
+/* ===== Coffee Kingdom Rewards — app styling ===== */
+:root {
+  --espresso:#2b1a12; --coffee:#4a2f20; --caramel:#c68a5b;
+  --cream:#f7f0e6; --paper:#fbf7f0; --gold:#c9a24b; --gold-deep:#a9843a;
+  --ink:#2b1a12; --muted:#7a6455; --line:#e6dccc; --danger:#b0453a;
+  --font-head:"Playfair Display",Georgia,serif;
+  --font-body:"Nunito",system-ui,sans-serif;
+  --font-script:"Dancing Script",cursive;
+  --radius:18px;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; }
+body {
+  font-family:var(--font-body); color:var(--ink);
+  background:linear-gradient(170deg,#33200f 0%,#241009 60%,#1a0b06 100%);
+  min-height:100vh; min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+}
+a { color:var(--gold-deep); }
+.muted { color:var(--muted); }
+
+.app { max-width:460px; margin:0 auto; padding:0 16px env(safe-area-inset-bottom); min-height:100dvh; }
+
+/* screens */
+.screen { display:none; padding:22px 0 40px; }
+.screen.is-active { display:block; }
+
+/* brand header */
+.brand { display:flex; align-items:center; gap:10px; padding:14px 4px 20px; color:var(--cream); }
+.brand--row { justify-content:space-between; }
+.brand__left { display:flex; align-items:center; gap:10px; }
+.crown { color:var(--gold); font-size:1.7rem; line-height:1; }
+.crown--lg { font-size:3rem; display:block; margin-bottom:6px; }
+.brand__name { font-family:var(--font-head); font-weight:700; font-size:1.15rem; line-height:1; color:var(--cream); display:flex; flex-direction:column; }
+.brand__name small { font-family:var(--font-body); font-weight:800; font-size:.58rem; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); margin-top:4px; }
+
+/* cards */
+.card { background:var(--paper); border-radius:var(--radius); padding:26px 22px; box-shadow:0 20px 50px -24px rgba(0,0,0,.6); }
+.card--center { text-align:center; margin-top:12vh; }
+.card h1 { font-family:var(--font-head); font-size:1.7rem; margin:0 0 6px; color:var(--espresso); }
+.card h2 { font-family:var(--font-head); font-size:1.15rem; margin:0 0 12px; color:var(--espresso); }
+
+/* offer pill */
+.offer-pill { display:inline-block; background:#efe2cf; color:var(--gold-deep); font-weight:800; padding:6px 14px; border-radius:999px; font-size:.9rem; margin:0 0 18px; }
+.offer-pill b { color:var(--espresso); }
+
+/* form */
+.field { margin-bottom:14px; }
+.field label { display:block; font-weight:800; font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--espresso); margin-bottom:6px; }
+.field input { width:100%; padding:13px 14px; border:1.5px solid var(--line); border-radius:12px; font-family:var(--font-body); font-size:1.05rem; background:#fff; color:var(--ink); }
+.field input:focus { outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,162,75,.22); }
+.form-error { color:var(--danger); font-weight:700; font-size:.9rem; margin:4px 0 12px; }
+
+.switch { text-align:center; margin:18px 0 0; font-size:.95rem; color:var(--muted); }
+.switch a { font-weight:800; }
+
+/* buttons */
+.btn { font-family:var(--font-body); font-weight:800; font-size:1rem; padding:14px 22px; border-radius:999px; border:2px solid transparent; cursor:pointer; transition:transform .12s ease,background .2s ease,color .2s ease,opacity .2s; }
+.btn:active { transform:scale(.98); }
+.btn--gold { background:var(--gold); color:var(--espresso); }
+.btn--gold:hover { background:var(--gold-deep); color:#fff; }
+.btn--ghost { background:transparent; border-color:var(--caramel); color:var(--cream); }
+.btn--ghost:hover { background:var(--caramel); color:var(--espresso); }
+.btn--block { width:100%; display:block; }
+.btn:disabled { opacity:.45; cursor:not-allowed; }
+.linkbtn { background:none; border:0; color:var(--gold); font-weight:800; cursor:pointer; font-size:.9rem; }
+
+/* loyalty card */
+.loyalty { background:linear-gradient(150deg,#3a2519,#241009); border:1px solid rgba(201,162,75,.3); border-radius:24px; padding:28px 22px; text-align:center; color:var(--cream); box-shadow:0 24px 60px -30px #000; }
+.loyalty__hello { color:#e7d6c5; font-weight:700; margin:0 0 6px; }
+.loyalty__balance { display:flex; align-items:baseline; justify-content:center; gap:10px; margin:6px 0 4px; }
+.loyalty__num { font-family:var(--font-head); font-weight:800; font-size:4.4rem; line-height:1; color:var(--gold); }
+.loyalty__label { text-transform:uppercase; letter-spacing:.16em; font-size:.72rem; font-weight:800; color:#d9c7b6; }
+.cups { display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin:16px 0 22px; min-height:26px; }
+.cups span { font-size:1.35rem; filter:grayscale(1) opacity(.35); transition:filter .2s; }
+.cups span.filled { filter:none; }
+.loyalty__actions { display:grid; gap:10px; }
+.offer-note { font-size:.82rem; color:#d9c7b6; margin:16px 0 0; }
+.offer-note b { color:var(--gold); }
+
+/* history */
+.history { margin-top:20px; }
+#history-list { list-style:none; padding:0; margin:0; }
+#history-list li { display:flex; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px dashed var(--line); font-size:.95rem; color:#4a3a30; }
+#history-list li:last-child { border-bottom:0; }
+#history-list li .amt { font-weight:800; }
+#history-list li .amt.pos { color:#2e7d32; }
+#history-list li .amt.neg { color:var(--coffee); }
+#history-list li .when { color:var(--muted); font-size:.82rem; }
+
+.applink { text-align:center; margin:22px 0 0; }
+.applink a { color:#d9c7b6; font-weight:700; font-size:.9rem; }
+
+/* loader */
+.loader { text-align:center; color:var(--cream); margin-top:26vh; }
+.loader .crown { font-size:2.6rem; animation:pulse 1.3s ease-in-out infinite; }
+.loader p { color:#d9c7b6; margin-top:12px; }
+@keyframes pulse { 0%,100%{opacity:.4;} 50%{opacity:1;} }
+
+/* toast */
+.toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%); background:var(--espresso); color:var(--cream); padding:13px 20px; border-radius:999px; font-weight:700; box-shadow:0 12px 30px -10px #000; z-index:60; max-width:90%; text-align:center; border:1px solid rgba(201,162,75,.4); }
+.toast.ok { border-color:#4caf50; }
+.toast.err { border-color:var(--danger); }
+
+/* modal */
+.modal { position:fixed; inset:0; background:rgba(20,10,5,.7); display:flex; align-items:center; justify-content:center; padding:20px; z-index:70; backdrop-filter:blur(3px); }
+.modal[hidden] { display:none; }
+.modal__box { background:var(--paper); border-radius:var(--radius); padding:26px 22px; width:100%; max-width:360px; box-shadow:0 30px 70px -20px #000; }
+.modal__box h2 { font-family:var(--font-head); margin:0 0 8px; color:var(--espresso); }
+.modal__actions { display:flex; gap:10px; margin-top:8px; }
+.modal__actions .btn { flex:1; padding:12px; }
+
+@keyframes reduce { }
+@media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }

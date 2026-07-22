@@ -312,6 +312,15 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.12; margin: 0 0 .5em;
 }
 .contact__fb:hover { border-color: var(--gold); }
 
+/* ---------- Rewards ---------- */
+.rewards { background: var(--espresso); color: var(--cream); text-align: center; }
+.rewards__inner { max-width: 640px; }
+.rewards__crown { color: var(--gold); font-size: 2.6rem; display: block; margin-bottom: 6px; }
+.rewards h2 { font-size: clamp(1.9rem, 4vw, 2.8rem); color: var(--cream); }
+.rewards__lead { color: #e2d1c1; font-size: 1.08rem; margin: 0 auto 26px; }
+.rewards__actions { display: flex; justify-content: center; }
+.rewards__note { color: #b99e86; font-size: .85rem; margin: 18px 0 0; font-weight: 700; }
+
 /* ---------- Footer ---------- */
 .footer { background: #1a0b06; color: #d9c7b6; padding: 52px 0 26px; }
 .footer__inner { display: flex; justify-content: space-between; gap: 30px; flex-wrap: wrap; align-items: flex-start; }
