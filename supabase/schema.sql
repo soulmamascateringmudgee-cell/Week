@@ -139,3 +139,14 @@ begin
   return new_balance;
 end;
 $$;
+
+-- ---------- Lock down the helpers -----------------------------------
+-- These SECURITY DEFINER functions can grant/spend coffees, so they must NOT be
+-- callable by customers. Revoke from everyone, then grant only to service_role
+-- (used by the app's server endpoints after auth / staff-PIN / payment checks).
+
+revoke all on function public.add_credit(uuid, int, int, text) from public, anon, authenticated;
+revoke all on function public.redeem_one(uuid, text)          from public, anon, authenticated;
+
+grant execute on function public.add_credit(uuid, int, int, text) to service_role;
+grant execute on function public.redeem_one(uuid, text)          to service_role;
