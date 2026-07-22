@@ -1,11 +1,15 @@
 // Shared helpers for the Coffee Kingdom loyalty API (Vercel serverless).
 import { createClient } from '@supabase/supabase-js';
 
+// Strip anything outside printable ASCII (defensive against paste gremlins that
+// slip invisible/unicode characters into env vars and break request headers).
+const clean = (s) => (s || '').replace(/[^\x21-\x7E]/g, '');
+
 // Service-role Supabase client — bypasses RLS. NEVER expose this key to the browser.
 export function admin() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) throw new Error('Supabase env not configured');
+  const url = clean(process.env.SUPABASE_URL) || 'https://gcasdasjlbxggnxcvtzp.supabase.co';
+  const key = clean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+  if (!key) throw new Error('Supabase service role key not configured');
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
