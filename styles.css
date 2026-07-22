@@ -178,6 +178,9 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.12; margin: 0 0 .5em;
 }
 .hero__lead strong { color: #fff; }
 .hero__actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+/* On the dark hero, the ghost button needs a light outline to be legible */
+.hero__actions .btn--ghost { border-color: var(--cream); color: var(--cream); }
+.hero__actions .btn--ghost:hover { background: var(--cream); color: var(--espresso); }
 .hero__badges {
   list-style: none; margin: 44px 0 0; padding: 0;
   display: flex; gap: 12px 26px; justify-content: center; flex-wrap: wrap;
@@ -328,14 +331,20 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.12; margin: 0 0 .5em;
   .nav__links {
     position: fixed; inset: 70px 0 auto 0;
     flex-direction: column; align-items: flex-start; gap: 0;
-    background: rgba(43,26,18,.98); padding: 10px 22px 24px;
-    max-height: 0; overflow: hidden; transition: max-height .3s ease;
+    background: rgba(43,26,18,.98); padding: 0 22px;
+    max-height: 0; overflow: hidden; visibility: hidden;
+    transition: max-height .3s ease, padding .3s ease, visibility .3s;
     border-bottom: 1px solid rgba(201,162,75,.25);
   }
-  .nav__links.is-open { max-height: 420px; }
+  .nav__links.is-open { max-height: 460px; padding: 10px 22px 24px; visibility: visible; }
   .nav__links a { width: 100%; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
   .nav__links a:not(.nav__cta)::after { display: none; }
   .nav__cta { margin-top: 12px; text-align: center; }
+
+  /* Hero: remove the tall centred dead-space under the nav on smaller screens */
+  .hero { min-height: auto; align-items: flex-start; }
+  .hero__inner { padding-top: 56px; padding-bottom: 76px; }
+  .hero__badges { margin-top: 34px; }
 
   .about__grid, .cart__grid, .contact__grid { grid-template-columns: 1fr; gap: 40px; }
   .about__media { order: -1; }
@@ -348,7 +357,7 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.12; margin: 0 0 .5em;
 @media (max-width: 560px) {
   .menu__grid { grid-template-columns: 1fr; }
   .field--split { grid-template-columns: 1fr; }
-  .hero { min-height: 88vh; }
+  .hero__inner { padding-top: 44px; padding-bottom: 64px; }
   .about__stats { gap: 20px; }
   .footer__inner { flex-direction: column; }
 }
