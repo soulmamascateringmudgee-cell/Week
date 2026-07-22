@@ -1,5 +1,5 @@
-/* Coffee Kingdom Rewards — service worker (offline shell) */
-const CACHE = 'ck-rewards-v1';
+/* Coffee Kingdom Rewards — service worker (network-first, offline fallback) */
+const CACHE = 'ck-rewards-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -23,17 +23,21 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
-  // Never cache API or auth calls — always hit the network.
+  // Never touch API or auth/payment calls — always hit the network.
   if (url.pathname.startsWith('/api/') || url.hostname.includes('supabase') || url.hostname.includes('square')) {
     return;
   }
   if (e.request.method !== 'GET') return;
-  // Cache-first for the app shell, falling back to network.
+
+  // Network-first: always try to load the freshest asset when online (so deploys
+  // land immediately), and fall back to the cached copy only when offline.
   e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
-      return res;
-    }).catch(() => cached))
+    fetch(e.request)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
