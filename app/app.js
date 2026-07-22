@@ -103,7 +103,7 @@
       errEl.hidden = false;
     } finally {
       btn.disabled = false;
-      setAuthMode(signupMode);
+      btn.textContent = signupMode ? 'Create account' : 'Sign in';
     }
   });
 
