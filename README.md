@@ -28,7 +28,7 @@ third-party service is involved.
 
 - **Change where responses go:** edit the one line at the top of `script.js`:
   ```js
-  var TO_EMAIL = "jessmyn.toovey@hotmail.com";
+  var TO_EMAIL = "hello@countrysmartai.com.au";
   ```
   (also update the address shown in the footer of `index.html`).
 
@@ -58,4 +58,4 @@ Netlify). Then share the link with your friends.
 
 ## Contact
 
-jessmyn.toovey@hotmail.com
+hello@countrysmartai.com.au

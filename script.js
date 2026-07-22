@@ -3,7 +3,7 @@
   "use strict";
 
   // Where responses go. Change this one line to point somewhere else.
-  var TO_EMAIL = "jessmyn.toovey@hotmail.com";
+  var TO_EMAIL = "hello@countrysmartai.com.au";
 
   // Current year in footer
   var yearEl = document.getElementById("year");
