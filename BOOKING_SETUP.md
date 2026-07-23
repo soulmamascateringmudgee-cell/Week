@@ -1,7 +1,7 @@
 # Setting up Fresha bookings for Restore
 
 The website is already wired for online booking. Once Lauren has a Fresha
-"Book Now" link, adding it takes **one line** — see step 4.
+"Book Now" link, adding it takes **one line** - see step 4.
 
 ## 1. Create the Fresha account (Lauren)
 
@@ -70,7 +70,7 @@ service with its duration and price.
 
 ## 3. Set opening hours
 
-In Fresha: **Settings → Business hours**. (Confirm Lauren's real hours — the
+In Fresha: **Settings → Business hours**. (Confirm Lauren's real hours - the
 website currently shows Mon closed · Tue–Fri 9:00–5:00 · Sat 9:00–1:00 · Sun closed.)
 
 ## 4. Get the booking link and add it to the site
@@ -85,7 +85,7 @@ website currently shows Mon closed · Tue–Fri 9:00–5:00 · Sat 9:00–1:00 �
 3. Save. Every "Book Now / Book an Appointment / Book a Treatment" button now
    opens Fresha in a new tab. (Send it to me and I'll paste it in for you.)
 
-## 5. Optional — embed booking on the page
+## 5. Optional - embed booking on the page
 
 Fresha also offers a "Book Now" **embed widget** (a `<place-widget>` snippet).
 If you'd prefer clients book without leaving the site, send me the widget code

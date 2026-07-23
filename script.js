@@ -1,9 +1,9 @@
-// ===== Restore Massage and Beauty — interactions =====
+// ===== Restore Massage and Beauty interactions =====
 (function () {
   "use strict";
 
   // =====================================================================
-  // BOOKING LINK — paste Restore's Fresha "Book Now" link between the quotes.
+  // BOOKING LINK: paste Restore's Fresha "Book Now" link between the quotes.
   // Example: "https://www.fresha.com/a/restore-massage-and-beauty-mudgee-...".
   // Once set, every "Book" button on the site opens Fresha in a new tab.
   // Leave it empty ("") and the buttons simply scroll to the enquiry section.
@@ -38,7 +38,7 @@
   var yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // Enquiry form — opens the user's email client with a prefilled message.
+  // Enquiry form: opens the user's email client with a prefilled message.
   // EDIT: change the address below to Restore's real email.
   var RESTORE_EMAIL = "hello@restorebeautyandmassage.com.au";
   var form = document.getElementById("enquiryForm");
@@ -56,7 +56,7 @@
         return;
       }
 
-      var subject = "Booking enquiry — " + interest;
+      var subject = "Booking enquiry: " + interest;
       var body =
         "Hi Restore team,\n\n" +
         "I'd like to enquire about: " + interest + "\n\n" +
@@ -71,7 +71,7 @@
         "&body=" + encodeURIComponent(body);
 
       window.location.href = mailto;
-      showNote("Opening your email app — hit send and we'll be in touch soon.", "ok");
+      showNote("Opening your email app. Hit send and we'll be in touch soon.", "ok");
       form.reset();
     });
   }
