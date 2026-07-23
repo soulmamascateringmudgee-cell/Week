@@ -304,8 +304,12 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; line-height
 .footer-links a { text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.78rem; color: rgba(246,242,233,0.85); }
 .footer-links a:hover { color: var(--cream); }
 .footer-bar { border-top: 1px solid rgba(246,242,233,0.15); }
-.footer-bar .container { padding: 20px 24px; }
-.footer-bar p { margin: 0; font-size: 0.78rem; color: rgba(246,242,233,0.6); text-align: center; }
+.footer-bar-inner { padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.footer-bar p { margin: 0; font-size: 0.78rem; color: rgba(246,242,233,0.6); }
+.credit { display: inline-flex; align-items: center; gap: 8px; }
+.credit strong { color: rgba(246,242,233,0.85); font-weight: 500; }
+.credit-logo { height: 22px; width: auto; border-radius: 3px; }
+@media (max-width: 620px) { .footer-bar-inner { flex-direction: column; text-align: center; } }
 
 /* ===== Responsive ===== */
 @media (max-width: 860px) {
