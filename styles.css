@@ -156,8 +156,23 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; line-height
 .about-points li { position: relative; padding-left: 26px; margin-bottom: 10px; color: var(--ink); }
 .about-points li::before { content: "✦"; position: absolute; left: 0; color: var(--green); font-size: 0.8rem; top: 2px; }
 
+/* ===== Why Restore ===== */
+.why { background: var(--cream); }
+.why-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.why-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+  padding: 44px 30px; text-align: center;
+  box-shadow: 0 12px 34px rgba(51,81,63,0.06); transition: transform .3s ease, box-shadow .3s ease;
+}
+.why-card:hover { transform: translateY(-4px); box-shadow: 0 20px 44px rgba(51,81,63,0.12); }
+.why-icon { color: var(--green); margin: 0 auto 22px; width: 46px; height: 46px; }
+.why-icon svg { width: 100%; height: 100%; }
+.why-card h3 { font-size: 1.55rem; color: var(--green-deep); margin-bottom: 12px; }
+.why-card p { margin: 0; color: var(--muted); font-size: 0.98rem; }
+
 /* ===== Services ===== */
 .services { background: var(--cream-2); }
+.menu-sub { text-align: center; color: var(--muted); font-size: 0.92rem; margin: -12px 0 24px; }
 .menu { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; max-width: 940px; margin: 0 auto; }
 .menu-heading {
   font-size: 1.9rem; color: var(--green-deep); text-align: center;
@@ -233,6 +248,7 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; line-height
   .mobile-nav.open { display: flex; }
   .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 40px; }
   .about-media::after { display: none; }
+  .why-grid { grid-template-columns: 1fr; gap: 18px; }
   .menu { grid-template-columns: 1fr; gap: 40px; }
   .gallery-grid { grid-template-columns: 1fr 1fr; }
   .gallery-item.tall { grid-row: span 1; grid-column: span 2; }
