@@ -2,6 +2,22 @@
 (function () {
   "use strict";
 
+  // =====================================================================
+  // BOOKING LINK — paste Restore's Fresha "Book Now" link between the quotes.
+  // Example: "https://www.fresha.com/a/restore-massage-and-beauty-mudgee-...".
+  // Once set, every "Book" button on the site opens Fresha in a new tab.
+  // Leave it empty ("") and the buttons simply scroll to the enquiry section.
+  // =====================================================================
+  var BOOKING_URL = "";
+
+  if (BOOKING_URL) {
+    document.querySelectorAll("[data-book]").forEach(function (el) {
+      el.setAttribute("href", BOOKING_URL);
+      el.setAttribute("target", "_blank");
+      el.setAttribute("rel", "noopener");
+    });
+  }
+
   // Mobile nav toggle
   var toggle = document.getElementById("navToggle");
   var mobileNav = document.getElementById("mobileNav");
