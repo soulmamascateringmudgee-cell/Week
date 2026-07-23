@@ -1,6 +1,22 @@
-// ===== Bomber Boxing — interactions =====
+// ===== Restore Massage and Beauty interactions =====
 (function () {
   "use strict";
+
+  // =====================================================================
+  // BOOKING LINK: paste Restore's Fresha "Book Now" link between the quotes.
+  // Example: "https://www.fresha.com/a/restore-massage-and-beauty-mudgee-...".
+  // Once set, every "Book" button on the site opens Fresha in a new tab.
+  // Leave it empty ("") and the buttons simply scroll to the enquiry section.
+  // =====================================================================
+  var BOOKING_URL = "";
+
+  if (BOOKING_URL) {
+    document.querySelectorAll("[data-book]").forEach(function (el) {
+      el.setAttribute("href", BOOKING_URL);
+      el.setAttribute("target", "_blank");
+      el.setAttribute("rel", "noopener");
+    });
+  }
 
   // Mobile nav toggle
   var toggle = document.getElementById("navToggle");
@@ -22,38 +38,40 @@
   var yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // Contact form — opens the user's email client with a prefilled enquiry
-  var form = document.getElementById("signupForm");
+  // Enquiry form: opens the user's email client with a prefilled message.
+  // EDIT: change the address below to Restore's real email.
+  var RESTORE_EMAIL = "hello@restorebeautyandmassage.com.au";
+  var form = document.getElementById("enquiryForm");
   var note = document.getElementById("formNote");
   if (form) {
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var name = form.name.value.trim();
       var email = form.email.value.trim();
-      var phone = form.phone.value.trim();
       var interest = form.interest.value;
+      var message = form.message.value.trim();
 
       if (!name || !email) {
         showNote("Please add your name and email so we can get back to you.", "err");
         return;
       }
 
-      var subject = "Bomber Boxing enquiry — " + interest;
+      var subject = "Booking enquiry: " + interest;
       var body =
-        "Hi Bomber Boxing team,\n\n" +
-        "I'd like to find out more about: " + interest + "\n\n" +
+        "Hi Restore team,\n\n" +
+        "I'd like to enquire about: " + interest + "\n\n" +
+        (message ? message + "\n\n" : "") +
         "Name: " + name + "\n" +
         "Email: " + email + "\n" +
-        (phone ? "Phone: " + phone + "\n" : "") +
-        "\nThanks!";
+        "\nThank you!";
 
       var mailto =
-        "mailto:bomberboxing@outlook.com" +
+        "mailto:" + RESTORE_EMAIL +
         "?subject=" + encodeURIComponent(subject) +
         "&body=" + encodeURIComponent(body);
 
       window.location.href = mailto;
-      showNote("Opening your email app — hit send and we'll be in touch!", "ok");
+      showNote("Opening your email app. Hit send and we'll be in touch soon.", "ok");
       form.reset();
     });
   }

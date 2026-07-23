@@ -1,55 +1,50 @@
-# Bomber Boxing — Mudgee
+# Restore Massage and Beauty
 
-Marketing website for **Bomber Boxing**, Mudgee's community boxing gym.
+Marketing website for **Restore Massage and Beauty**.
 
-**Train · Fit · Fight · Win**
+**Relax · Refresh · Reconnect**
+
+A fast, zero-dependency static site - no build step, deploys to Vercel with zero configuration.
 
 ## What's here
 
-A fast, zero-dependency static site — no build step required.
-
 ```
-index.html      # Single-page site (hero, about, classes, schedule, fight night, gallery, contact)
-styles.css      # Brand styling (black / red / white)
-script.js       # Mobile nav + contact form (opens a prefilled email)
-assets/         # Logo and photos
+index.html      # Single-page site (hero, about, services, gallery, contact)
+styles.css      # Brand styling (sage green / cream)
+script.js       # Mobile nav + enquiry form (opens a prefilled email)
+assets/         # Real logo and studio photos
 ```
-
-## Sections
-
-- **Hero** — brand statement and calls to action
-- **About** — the four pillars (Train Hard, Get Fit, Fight Strong, Win Together)
-- **Classes** — kids, boxing fitness, S&C, sparring, fighters, open gym
-- **Schedule** — full weekly timetable
-- **Fight Night** — Mudgee Madness event (Sat 12 Sep 2026, Parklands Mudgee)
-- **Gallery** — photos from inside the gym
-- **Contact** — location, phone, email and an enquiry form
 
 ## Deploying to Vercel
 
-This is a plain static site, so it deploys with **zero configuration**.
-
-**Option A — Git (recommended)**
+**Option A - Git (recommended)**
 1. Push this repo to GitHub.
 2. In Vercel, *Add New → Project* and import the repo.
 3. Framework preset: **Other**. Leave build command and output directory empty.
-4. Deploy.
+4. Deploy, then add the custom domain `restorebeautyandmassage.com.au` in
+   Vercel → Project → Settings → Domains, and point the domain's DNS at Vercel.
 
-**Option B — Vercel CLI**
+**Option B - Vercel CLI**
 ```bash
 npm i -g vercel
 vercel        # preview
 vercel --prod # production
 ```
 
+## Content still to confirm
+
+Because the live site couldn't be read, the following are **placeholders** - search
+`index.html` for `EDIT:` comments and drop in the real details:
+
+- **Services & prices** - the `#services` menu (names, durations, prices shown as `$-`).
+- **About / owner bio** - the `#about` copy.
+- **Contact** - address + Google Maps link, phone (and `tel:` link), email, opening hours.
+- **Booking link** - the "Book Now" / "Book Online" buttons currently point to the contact form.
+- **Social links** - Instagram / Facebook URLs.
+- **Email** - the enquiry form address is also set at the top of `script.js`.
+
 ## Editing content
 
-- **Schedule** — edit the `<table class="schedule-table">` in `index.html`.
-- **Contact details** — search `index.html` for the phone/email/address.
-- **Fight night** — update the `#event` section and swap the poster in `assets/`.
-- **Photos** — drop new images in `assets/` and update the `<img>` `src` paths.
-
-## Contact
-
-Unit 7, 22–26 Sydney Road, Mudgee (behind Mudgee Camping & 4WD)
-0411 042 757 · bomberboxing@outlook.com
+- **Services** - edit the `.menu` block in `index.html`.
+- **Photos** - replace files in `assets/` (keep the same names, or update the `<img src>`).
+- **Colours** - the palette lives in `:root` at the top of `styles.css`.
