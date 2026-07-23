@@ -32,7 +32,6 @@
       e.preventDefault();
       var name = form.name.value.trim();
       var email = form.email.value.trim();
-      var phone = form.phone.value.trim();
       var interest = form.interest.value;
       var message = form.message.value.trim();
 
@@ -48,7 +47,6 @@
         (message ? message + "\n\n" : "") +
         "Name: " + name + "\n" +
         "Email: " + email + "\n" +
-        (phone ? "Phone: " + phone + "\n" : "") +
         "\nThank you!";
 
       var mailto =

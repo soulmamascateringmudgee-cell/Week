@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Restore Massage and Beauty | Relax · Refresh · Reconnect</title>
-  <meta name="description" content="Restore Massage and Beauty — a calm, welcoming studio for remedial and relaxation massage and beauty treatments. Relax. Refresh. Reconnect." />
+  <title>Restore Massage and Beauty | Mudgee · Relax · Restore · Rejuvenate</title>
+  <meta name="description" content="Restore Massage and Beauty in Mudgee — massage, waxing, tinting and lash treatments with Lauren. A calm, private studio. Relax. Restore. Rejuvenate." />
   <meta name="theme-color" content="#416A58" />
 
   <!-- Open Graph / social preview -->
-  <meta property="og:title" content="Restore Massage and Beauty" />
-  <meta property="og:description" content="A calm space for massage and beauty. Relax. Refresh. Reconnect." />
+  <meta property="og:title" content="Restore Massage and Beauty · Mudgee" />
+  <meta property="og:description" content="A calm, private studio for massage and beauty in Mudgee. Relax · Restore · Rejuvenate." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="/assets/logo.png" />
 
   <link rel="icon" type="image/png" href="/assets/logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -28,22 +28,24 @@
       </a>
       <nav class="nav" aria-label="Primary">
         <a href="#about">About</a>
-        <a href="#services">Services</a>
-        <a href="#gallery">The Space</a>
-        <a href="#contact">Visit</a>
+        <a href="#menu">Menu</a>
+        <a href="#lauren">Meet Lauren</a>
+        <a href="#faq">FAQ</a>
+        <a href="#visit">Visit</a>
       </nav>
-      <!-- EDIT: replace href with the real online booking link (Fresha / Square / Timely etc.) -->
-      <a href="#contact" class="btn btn-primary btn-sm nav-cta">Book Now</a>
+      <!-- EDIT: replace href with the real online booking link (the "Book Now" system Lauren uses) -->
+      <a href="#visit" class="btn btn-primary btn-sm nav-cta">Book Now</a>
       <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
     </div>
     <div class="mobile-nav" id="mobileNav">
       <a href="#about">About</a>
-      <a href="#services">Services</a>
-      <a href="#gallery">The Space</a>
-      <a href="#contact">Visit</a>
-      <a href="#contact" class="btn btn-primary">Book Now</a>
+      <a href="#menu">Menu</a>
+      <a href="#lauren">Meet Lauren</a>
+      <a href="#faq">FAQ</a>
+      <a href="#visit">Visit</a>
+      <a href="#visit" class="btn btn-primary">Book Now</a>
     </div>
   </header>
 
@@ -60,8 +62,8 @@
         set aside just for you — massage, waxing, tinting and lash, thoughtfully delivered.
       </p>
       <div class="hero-actions">
-        <a href="#contact" class="btn btn-primary">Book an Appointment</a>
-        <a href="#services" class="btn btn-ghost">View Services</a>
+        <a href="#visit" class="btn btn-primary">Book an Appointment</a>
+        <a href="#menu" class="btn btn-ghost">View the Menu</a>
       </div>
     </div>
     <div class="hero-scroll" aria-hidden="true"><span></span></div>
@@ -73,7 +75,7 @@
       <span>Massage</span><i>✦</i>
       <span>Waxing</span><i>✦</i>
       <span>Tinting</span><i>✦</i>
-      <span>Lash Treatments</span><i>✦</i>
+      <span>Lash Lift</span><i>✦</i>
       <span>Time For You</span>
     </div>
   </div>
@@ -102,7 +104,7 @@
           <li>A quiet, relaxing atmosphere</li>
           <li>Flexible appointments to suit you</li>
         </ul>
-        <a href="#contact" class="btn btn-primary">Book Your Visit</a>
+        <a href="#visit" class="btn btn-primary">Book Your Visit</a>
       </div>
     </div>
   </section>
@@ -140,75 +142,124 @@
     </div>
   </section>
 
-  <!-- ===== SERVICES ===== -->
-  <!-- EDIT: These services and prices are placeholders in Restore's style.
-       Replace names, descriptions, durations and prices with the real menu. -->
-  <section class="section services" id="services">
+  <!-- ===== THE MENU ===== -->
+  <section class="section menu-section" id="menu">
     <div class="container">
-      <div class="section-head center">
-        <p class="section-eyebrow">Treatments</p>
-        <h2 class="section-title">Our <em>services</em>.</h2>
-        <p class="section-intro">A considered menu of massage and beauty treatments. Times and prices are a guide — please confirm when you book.</p>
+      <!-- ---- Massage ---- -->
+      <div class="menu-head">
+        <p class="section-eyebrow light">The Menu</p>
+        <h2 class="menu-title">Massage</h2>
+        <p class="menu-intro">Melt away tension and reset your body with a treatment to suit your time and needs.</p>
       </div>
-
-      <div class="menu">
-        <div class="menu-col">
-          <h3 class="menu-heading">Massage</h3>
-          <p class="menu-sub">Melt away tension and reset your body with a treatment to suit your time and needs.</p>
-          <ul class="menu-list">
-            <li>
-              <div class="menu-row"><span class="menu-name">Relaxation Massage</span><span class="menu-dots"></span><span class="menu-price">60 min · $—</span></div>
-              <p class="menu-desc">Flowing, gentle pressure to melt away tension and calm the mind.</p>
-            </li>
-            <li>
-              <div class="menu-row"><span class="menu-name">Remedial Massage</span><span class="menu-dots"></span><span class="menu-price">60 min · $—</span></div>
-              <p class="menu-desc">Targeted work to release tight muscles, ease pain and restore movement.</p>
-            </li>
-            <li>
-              <div class="menu-row"><span class="menu-name">Hot Stone Massage</span><span class="menu-dots"></span><span class="menu-price">75 min · $—</span></div>
-              <p class="menu-desc">Warm stones and slow strokes for deep, grounding relaxation.</p>
-            </li>
-            <li>
-              <div class="menu-row"><span class="menu-name">Pregnancy Massage</span><span class="menu-dots"></span><span class="menu-price">60 min · $—</span></div>
-              <p class="menu-desc">Safe, nurturing care to support you through every trimester.</p>
-            </li>
-          </ul>
-        </div>
-
-        <div class="menu-col">
-          <h3 class="menu-heading">Beauty</h3>
-          <p class="menu-sub">Waxing, tinting and lash treatments to leave you feeling polished and put-together.</p>
-          <ul class="menu-list">
-            <li>
-              <div class="menu-row"><span class="menu-name">Signature Facial</span><span class="menu-dots"></span><span class="menu-price">60 min · $—</span></div>
-              <p class="menu-desc">A tailored facial to cleanse, nourish and leave skin glowing.</p>
-            </li>
-            <li>
-              <div class="menu-row"><span class="menu-name">Waxing</span><span class="menu-dots"></span><span class="menu-price">from $—</span></div>
-              <p class="menu-desc">Gentle, thorough waxing for face and body.</p>
-            </li>
-            <li>
-              <div class="menu-row"><span class="menu-name">Brow &amp; Lash Tint / Shape</span><span class="menu-dots"></span><span class="menu-price">from $—</span></div>
-              <p class="menu-desc">Define and frame with a tidy shape, tint or lash lift.</p>
-            </li>
-            <li>
-              <div class="menu-row"><span class="menu-name">Restore Package</span><span class="menu-dots"></span><span class="menu-price">$—</span></div>
-              <p class="menu-desc">Massage and a facial together — the full switch-off. Ask us to build yours.</p>
-            </li>
-          </ul>
-        </div>
+      <div class="menu-cat">
+        <h3 class="cat-label">Massage</h3>
+        <ul class="price-list">
+          <li><div class="price-row"><span class="p-name">45 Minute Massage</span><span class="p-dots"></span><span class="p-price">$90</span></div><p class="p-meta">45 min · focused tension relief</p></li>
+          <li><div class="price-row"><span class="p-name">60 Minute Massage</span><span class="p-dots"></span><span class="p-price">$120</span></div><p class="p-meta">1 hr · full relaxation</p></li>
+          <li><div class="price-row"><span class="p-name">90 Minute Massage</span><span class="p-dots"></span><span class="p-price">$150</span></div><p class="p-meta">1 hr 30 · deep, total-body release</p></li>
+          <li><div class="price-row"><span class="p-name">Lomi Lomi Massage</span><span class="p-dots"></span><span class="p-price">$165</span></div><p class="p-meta">1 hr 30 · flowing Hawaiian style</p></li>
+          <li><div class="price-row"><span class="p-name">Brazilian Lymphatic Drainage</span><span class="p-dots"></span><span class="p-price">$150</span></div><p class="p-meta">1 hr · de-bloat &amp; detox</p></li>
+        </ul>
       </div>
-
-      <p class="services-note">Can't see what you're after? <a href="#contact">Get in touch</a> — treatments can be tailored to you.</p>
     </div>
   </section>
 
-  <!-- ===== GALLERY / THE SPACE ===== -->
+  <!-- ---- Beauty (on green) ---- -->
+  <section class="section menu-section beauty-section">
+    <div class="container">
+      <div class="menu-head">
+        <p class="section-eyebrow light">The Menu</p>
+        <h2 class="menu-title light">Beauty</h2>
+        <p class="menu-intro light">Waxing, tinting and lash treatments to leave you feeling polished and put-together.</p>
+      </div>
+
+      <div class="beauty-grid">
+        <div class="menu-cat">
+          <h3 class="cat-label">Facial Waxing</h3>
+          <ul class="price-list">
+            <li><div class="price-row"><span class="p-name">Brow Wax</span><span class="p-dots"></span><span class="p-price">$30</span></div><p class="p-meta">20 min</p></li>
+            <li><div class="price-row"><span class="p-name">Lip Wax</span><span class="p-dots"></span><span class="p-price">$18</span></div><p class="p-meta">15 min</p></li>
+            <li><div class="price-row"><span class="p-name">Chin Wax</span><span class="p-dots"></span><span class="p-price">$15</span></div><p class="p-meta">15 min</p></li>
+            <li><div class="price-row"><span class="p-name">Nose Wax</span><span class="p-dots"></span><span class="p-price">$10</span></div><p class="p-meta">15 min</p></li>
+            <li><div class="price-row"><span class="p-name">Brow, Lip &amp; Chin Wax</span><span class="p-dots"></span><span class="p-price">$60</span></div><p class="p-meta">30 min</p></li>
+            <li><div class="price-row"><span class="p-name">Full Face Wax</span><span class="p-dots"></span><span class="p-price">$75</span></div><p class="p-meta">40 min</p></li>
+          </ul>
+        </div>
+
+        <div class="menu-cat">
+          <h3 class="cat-label">Body Waxing</h3>
+          <ul class="price-list">
+            <li><div class="price-row"><span class="p-name">Full Leg Wax</span><span class="p-dots"></span><span class="p-price">$50</span></div><p class="p-meta">40 min</p></li>
+            <li><div class="price-row"><span class="p-name">½ Leg Wax</span><span class="p-dots"></span><span class="p-price">$30</span></div><p class="p-meta">20 min</p></li>
+            <li><div class="price-row"><span class="p-name">Arm Wax</span><span class="p-dots"></span><span class="p-price">$30</span></div><p class="p-meta">20 min</p></li>
+            <li><div class="price-row"><span class="p-name">Full Leg &amp; Bikini Line</span><span class="p-dots"></span><span class="p-price">$80</span></div><p class="p-meta">45 min</p></li>
+            <li><div class="price-row"><span class="p-name">Brazilian</span><span class="p-dots"></span><span class="p-price">$60</span></div><p class="p-meta">30 min</p></li>
+            <li><div class="price-row"><span class="p-name">Bikini Line</span><span class="p-dots"></span><span class="p-price">$35</span></div><p class="p-meta">20 min</p></li>
+          </ul>
+        </div>
+
+        <div class="menu-cat">
+          <h3 class="cat-label">Tinting</h3>
+          <ul class="price-list">
+            <li><div class="price-row"><span class="p-name">Lash Tint</span><span class="p-dots"></span><span class="p-price">$25</span></div><p class="p-meta">20 min</p></li>
+            <li><div class="price-row"><span class="p-name">Brow Tint</span><span class="p-dots"></span><span class="p-price">$30</span></div><p class="p-meta">20 min</p></li>
+            <li><div class="price-row"><span class="p-name">Eye Trio</span><span class="p-dots"></span><span class="p-price">$80</span></div><p class="p-meta">40 min · lash tint, brow tint &amp; shape</p></li>
+            <li><div class="price-row"><span class="p-name">Henna Only Tint</span><span class="p-dots"></span><span class="p-price">$40</span></div><p class="p-meta">20 min</p></li>
+          </ul>
+        </div>
+
+        <div class="menu-cat">
+          <h3 class="cat-label">Wax &amp; Tint</h3>
+          <ul class="price-list">
+            <li><div class="price-row"><span class="p-name">Brow Wax &amp; Tint</span><span class="p-dots"></span><span class="p-price">$50</span></div><p class="p-meta">30 min</p></li>
+            <li><div class="price-row"><span class="p-name">Henna Wax &amp; Tint</span><span class="p-dots"></span><span class="p-price">$60</span></div><p class="p-meta">30 min</p></li>
+          </ul>
+          <h3 class="cat-label with-tag">Lash Lift <span class="cat-tag">Effortless Eyes</span></h3>
+          <ul class="price-list">
+            <li><div class="price-row"><span class="p-name">Lash Lift &amp; Tint</span><span class="p-dots"></span><span class="p-price">$95</span></div><p class="p-meta">1 hr · lifted, darker natural lashes</p></li>
+            <li><div class="price-row"><span class="p-name">Lash Lift &amp; Tint + FREE Brow Tint</span><span class="p-dots"></span><span class="p-price">$95</span></div><p class="p-meta">1 hr · the Effortless Eyes promo</p></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="menu-cta">
+        <a href="#visit" class="btn btn-cream">Book a Treatment</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MEET LAUREN ===== -->
+  <section class="section lauren" id="lauren">
+    <div class="container lauren-grid">
+      <div class="lauren-media">
+        <img src="/assets/lauren.jpg" alt="Lauren Roberts, therapist and owner of Restore Massage and Beauty" loading="lazy" />
+      </div>
+      <div class="lauren-copy">
+        <p class="section-eyebrow">Meet Lauren</p>
+        <h2 class="section-title">Your therapist, <em>Lauren Roberts</em>.</h2>
+        <p class="lead">
+          Restore is the studio Lauren always dreamed of — a place where the people of Mudgee
+          can escape the everyday, unwind, and be genuinely cared for.
+        </p>
+        <p>
+          With a gentle, intuitive approach and a real passion for helping people feel good in
+          their own skin, Lauren blends therapeutic massage with beauty treatments so every visit
+          leaves you feeling restored inside and out.
+        </p>
+        <blockquote class="lauren-quote">
+          "There's nothing I love more than seeing someone walk out lighter than they came in."
+          <cite>— Lauren</cite>
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== THE SPACE / GALLERY ===== -->
   <section class="section gallery" id="gallery">
     <div class="container">
       <div class="section-head center">
         <p class="section-eyebrow">The Space</p>
-        <h2 class="section-title">Step inside.</h2>
+        <h2 class="section-title">A little peek inside.</h2>
       </div>
       <div class="gallery-grid">
         <figure class="gallery-item tall">
@@ -224,86 +275,122 @@
     </div>
   </section>
 
-  <!-- ===== QUOTE ===== -->
-  <section class="quote">
+  <!-- ===== GIFT VOUCHERS ===== -->
+  <section class="quote gift">
     <div class="container">
-      <p class="quote-text">"An hour that gives you back your whole week."</p>
-      <p class="quote-by">— Relax · Restore · Rejuvenate</p>
+      <p class="section-eyebrow light center-eb">The Gift of Relaxation</p>
+      <p class="quote-text">Gift Vouchers</p>
+      <p class="gift-copy">
+        Give someone you love the gift of a little time out. Restore vouchers can be used on any
+        treatment and make the perfect thank-you, birthday or just-because.
+      </p>
+      <a href="#visit" class="btn btn-cream">Enquire About a Voucher</a>
     </div>
   </section>
 
-  <!-- ===== CONTACT / VISIT ===== -->
-  <section class="section contact" id="contact">
+  <!-- ===== FAQ ===== -->
+  <section class="section faq" id="faq">
+    <div class="container faq-wrap">
+      <div class="section-head center">
+        <p class="section-eyebrow">Good to Know</p>
+        <h2 class="section-title">Frequently asked.</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item" open>
+          <summary>Where are you located?</summary>
+          <div class="faq-body">
+            <p>Restore is at 85 Market Street, Mudgee — inside and upstairs of Mixi Blu. Head in and up the stairs, and you'll find us. Street parking is available nearby along Market Street.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>How do I book?</summary>
+          <div class="faq-body">
+            <p>The quickest way is online through the Book Now button — you'll see live availability and can secure your spot in a couple of taps. Payment is taken at the time of booking.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>What's your cancellation policy?</summary>
+          <div class="faq-body">
+            <p>Life happens — we just ask for at least 24 hours' notice if you need to change or cancel, so the time can be offered to someone else.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>What should I expect at my first visit?</summary>
+          <div class="faq-body">
+            <p>Arrive a few minutes early to settle in. Lauren will chat with you about what you're after and any areas of focus, then it's over to you to relax and enjoy.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>Do you sell gift vouchers?</summary>
+          <div class="faq-body">
+            <p>Yes — Restore vouchers can be used on any treatment and make a lovely gift. Just ask, or send an enquiry below and we'll sort one out for you.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VISIT & BOOK ===== -->
+  <section class="section contact" id="visit">
     <div class="container contact-grid">
       <div class="contact-copy">
-        <p class="section-eyebrow">Visit</p>
-        <h2 class="section-title">Come and <em>unwind</em>.</h2>
-        <p class="lead">
-          Ready to book? Reach out and we'll find a time that suits you.
-          New clients are always welcome.
-        </p>
+        <p class="section-eyebrow">Visit &amp; Book</p>
+        <h2 class="section-title">Come and <em>see us</em>.</h2>
         <ul class="contact-list">
           <li>
-            <span class="contact-label">Location</span>
-            <!-- EDIT: real street address + Google Maps link -->
-            <a href="#" target="_blank" rel="noopener">Mudgee, NSW <small>— add full studio address</small></a>
-          </li>
-          <li>
-            <span class="contact-label">Phone</span>
-            <!-- EDIT: real phone (update tel: link too) -->
-            <a href="tel:0000000000">Add phone number</a>
+            <span class="contact-label">Studio</span>
+            <a href="https://maps.google.com/?q=85+Market+Street+Mudgee+NSW+2850" target="_blank" rel="noopener">85 Market Street (upstairs of Mixi Blu)<br />Mudgee NSW 2850</a>
           </li>
           <li>
             <span class="contact-label">Email</span>
-            <!-- EDIT: real email -->
             <a href="mailto:hello@restorebeautyandmassage.com.au">hello@restorebeautyandmassage.com.au</a>
           </li>
           <li>
-            <span class="contact-label">Hours</span>
-            <!-- EDIT: real opening hours -->
-            <span class="contact-plain">Add opening hours</span>
+            <span class="contact-label">Instagram</span>
+            <a href="https://www.instagram.com/restore_massageandbeauty" target="_blank" rel="noopener">@restore_massageandbeauty</a>
+          </li>
+          <li>
+            <span class="contact-label">Opening Hours</span>
+            <span class="contact-plain hours">
+              <span><em>Mon</em> Closed</span>
+              <span><em>Tue – Fri</em> 9:00 – 5:00</span>
+              <span><em>Sat</em> 9:00 – 1:00</span>
+              <span><em>Sun</em> Closed</span>
+            </span>
+            <!-- EDIT: confirm the real opening hours above -->
+            <small class="hours-note">Please confirm your real opening hours.</small>
           </li>
         </ul>
         <!-- EDIT: replace href with the real online booking link -->
-        <a href="#" class="btn btn-primary signup-cta">Book Online →</a>
-        <div class="socials">
-          <!-- EDIT: real social links -->
-          <a href="#" target="_blank" rel="noopener" aria-label="Instagram">Instagram</a>
-          <a href="#" target="_blank" rel="noopener" aria-label="Facebook">Facebook</a>
-        </div>
+        <a href="#visit" class="btn btn-primary signup-cta">Book Your Appointment →</a>
       </div>
 
       <form class="contact-form" id="enquiryForm" novalidate>
         <h3>Send an enquiry</h3>
         <div class="field">
           <label for="name">Name</label>
-          <input type="text" id="name" name="name" required autocomplete="name" />
+          <input type="text" id="name" name="name" placeholder="Your name" required autocomplete="name" />
         </div>
         <div class="field">
           <label for="email">Email</label>
-          <input type="email" id="email" name="email" required autocomplete="email" />
-        </div>
-        <div class="field">
-          <label for="phone">Phone</label>
-          <input type="tel" id="phone" name="phone" autocomplete="tel" />
+          <input type="email" id="email" name="email" placeholder="you@email.com" required autocomplete="email" />
         </div>
         <div class="field">
           <label for="interest">I'm interested in</label>
           <select id="interest" name="interest">
-            <option value="Relaxation Massage">Relaxation Massage</option>
-            <option value="Remedial Massage">Remedial Massage</option>
-            <option value="Hot Stone Massage">Hot Stone Massage</option>
-            <option value="Pregnancy Massage">Pregnancy Massage</option>
-            <option value="Facial">Facial</option>
-            <option value="Beauty Treatment">Beauty Treatment</option>
+            <option value="Massage">Massage</option>
+            <option value="Waxing">Waxing</option>
+            <option value="Tinting">Tinting</option>
+            <option value="Lash Lift">Lash Lift</option>
+            <option value="Gift Voucher">Gift Voucher</option>
             <option value="Something else">Something else</option>
           </select>
         </div>
         <div class="field">
           <label for="message">Message</label>
-          <textarea id="message" name="message" rows="3"></textarea>
+          <textarea id="message" name="message" rows="3" placeholder="How can we help?"></textarea>
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Send Enquiry</button>
+        <button type="submit" class="btn btn-primary btn-block">Send Message</button>
         <p class="form-note" id="formNote" role="status"></p>
       </form>
     </div>
@@ -318,14 +405,15 @@
       </div>
       <div class="footer-links">
         <a href="#about">About</a>
-        <a href="#services">Services</a>
-        <a href="#gallery">The Space</a>
-        <a href="#contact">Visit</a>
+        <a href="#menu">Menu</a>
+        <a href="#lauren">Meet Lauren</a>
+        <a href="#faq">FAQ</a>
+        <a href="#visit">Visit</a>
       </div>
     </div>
     <div class="footer-bar">
       <div class="container">
-        <p>© <span id="year"></span> Restore Massage and Beauty. All rights reserved.</p>
+        <p>© <span id="year"></span> Restore Massage and Beauty · 85 Market Street, Mudgee NSW</p>
       </div>
     </div>
   </footer>
