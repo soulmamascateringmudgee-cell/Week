@@ -50,7 +50,7 @@ Dashboard → **Product catalogue** → **Add product**.
 
 | Field | Value |
 |---|---|
-| Name | A Standing Date |
+| Name | The Monthly Date |
 | Description | A new wrapped blind date book every month, three little gifts, a clue card and bookish stickers. Posted Australia-wide. |
 | Price | `80.00` AUD |
 | Billing | **Recurring**, monthly |
@@ -69,8 +69,7 @@ open the options and set:
 
   1. **Dropdown**, label `Your reading vibe`, required.
      Options — use the same wording as the page:
-     `Romance`, `Spice`, `Thriller & mystery`, `Fantasy`, `Historical`,
-     `Literary fiction`, `Surprise me`.
+     `Romance`, `Spice`, `Thriller & mystery`, `Fantasy`, `Surprise me`.
   2. **Text**, label `Anything you've already read or would rather avoid?`, optional.
 
 - **Quantity adjustable** → off for the subscription (one book per month).
@@ -184,10 +183,21 @@ Everything is plain HTML — open `index.html` in any text editor and type over 
 | Instagram / email | `script.js`, bottom of the `CONFIG` block |
 | Colours and fonts | `styles.css`, the `:root` block at the very top |
 
-The brush script is Google's **Yellowtail** and the serif is **Cormorant Garamond** —
-both free, both close to your cards. If you have the actual logo as a PNG with a
-transparent background, drop it in this folder and swap the hero text for
-`<img src="logo.png" alt="Read Me Maybe">`.
+Type is **Cormorant Garamond** for headings and **Inter** for body text, both free
+from Google Fonts.
+
+The wordmark and hearts aren't a font — they're your own hand lettering, cut out of
+the brand card and saved as transparent PNGs in `assets/`:
+
+| File | Used for |
+|---|---|
+| `wordmark.png` | the hero lockup and the footer |
+| `wordmark-light.png` | the same, in cream, for the dark strip near the bottom |
+| `heart-large.png`, `heart-small.png` | the two hearts, positioned in `styles.css` |
+
+To move a heart, edit `.heart-big` / `.heart-small` in `styles.css` — the `top`,
+`left` and `bottom` percentages are measured against the wordmark, so it stays put
+at every screen size.
 
 ---
 

@@ -1,23 +1,22 @@
 /* ============================================================
    Read Me Maybe — a blind date with a book
-   Palette lifted from the brand cards: cream stock, library
-   blue ruling, black brush script.
+   Palette lifted from the brand cards: cream stock, charcoal
+   ruling and type, hand-lettered wordmark (assets/wordmark.png).
    ============================================================ */
 
 :root {
   --cream:      #fdfaf0;
   --cream-deep: #f8f2e2;
   --paper:      #fffdf7;
-  --ink:        #17130f;
-  --ink-soft:   #4c443c;
-  --blue:       #4a8fd5;
-  --blue-deep:  #2f6cb0;
-  --rule:       rgba(74, 143, 213, 0.55);
-  --rule-faint: rgba(74, 143, 213, 0.28);
+  --ink:        #2e2b28;
+  --ink-soft:   #6b6560;
+  --blue:       #2e2b28;   /* kept as a name so the two type tones stay separable */
+  --blue-deep:  #2e2b28;
+  --rule:       rgba(46, 43, 40, 0.42);
+  --rule-faint: rgba(46, 43, 40, 0.2);
 
   --display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
-  --script:  "Yellowtail", "Brush Script MT", cursive;
-  --body:    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --body:    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
 
   --line: 2.75rem;            /* ruled-paper line height */
   --shadow: 0 18px 44px -28px rgba(23, 19, 15, 0.45);
@@ -52,13 +51,6 @@ a { color: var(--blue-deep); }
 .skip-link:focus { left: 0; }
 
 /* ---------- shared type ---------- */
-
-.script {
-  font-family: var(--script);
-  font-weight: 400;
-  line-height: 0.95;
-  margin: 0;
-}
 
 .section-title {
   font-family: var(--display);
@@ -102,7 +94,7 @@ a { color: var(--blue-deep); }
 .btn-ghost { background: transparent; color: var(--ink); }
 .btn-ghost:hover { background: var(--ink); color: var(--cream); }
 
-.btn-small { padding: 0.55rem 1.1rem; font-size: 0.8125rem; }
+.btn-small { padding: 0.55rem 1.1rem; font-size: 0.8125rem; white-space: nowrap; }
 
 .btn-block { display: block; text-align: center; width: 100%; }
 
@@ -121,8 +113,11 @@ a { color: var(--blue-deep); }
 }
 
 .brand {
-  font-family: var(--script);
-  font-size: 1.75rem;
+  font-family: var(--display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   color: var(--ink);
   text-decoration: none;
   line-height: 1;
@@ -208,19 +203,19 @@ a { color: var(--blue-deep); }
   text-align: center;
 }
 
-.hero-mark .script {
-  font-size: clamp(3.5rem, 13vw, 8.5rem);
-  color: var(--ink);
-  display: inline-block;
-  text-align: left;
+/* The wordmark and both hearts are the real hand-lettered artwork, lifted
+   from the brand card. Hearts sit on a diagonal — one after "Read", one
+   tucked in beside "Maybe". */
+.lockup {
+  position: relative;
+  width: min(30rem, 76%);
+  margin-inline: auto;
 }
-.hero-mark .script span { display: block; }
-.hero-mark .script span:first-of-type { margin-left: 1.2em; margin-top: -0.12em; }
-.hero-mark .script span:last-of-type  { margin-left: 0.55em; margin-top: -0.14em; }
+.wordmark { width: 100%; height: auto; }
 
-.heart { position: absolute; fill: none; stroke: var(--ink); stroke-width: 2.4; }
-.heart-big   { width: clamp(2.75rem, 8vw, 5.5rem); top: 8%;  right: 8%; }
-.heart-small { width: clamp(1.5rem, 4.5vw, 3rem);  top: 34%; right: 12%; }
+.heart { position: absolute; height: auto; }
+.heart-big   { width: 19%; top: -1%; left: 78%; }
+.heart-small { width: 11%; bottom: 4%; left: -11%; }
 
 .hero-copy {
   max-width: 44ch;
@@ -505,14 +500,14 @@ a { color: var(--blue-deep); }
   text-align: center;
   padding: 4rem 0;
 }
-.cta-script { font-size: clamp(3rem, 9vw, 5.5rem); color: var(--cream); }
+.cta-wordmark { width: min(20rem, 62%); height: auto; margin-inline: auto; }
 .cta-line {
   font-family: var(--display);
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-size: clamp(1rem, 2.5vw, 1.25rem);
   margin: 1.25rem 0 2rem;
-  color: #cfe0f3;
+  color: rgba(253, 250, 240, 0.72);
 }
 .cta-strip .btn { background: var(--cream); color: var(--ink); border-color: var(--cream); }
 .cta-strip .btn:hover { background: var(--blue); border-color: var(--blue); color: var(--cream); }
@@ -554,7 +549,7 @@ details p { margin: 0.75rem 0 0; color: var(--ink-soft); max-width: 60ch; }
   padding: 3rem 0;
   text-align: center;
 }
-.footer-brand { font-family: var(--script); font-size: 2.25rem; margin: 0; }
+.footer-brand { width: 9rem; height: auto; margin-inline: auto; }
 .footer-links {
   font-family: var(--display);
   text-transform: uppercase;
@@ -571,8 +566,8 @@ details p { margin: 0.75rem 0 0; color: var(--ink-soft); max-width: 60ch; }
 @media (max-width: 720px) {
   .site-nav { display: none; }
   .header-inner { gap: 0.75rem; }
-  .header-inner .btn-small { margin-left: auto; }
-  .brand { font-size: 1.4rem; }
+  .header-inner .btn-small { margin-left: auto; font-size: 0.75rem; padding: 0.5rem 0.85rem; }
+  .brand { font-size: 1rem; letter-spacing: 0.14em; }
   .wrap { width: calc(100% - 2rem); }
   :root { --line: 2.25rem; }
   .hero { padding-top: 1.5rem; }

@@ -16,13 +16,11 @@ const CONFIG = {
   // The vibe options shown on both cards.
   // `id` is what gets sent to Stripe, `label` is what customers see.
   vibes: [
-    { id: 'romance',    label: 'Romance 💕' },
-    { id: 'spice',      label: 'Spice 🌶️' },
-    { id: 'thriller',   label: 'Thriller & mystery 🔪' },
-    { id: 'fantasy',    label: 'Fantasy ✨' },
-    { id: 'historical', label: 'Historical 🕰️' },
-    { id: 'literary',   label: 'Literary fiction 📖' },
-    { id: 'surprise',   label: 'Surprise me 🎁' },
+    { id: 'romance',  label: 'Romance 💕' },
+    { id: 'spice',    label: 'Spice 🌶️' },
+    { id: 'thriller', label: 'Thriller & mystery 🔪' },
+    { id: 'fantasy',  label: 'Fantasy ✨' },
+    { id: 'surprise', label: 'Surprise me 🎁' },
   ],
 
   instagram: 'https://instagram.com/readmemaybe',
