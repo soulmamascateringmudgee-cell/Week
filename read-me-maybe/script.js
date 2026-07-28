@@ -25,9 +25,8 @@ const CONFIG = {
 
   instagram: 'https://www.instagram.com/readmemaybe_/',
 
-  // Leave empty until there's a real inbox — the "Email us" link hides itself
-  // rather than pointing customers at an address that bounces.
-  email: '',
+  // Leave empty to hide the "Email us" link entirely.
+  email: 'oliviamldutka@yahoo.com',
 };
 
 /* ---------- plumbing ---------- */
