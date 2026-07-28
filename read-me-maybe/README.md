@@ -191,8 +191,7 @@ the brand card and saved as transparent PNGs in `assets/`:
 
 | File | Used for |
 |---|---|
-| `wordmark.png` | the hero lockup and the footer |
-| `wordmark-light.png` | the same, in cream, for the dark strip near the bottom |
+| `wordmark.png` | the hero lockup, the dark strip (flipped to white in CSS) and the footer |
 | `heart-large.png`, `heart-small.png` | the two hearts, positioned in `styles.css` |
 
 To move a heart, edit `.heart-big` / `.heart-small` in `styles.css` — the `top`,

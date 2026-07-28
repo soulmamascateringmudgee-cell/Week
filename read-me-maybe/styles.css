@@ -500,7 +500,13 @@ a { color: var(--blue-deep); }
   text-align: center;
   padding: 4rem 0;
 }
-.cta-wordmark { width: min(20rem, 62%); height: auto; margin-inline: auto; }
+/* same artwork, flipped to white for the dark strip */
+.cta-wordmark {
+  width: min(20rem, 62%);
+  height: auto;
+  margin-inline: auto;
+  filter: brightness(0) invert(1);
+}
 .cta-line {
   font-family: var(--display);
   text-transform: uppercase;
