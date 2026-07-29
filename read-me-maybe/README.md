@@ -1,6 +1,6 @@
-# Read Me Maybe — landing page + Stripe setup
+# Read Me Maybe: landing page and Stripe setup
 
-A blind date with a book. One page, no build step, no monthly website fee — link it
+A blind date with a book. One page, no build step, no monthly website fee. Link it
 from your Instagram bio and it does the whole shop.
 
 ```
@@ -15,7 +15,7 @@ read-me-maybe/
 
 ## The short version
 
-1. In Stripe, make **two Payment Links** — one $65 one-off, one $80/month subscription.
+1. In Stripe, make **two Payment Links**: one $65 one-off, one $80/month subscription.
 2. On each link, add a **dropdown custom field** for the reading vibe, and turn on
    **collect shipping address**.
 3. Paste the two link URLs into the `CONFIG` block at the top of `script.js`.
@@ -26,10 +26,10 @@ checkout, sends the receipts, charges the subscriptions each month and handles r
 
 ---
 
-## Step 1 — Set up Stripe
+## Step 1. Set up Stripe
 
 Sign up at [stripe.com](https://stripe.com) with your business details (ABN, bank
-account for payouts). Do everything below in **Test mode** first — there's a toggle in
+account for payouts). Do everything below in **Test mode** first. There's a toggle in
 the top right of the dashboard. Test card number: `4242 4242 4242 4242`, any future
 expiry, any CVC.
 
@@ -37,7 +37,7 @@ expiry, any CVC.
 
 Dashboard → **Product catalogue** → **Add product**.
 
-**Product 1 — the one-off**
+**Product 1: the one-off**
 
 | Field | Value |
 |---|---|
@@ -46,7 +46,7 @@ Dashboard → **Product catalogue** → **Add product**.
 | Price | `65.00` AUD |
 | Billing | **One-off** |
 
-**Product 2 — the subscription**
+**Product 2: the subscription**
 
 | Field | Value |
 |---|---|
@@ -64,21 +64,21 @@ Dashboard → **Payment Links** → **New**. Pick the product, then before you f
 open the options and set:
 
 - **Collect shipping address** → on, restricted to **Australia**. (This is the bit
-  people forget — without it you get paid but have nowhere to post the book.)
+  people forget, and without it you get paid but have nowhere to post the book.)
 - **Custom fields** → add two:
 
   1. **Dropdown**, label `Your reading vibe`, required.
-     Options — use the same wording as the page:
+     Options, using the same wording as the page:
      `Romance`, `Spice`, `Thriller & mystery`, `Fantasy`, `Surprise me`.
   2. **Text**, label `Anything you've already read or would rather avoid?`, optional.
 
 - **Quantity adjustable** → off for the subscription (one book per month).
 - **After payment** → show a confirmation message, something like:
-  *"Yes! Your blind date is on its way. Keep an eye on your inbox — and no peeking."*
+  *"Yes! Your blind date is on its way. Keep an eye on your inbox, and no peeking."*
 
 Save, then copy the link. It looks like `https://buy.stripe.com/xxxxxxxx`.
 
-Do this twice — once per product — so you end up with two URLs.
+Do this twice, once per product, so you end up with two URLs.
 
 ### For the subscription, turn on the customer portal
 
@@ -89,7 +89,7 @@ to your welcome email.
 
 ---
 
-## Step 2 — Connect the links to the page
+## Step 2. Connect the links to the page
 
 Open `script.js` and paste your two URLs into the top block:
 
@@ -101,18 +101,18 @@ stripe: {
 ```
 
 That's the only edit needed to go live. Same file also holds the vibe list, your
-Instagram URL and your email address — change those to match your real handles.
+Instagram URL and your email address. Change those to match your real handles.
 
 **How the vibe gets to you:** when someone picks a vibe on the page, the button sends
 it to Stripe as `client_reference_id` (e.g. `monthly-romance`), which shows up on the
 payment in your Stripe dashboard. The dropdown *inside* Stripe checkout catches it a
-second time, so it's also on the receipt and in your CSV exports. Belt and braces —
+second time, so it's also on the receipt and in your CSV exports. Belt and braces:
 if someone lands on your Stripe link directly from a DM without touching the page,
 the dropdown still forces them to choose.
 
 ---
 
-## Step 3 — Publish the page
+## Step 3. Publish the page
 
 Free, no card needed, either works:
 
@@ -140,7 +140,7 @@ Then: Instagram → Edit profile → Website → paste the URL.
   charges automatically and emails a receipt.
 
 **One thing to watch on subscriptions:** the vibe is captured when they *sign up*, not
-on every monthly renewal. Keep a simple spreadsheet — name, address, vibe, start date —
+on every monthly renewal. Keep a simple spreadsheet (name, address, vibe, start date)
 and update it when someone messages you to change their vibe. Ten minutes a month, and
 it doubles as your packing list.
 
@@ -148,7 +148,7 @@ it doubles as your packing list.
 for current rates). On $65 that's about $1.40; on $80 about $1.66. Payouts land in your
 bank a couple of days after each payment.
 
-**GST:** if you're not registered for GST, don't switch on Stripe Tax — your prices are
+**GST:** if you're not registered for GST, don't switch on Stripe Tax. Your prices are
 just your prices. If you register later, that's a conversation for your accountant, and
 Stripe Tax can handle it from that point.
 
@@ -158,7 +158,7 @@ Stripe Tax can handle it from that point.
 
 If you started setting this up last night, run through this:
 
-- [ ] Two separate products — one **one-off**, one **recurring monthly**. (Easy trap:
+- [ ] Two separate products: one **one-off**, one **recurring monthly**. (Easy trap:
       making both one-off, so the "subscription" only ever charges once.)
 - [ ] Currency is **AUD**, not USD.
 - [ ] **Shipping address collection is on** for both links.
@@ -166,14 +166,14 @@ If you started setting this up last night, run through this:
 - [ ] You've done one full **test-mode** purchase of each with `4242 4242 4242 4242`
       and seen both land in the dashboard.
 - [ ] Business details and bank account are verified, so payouts actually pay out.
-- [ ] You've flipped **out of test mode** and re-copied the links — test-mode links
+- [ ] You've flipped **out of test mode** and re-copied the links. Test-mode links
       don't take real money. This is the number one launch-day mistake.
 
 ---
 
 ## Changing the page later
 
-Everything is plain HTML — open `index.html` in any text editor and type over the words.
+Everything is plain HTML. Open `index.html` in any text editor and type over the words.
 
 | What | Where |
 |---|---|
@@ -186,7 +186,7 @@ Everything is plain HTML — open `index.html` in any text editor and type over 
 Type is **Cormorant Garamond** for headings and **Inter** for body text, both free
 from Google Fonts.
 
-The wordmark and hearts aren't a font — they're your own hand lettering, cut out of
+The wordmark and hearts aren't a font. They're your own hand lettering, cut out of
 the brand card and saved as transparent PNGs in `assets/`:
 
 | File | Used for |
@@ -194,7 +194,7 @@ the brand card and saved as transparent PNGs in `assets/`:
 | `wordmark.png` | the hero lockup, the dark strip (flipped to white in CSS) and the footer |
 | `heart-large.png`, `heart-small.png` | the two hearts, positioned in `styles.css` |
 
-To move a heart, edit `.heart-big` / `.heart-small` in `styles.css` — the `top`,
+To move a heart, edit `.heart-big` / `.heart-small` in `styles.css`. The `top`,
 `left` and `bottom` percentages are measured against the wordmark, so it stays put
 at every screen size.
 
@@ -202,7 +202,7 @@ at every screen size.
 
 ## Ideas for when it's running
 
-- Add a third one-off tier (a $45 "just the book" option) — same process, one more
+- Add a third one-off tier (a $45 "just the book" option). Same process, one more
   product and Payment Link, then copy a plan card in `index.html`.
 - Gift subscriptions: a 3-month prepaid product priced in one go, so it doesn't renew.
 - Collect emails with a Stripe post-purchase link to your mailing list, so you can send

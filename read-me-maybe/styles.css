@@ -1,5 +1,5 @@
 /* ============================================================
-   Read Me Maybe — a blind date with a book
+   Read Me Maybe, a blind date with a book
    Palette lifted from the brand cards: cream stock, charcoal
    ruling and type, hand-lettered wordmark (assets/wordmark.png).
    ============================================================ */
@@ -204,7 +204,7 @@ a { color: var(--blue-deep); }
 }
 
 /* The wordmark and both hearts are the real hand-lettered artwork, lifted
-   from the brand card. Hearts sit on a diagonal — one after "Read", one
+   from the brand card. Hearts sit on a diagonal: one after "Read", one
    tucked in beside "Maybe". */
 .lockup {
   position: relative;
