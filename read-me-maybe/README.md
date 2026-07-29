@@ -15,7 +15,7 @@ read-me-maybe/
 
 ## The short version
 
-1. In Stripe, make **two Payment Links**: one $65 one-off, one $80/month subscription.
+1. In Stripe, make **two Payment Links**: one $69.95 one-off, one $65.95/month subscription.
 2. On each link, add a **dropdown custom field** for the reading vibe, and turn on
    **collect shipping address**.
 3. Paste the two link URLs into the `CONFIG` block at the top of `script.js`.
@@ -43,7 +43,7 @@ Dashboard → **Product catalogue** → **Add product**.
 |---|---|
 | Name | A Single Blind Date |
 | Description | One wrapped blind date book, two little gifts, a clue card and bookish stickers. Posted Australia-wide. |
-| Price | `65.00` AUD |
+| Price | `69.95` AUD |
 | Billing | **One-off** |
 
 **Product 2: the subscription**
@@ -52,7 +52,7 @@ Dashboard → **Product catalogue** → **Add product**.
 |---|---|
 | Name | The Monthly Date |
 | Description | A new wrapped blind date book every month, three little gifts, a clue card and bookish stickers. Posted Australia-wide. |
-| Price | `80.00` AUD |
+| Price | `65.95` AUD |
 | Billing | **Recurring**, monthly |
 
 Prices include postage, so you don't need to add a shipping rate. (If you'd rather
@@ -145,7 +145,7 @@ and update it when someone messages you to change their vibe. Ten minutes a mont
 it doubles as your packing list.
 
 **Fees:** Stripe takes roughly 1.7% + 30c on Australian cards (check their pricing page
-for current rates). On $65 that's about $1.40; on $80 about $1.66. Payouts land in your
+for current rates). On $69.95 that's about $1.49; on $65.95 about $1.42. Payouts land in your
 bank a couple of days after each payment.
 
 **GST:** if you're not registered for GST, don't switch on Stripe Tax. Your prices are
@@ -177,7 +177,7 @@ Everything is plain HTML. Open `index.html` in any text editor and type over the
 
 | What | Where |
 |---|---|
-| Prices | `index.html`, search for `$65` and `$80` (change them in Stripe too) |
+| Prices | `index.html`, search for `$69.95` and `$65.95` (change them in Stripe too) |
 | Vibe options | `script.js`, the `vibes` list |
 | FAQ answers | `index.html`, the `<details>` blocks near the bottom |
 | Instagram / email | `script.js`, bottom of the `CONFIG` block |
