@@ -23,8 +23,10 @@ const CONFIG = {
     { id: 'surprise', label: 'Surprise me 🎁' },
   ],
 
-  instagram: 'https://instagram.com/readmemaybe',
-  email: 'hello@readmemaybe.com.au',
+  instagram: 'https://www.instagram.com/readmemaybe_/',
+
+  // Leave empty to hide the "Email us" link entirely.
+  email: 'readmemaybeblindbooks@gmail.com',
 };
 
 /* ---------- plumbing ---------- */
@@ -108,4 +110,10 @@ const instagram = document.querySelector('[data-instagram]');
 if (instagram) instagram.href = CONFIG.instagram;
 
 const email = document.querySelector('[data-email]');
-if (email) email.href = `mailto:${CONFIG.email}`;
+if (email && CONFIG.email) {
+  email.href = `mailto:${CONFIG.email}`;
+} else if (email) {
+  // No inbox yet — drop the link and the separator before it.
+  email.previousElementSibling?.remove();
+  email.remove();
+}
