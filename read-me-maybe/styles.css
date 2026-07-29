@@ -578,4 +578,6 @@ details p { margin: 0.75rem 0 0; color: var(--ink-soft); max-width: 60ch; }
   :root { --line: 2.25rem; }
   .hero { padding-top: 1.5rem; }
   .heart-big { top: 4%; }
+  /* keep the price on the same line as the label */
+  .plan .btn-block { font-size: 0.9375rem; letter-spacing: 0.06em; padding-inline: 1rem; }
 }
