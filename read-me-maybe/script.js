@@ -26,7 +26,7 @@ const CONFIG = {
   instagram: 'https://www.instagram.com/readmemaybe_/',
 
   // Leave empty to hide the "Email us" link entirely.
-  email: 'oliviamldutka@yahoo.com',
+  email: 'readmemaybeblindbooks@gmail.com',
 };
 
 /* ---------- plumbing ---------- */
