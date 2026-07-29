@@ -1,5 +1,5 @@
 /* ============================================================
-   Read Me Maybe — shop wiring
+   Read Me Maybe shop wiring
    ------------------------------------------------------------
    EDIT THIS BLOCK ONLY. Paste your two Stripe Payment Link URLs
    below (see README.md for how to make them), and change the
@@ -7,7 +7,7 @@
    ============================================================ */
 
 const CONFIG = {
-  // Stripe Payment Links — paste the full https://buy.stripe.com/... URLs here.
+  // Stripe Payment Links: paste the full https://buy.stripe.com/... URLs here.
   stripe: {
     'one-off': 'PASTE_YOUR_ONE_OFF_PAYMENT_LINK_HERE',
     'monthly': 'PASTE_YOUR_SUBSCRIPTION_PAYMENT_LINK_HERE',
@@ -92,7 +92,7 @@ document.querySelectorAll('.plan').forEach((card) => {
 
     const link = CONFIG.stripe[planId];
     if (!isConfigured(link)) {
-      nudge(card, 'Checkout isn’t connected yet — add your Stripe Payment Link in script.js.');
+      nudge(card, 'Checkout isn’t connected yet. Add your Stripe Payment Link in script.js.');
       return;
     }
 
@@ -113,7 +113,7 @@ const email = document.querySelector('[data-email]');
 if (email && CONFIG.email) {
   email.href = `mailto:${CONFIG.email}`;
 } else if (email) {
-  // No inbox yet — drop the link and the separator before it.
+  // No inbox yet, so drop the link and the separator before it.
   email.previousElementSibling?.remove();
   email.remove();
 }
