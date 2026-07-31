@@ -43,7 +43,7 @@ Dashboard → **Product catalogue** → **Add product**.
 | Field | Value |
 |---|---|
 | Name | The Single Date |
-| Description | One wrapped blind date book, a clue card and bookish stickers. No extra gifts. Posted Australia-wide. |
+| Description | One wrapped blind date book and a clue card. No gifts or stickers. Posted Australia-wide. |
 | Price | `39.95` AUD |
 | Billing | **One-off** |
 
