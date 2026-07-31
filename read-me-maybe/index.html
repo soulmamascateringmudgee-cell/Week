@@ -103,11 +103,37 @@
 
       <div class="plans">
 
-        <!-- ONE-OFF -->
+        <!-- BOOK ONLY -->
+        <article class="plan card-stock" data-plan="book-only">
+          <header class="plan-head">
+            <p class="plan-kicker">Book only</p>
+            <h3 class="plan-name">The Single Date</h3>
+            <p class="plan-price"><span class="amount">$39.95</span> <span class="per">one-off</span></p>
+          </header>
+
+          <ul class="plan-includes">
+            <li>One blind date book, wrapped</li>
+            <li>A clue card so you know the vibe</li>
+            <li>Bookish stickers</li>
+            <li>Shipping Australia-wide</li>
+            <li>No extra gifts, just the book</li>
+          </ul>
+
+          <fieldset class="vibes">
+            <legend>Your vibe</legend>
+            <div class="chips" role="radiogroup" aria-label="Choose your vibe for the book-only parcel"></div>
+            <p class="vibe-hint" data-hint>Pick one and we'll match your book to it.</p>
+          </fieldset>
+
+          <a class="btn btn-block" href="#" data-checkout>Send me a book · $39.95</a>
+          <p class="plan-foot">Secure checkout by Stripe. You'll add your postal address at checkout.</p>
+        </article>
+
+        <!-- ONE-OFF BOX -->
         <article class="plan card-stock" data-plan="one-off">
           <header class="plan-head">
-            <p class="plan-kicker">One-off</p>
-            <h3 class="plan-name">The Single Blind Date</h3>
+            <p class="plan-kicker">One-off box</p>
+            <h3 class="plan-name">The One Off Box Date</h3>
             <p class="plan-price"><span class="amount">$69.95</span> <span class="per">one-off</span></p>
           </header>
 
@@ -125,7 +151,7 @@
             <p class="vibe-hint" data-hint>Pick one and we'll match your book to it.</p>
           </fieldset>
 
-          <a class="btn btn-block" href="#" data-checkout>Send me a book · $69.95</a>
+          <a class="btn btn-block" href="#" data-checkout>Send me a box · $69.95</a>
           <p class="plan-foot">Secure checkout by Stripe. You'll add your postal address at checkout.</p>
         </article>
 
@@ -133,8 +159,8 @@
         <article class="plan plan-feature card-stock" data-plan="monthly">
           <p class="ribbon">Most loved</p>
           <header class="plan-head">
-            <p class="plan-kicker">Monthly</p>
-            <h3 class="plan-name">The Monthly Date</h3>
+            <p class="plan-kicker">Monthly box</p>
+            <h3 class="plan-name">The Monthly Box Date</h3>
             <p class="plan-price"><span class="amount">$65.95</span> <span class="per">per month</span></p>
           </header>
 
@@ -153,7 +179,7 @@
             <p class="vibe-hint" data-hint>Pick one. You can change it any month, just message us.</p>
           </fieldset>
 
-          <a class="btn btn-block" href="#" data-checkout>Start my subscription · $65.95/mo</a>
+          <a class="btn btn-block" href="#" data-checkout>Subscribe · $65.95/mo</a>
           <p class="plan-foot">Secure checkout by Stripe. Cancel any time from your receipt email.</p>
         </article>
 
@@ -172,7 +198,7 @@
         <ul class="tick-list">
           <li><strong>The book</strong>: wrapped, unlabelled, chosen for your vibe.</li>
           <li><strong>The clue card</strong>: five hints about who you're about to meet.</li>
-          <li><strong>Little gifts</strong>: two in a one-off, three in a subscription.</li>
+          <li><strong>Little gifts</strong>: two in a one-off box, three in a monthly box. The book-only date skips these.</li>
           <li><strong>Stickers</strong>: for the laptop, the water bottle, the journal.</li>
         </ul>
       </div>

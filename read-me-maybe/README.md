@@ -15,10 +15,11 @@ read-me-maybe/
 
 ## The short version
 
-1. In Stripe, make **two Payment Links**: one $69.95 one-off, one $65.95/month subscription.
+1. In Stripe, make **three Payment Links**: $39.95 book only, $69.95 one-off box,
+   $65.95/month subscription.
 2. On each link, add a **dropdown custom field** for the reading vibe, and turn on
    **collect shipping address**.
-3. Paste the two link URLs into the `CONFIG` block at the top of `script.js`.
+3. Paste the three link URLs into the `CONFIG` block at the top of `script.js`.
 4. Publish the page (Netlify or Vercel, free), put the URL in your Instagram bio.
 
 You do **not** need a backend, a database, or a Shopify subscription. Stripe hosts the
@@ -33,24 +34,33 @@ account for payouts). Do everything below in **Test mode** first. There's a togg
 the top right of the dashboard. Test card number: `4242 4242 4242 4242`, any future
 expiry, any CVC.
 
-### Create the two products
+### Create the three products
 
 Dashboard → **Product catalogue** → **Add product**.
 
-**Product 1: the one-off**
+**Product 1: the book on its own**
 
 | Field | Value |
 |---|---|
-| Name | The Single Blind Date |
+| Name | The Single Date |
+| Description | One wrapped blind date book, a clue card and bookish stickers. No extra gifts. Posted Australia-wide. |
+| Price | `39.95` AUD |
+| Billing | **One-off** |
+
+**Product 2: the one-off box**
+
+| Field | Value |
+|---|---|
+| Name | The One Off Box Date |
 | Description | One wrapped blind date book, two little gifts, a clue card and bookish stickers. Posted Australia-wide. |
 | Price | `69.95` AUD |
 | Billing | **One-off** |
 
-**Product 2: the subscription**
+**Product 3: the subscription**
 
 | Field | Value |
 |---|---|
-| Name | The Monthly Date |
+| Name | The Monthly Box Date |
 | Description | A new wrapped blind date book every month, three little gifts, a clue card and bookish stickers. Posted Australia-wide. |
 | Price | `65.95` AUD |
 | Billing | **Recurring**, monthly |
@@ -78,7 +88,7 @@ open the options and set:
 
 Save, then copy the link. It looks like `https://buy.stripe.com/xxxxxxxx`.
 
-Do this twice, once per product, so you end up with two URLs.
+Do this three times, once per product, so you end up with three URLs.
 
 ### For the subscription, turn on the customer portal
 
@@ -95,8 +105,9 @@ Open `script.js` and paste your two URLs into the top block:
 
 ```js
 stripe: {
-  'one-off': 'https://buy.stripe.com/your_one_off_link',
-  'monthly': 'https://buy.stripe.com/your_subscription_link',
+  'book-only': 'https://buy.stripe.com/your_book_only_link',
+  'one-off':   'https://buy.stripe.com/your_one_off_box_link',
+  'monthly':   'https://buy.stripe.com/your_subscription_link',
 },
 ```
 
@@ -145,7 +156,7 @@ and update it when someone messages you to change their vibe. Ten minutes a mont
 it doubles as your packing list.
 
 **Fees:** Stripe takes roughly 1.7% + 30c on Australian cards (check their pricing page
-for current rates). On $69.95 that's about $1.49; on $65.95 about $1.42. Payouts land in your
+for current rates). On $39.95 that's about $0.98, on $69.95 about $1.49, on $65.95 about $1.42. Payouts land in your
 bank a couple of days after each payment.
 
 **GST:** if you're not registered for GST, don't switch on Stripe Tax. Your prices are
@@ -158,8 +169,8 @@ Stripe Tax can handle it from that point.
 
 If you started setting this up last night, run through this:
 
-- [ ] Two separate products: one **one-off**, one **recurring monthly**. (Easy trap:
-      making both one-off, so the "subscription" only ever charges once.)
+- [ ] Three separate products: two **one-off**, one **recurring monthly**. (Easy trap:
+      making the monthly one-off too, so the "subscription" only ever charges once.)
 - [ ] Currency is **AUD**, not USD.
 - [ ] **Shipping address collection is on** for both links.
 - [ ] The vibe custom field is **required**, and its options match the page.
@@ -177,7 +188,7 @@ Everything is plain HTML. Open `index.html` in any text editor and type over the
 
 | What | Where |
 |---|---|
-| Prices | `index.html`, search for `$69.95` and `$65.95` (change them in Stripe too) |
+| Prices | `index.html`, search for `$39.95`, `$69.95` and `$65.95` (change them in Stripe too) |
 | Vibe options | `script.js`, the `vibes` list |
 | FAQ answers | `index.html`, the `<details>` blocks near the bottom |
 | Instagram / email | `script.js`, bottom of the `CONFIG` block |

@@ -9,8 +9,9 @@
 const CONFIG = {
   // Stripe Payment Links: paste the full https://buy.stripe.com/... URLs here.
   stripe: {
-    'one-off': 'PASTE_YOUR_ONE_OFF_PAYMENT_LINK_HERE',
-    'monthly': 'PASTE_YOUR_SUBSCRIPTION_PAYMENT_LINK_HERE',
+    'book-only': 'PASTE_YOUR_BOOK_ONLY_PAYMENT_LINK_HERE',
+    'one-off':   'PASTE_YOUR_ONE_OFF_BOX_PAYMENT_LINK_HERE',
+    'monthly':   'PASTE_YOUR_SUBSCRIPTION_PAYMENT_LINK_HERE',
   },
 
   // The vibe options shown on both cards.
