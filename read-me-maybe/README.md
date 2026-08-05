@@ -16,7 +16,7 @@ read-me-maybe/
 ## The short version
 
 1. In Stripe, make **three Payment Links**: $39.95 book only, $69.95 one-off box,
-   $65.95/month subscription.
+   $62.95/month subscription.
 2. On each link, add a **dropdown custom field** for the reading vibe, and turn on
    **collect shipping address**.
 3. Paste the three link URLs into the `CONFIG` block at the top of `script.js`.
@@ -62,7 +62,7 @@ Dashboard → **Product catalogue** → **Add product**.
 |---|---|
 | Name | The Monthly Box Date |
 | Description | A new wrapped blind date book every month, three little gifts, a clue card and bookish stickers. Posted Australia-wide. |
-| Price | `65.95` AUD |
+| Price | `62.95` AUD |
 | Billing | **Recurring**, monthly |
 
 Prices include postage, so you don't need to add a shipping rate. (If you'd rather
@@ -156,7 +156,7 @@ and update it when someone messages you to change their vibe. Ten minutes a mont
 it doubles as your packing list.
 
 **Fees:** Stripe takes roughly 1.7% + 30c on Australian cards (check their pricing page
-for current rates). On $39.95 that's about $0.98, on $69.95 about $1.49, on $65.95 about $1.42. Payouts land in your
+for current rates). On $39.95 that's about $0.98, on $69.95 about $1.49, on $62.95 about $1.37. Payouts land in your
 bank a couple of days after each payment.
 
 **GST:** if you're not registered for GST, don't switch on Stripe Tax. Your prices are
@@ -188,7 +188,7 @@ Everything is plain HTML. Open `index.html` in any text editor and type over the
 
 | What | Where |
 |---|---|
-| Prices | `index.html`, search for `$39.95`, `$69.95` and `$65.95` (change them in Stripe too) |
+| Prices | `index.html`, search for `$39.95`, `$69.95` and `$62.95` (change them in Stripe too) |
 | Vibe options | `script.js`, the `vibes` list |
 | FAQ answers | `index.html`, the `<details>` blocks near the bottom |
 | Instagram / email | `script.js`, bottom of the `CONFIG` block |
