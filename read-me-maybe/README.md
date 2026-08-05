@@ -65,8 +65,10 @@ Dashboard → **Product catalogue** → **Add product**.
 | Price | `62.95` AUD |
 | Billing | **Recurring**, monthly |
 
-Prices include postage, so you don't need to add a shipping rate. (If you'd rather
-charge postage separately later, you can add a shipping rate to the link instead.)
+Postage is charged separately, as a shipping rate on each Payment Link, so the prices
+above are for the parcel contents only. The page says "postage added at checkout" to
+match. If you ever fold postage into the price instead, remove the shipping rates and
+change that wording back.
 
 ### Turn each product into a Payment Link
 
