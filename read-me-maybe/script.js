@@ -9,8 +9,8 @@
 const CONFIG = {
   // Stripe Payment Links: paste the full https://buy.stripe.com/... URLs here.
   stripe: {
-    'book-only': 'PASTE_YOUR_BOOK_ONLY_PAYMENT_LINK_HERE',
-    'one-off':   'PASTE_YOUR_ONE_OFF_BOX_PAYMENT_LINK_HERE',
+    'book-only': 'https://buy.stripe.com/fZu14m2WP38q43P4mv33W06',
+    'one-off':   'https://buy.stripe.com/dRm14m2WP24mdEpaKT33W05',
     'monthly':   'https://buy.stripe.com/aFa6oG54XaAS1VH1aj33W07',
   },
 
