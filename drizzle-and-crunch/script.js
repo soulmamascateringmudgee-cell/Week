@@ -214,7 +214,7 @@
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
-    fetch('/api/enquiry', {
+    fetch('api/enquiry', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)

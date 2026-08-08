@@ -111,6 +111,25 @@ locally will show the phone-number fallback. That's expected.
 
 ---
 
+## Deploying
+
+Asset paths are **relative**, so the site renders correctly both at a project
+root and when served from a subdirectory. That means the repo-root `week` Vercel
+project already gives a working preview at `/drizzle-and-crunch/` — handy for
+showing a client — but the serverless function will not run there, because Vercel
+only picks up an `api/` directory at the deployment root. On that preview the
+enquiry form falls back to showing the phone number.
+
+For the real thing, add a **separate Vercel project** pointed at this folder:
+
+> Add New → Project → import the `Week` repo → **Root Directory: `drizzle-and-crunch`**
+> → Framework Preset: *Other*
+
+That gives `/api/enquiry` a working route, applies `vercel.json`, and redeploys on
+every push. It's the same arrangement the `read-me-maybe` project already uses.
+
+---
+
 ## Notes
 
 - Photos are resized and compressed to ~3.6MB total across 17 images; everything
