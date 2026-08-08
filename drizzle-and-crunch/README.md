@@ -16,7 +16,7 @@ vercel.json         caching + security headers
 
 ## Before this goes live
 
-Four things need a real value. Everything else is finished.
+Three things need a real value. Everything else is finished.
 
 **1. `RESEND_API_KEY` and `ENQUIRY_TO` environment variables**
 
@@ -35,19 +35,14 @@ the phone number and email address, so no enquiry is silently swallowed. Once th
 domain is connected, verify it in Resend and set `ENQUIRY_FROM` to something like
 `Drizzle & Crunch <hello@drizzleandcrunch.com.au>` so replies don't land in spam.
 
-**2. The Facebook page URL**
-
-`index.html` has a placeholder marked `data-todo="confirm Facebook page URL"` —
-it currently points at facebook.com generally. Swap in the real page URL.
-
-**3. The domain**
+**2. The domain**
 
 Once it's connected in Vercel, update the hard-coded domain in three places:
 `<link rel="canonical">` and the `og:image` in `index.html`, the `@id`/`image` in
 the JSON-LD block, and the `Sitemap:` line in `robots.txt` + the `<loc>` in
 `sitemap.xml`. Search for `drizzleandcrunch.com.au`.
 
-**4. Wedding and event pricing**
+**3. Wedding and event pricing**
 
 Deliberately **not** published. The supplied pricing guide carries three `EDIT`
 markers — base hire fee, staff hourly rate, travel rate — and states those need
