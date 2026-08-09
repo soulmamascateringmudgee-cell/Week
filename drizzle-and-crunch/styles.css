@@ -150,6 +150,8 @@ a{color:inherit}
   color:var(--cream);margin:0 0 .5rem;text-transform:lowercase;
 }
 .hero__sub{color:rgba(249,222,194,.9);max-width:46ch;font-size:clamp(1rem,1.5vw,1.18rem);margin:0 0 2rem}
+/* each sentence starts its own line, so "From a van" never dangles */
+.hero__sub span{display:block}
 .hero__cta{display:flex;flex-wrap:wrap;gap:.85rem}
 
 /* ── Sections ─────────────────────────────────────────────── */
@@ -360,6 +362,11 @@ a{color:inherit}
 
 /* ── Events ───────────────────────────────────────────────── */
 .ev{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(2rem,5vw,4.5rem);align-items:center}
+.ev__tag{
+  font-family:var(--f-disp);font-weight:800;
+  font-size:clamp(1.15rem,2.1vw,1.5rem);line-height:1.25;
+  letter-spacing:-.01em;color:var(--pink-deep);margin:0 0 1.6rem
+}
 .ev__price{color:var(--ink-soft);margin:0 0 2rem}
 .inc{list-style:none;margin:0 0 2rem;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.55rem 1.5rem}
 .inc li{position:relative;padding-left:1.7rem;color:var(--ink-soft);font-size:.98rem}
