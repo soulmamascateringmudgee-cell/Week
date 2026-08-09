@@ -1,5 +1,5 @@
 /**
- * POST /api/enquiry — takes the event enquiry form and emails it through.
+ * POST /api/enquiry: takes the event enquiry form and emails it through.
  *
  * Needs two environment variables set in the Vercel project:
  *   RESEND_API_KEY   an API key from resend.com
@@ -78,7 +78,7 @@ export default async function handler(req, res) {
         from: process.env.ENQUIRY_FROM || 'Drizzle & Crunch <onboarding@resend.dev>',
         to: [to],
         reply_to: email,
-        subject: `Event enquiry — ${name}${str(body.date) ? ` — ${str(body.date)}` : ''}`,
+        subject: `Event enquiry from ${name}${str(body.date) ? `, ${str(body.date)}` : ''}`,
         html
       })
     });

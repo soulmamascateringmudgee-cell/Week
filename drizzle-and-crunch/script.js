@@ -1,4 +1,4 @@
-/* Drizzle & Crunch — site behaviour
+/* Drizzle & Crunch site behaviour
    Three things: sticky nav, the drizzle/crunch builder, the enquiry form. */
 
 (function () {
@@ -189,7 +189,7 @@
     note.className = 'form__note';
     note.textContent = '';
 
-    // honeypot — bots fill this, people never see it
+    // honeypot: bots fill this, people never see it
     if (enq.company.value) return;
 
     var bad = null;
@@ -224,7 +224,7 @@
         if (!res.ok) throw new Error(res.j.error || 'Send failed');
         enq.reset();
         note.className = 'form__note is-ok';
-        note.textContent = "Got it — we'll be in touch shortly. Thanks!";
+        note.textContent = "Got it, we'll be in touch shortly. Thanks!";
         btn.textContent = 'Sent';
       })
       .catch(function () {
