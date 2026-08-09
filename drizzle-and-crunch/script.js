@@ -55,8 +55,8 @@
   var BASES = [
     { id: 'sundae',  name: 'Sundae',            price: 12.50, inc: true  },
     { id: 'waffle',  name: 'Stick waffle',      price: 17.50, inc: true  },
-    { id: 'acai-r',  name: 'Açaí bowl, regular', price: 15.50, inc: false },
-    { id: 'acai-l',  name: 'Açaí bowl, large',   price: 18.50, inc: false }
+    { id: 'acai-r',  name: 'Açaí bowl, regular', price: 15.50, inc: false, note: 'toppings extra' },
+    { id: 'acai-l',  name: 'Açaí bowl, large',   price: 18.50, inc: false, note: 'toppings extra' }
   ];
 
   var DRIZZLES = [
@@ -99,7 +99,8 @@
       baseWrap.insertAdjacentHTML('beforeend',
         '<label class="opt">' +
           '<input type="radio" name="base" value="' + b.id + '"' + (i === 0 ? ' checked' : '') + '>' +
-          '<span>' + b.name + ' <b>' + money(b.price) + '</b></span>' +
+          '<span>' + b.name + ' <b>' + money(b.price) + '</b>' +
+            (b.note ? ' <i class="opt__note">' + b.note + '</i>' : '') + '</span>' +
         '</label>');
     });
 
@@ -160,10 +161,10 @@
       }
     });
 
-    // "first one included" badges dim out when the base doesn't include them
+    // açaí includes nothing, so the badge flips to a charge notice rather than dimming
     form.querySelectorAll('.binc').forEach(function (el) {
-      el.classList.toggle('is-off', !base.inc);
-      el.textContent = base.inc ? 'first one included' : 'not included on açaí';
+      el.classList.toggle('is-extra', !base.inc);
+      el.textContent = base.inc ? 'first one included' : 'all extra on açaí';
     });
 
     // readout

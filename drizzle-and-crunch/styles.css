@@ -273,7 +273,6 @@ a{color:inherit}
   text-transform:uppercase;color:var(--pink);
   border:1.5px solid currentColor;border-radius:100px;padding:.28em .8em;
 }
-.binc.is-off{opacity:.35;text-decoration:line-through}
 
 .opts{display:flex;flex-wrap:wrap;gap:.6rem}
 .opt{position:relative}
@@ -328,6 +327,26 @@ a{color:inherit}
   .story{grid-template-columns:1fr}
   .story__pics{grid-template-columns:1fr 1fr;order:2}
   .story__pics img:first-child,.story__pics img:last-child{aspect-ratio:1/1}
+}
+
+.opt__note{
+  font-style:normal;font-size:.72rem;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--pink);opacity:.85;
+}
+.opt input:checked+span .opt__note{color:#fff;opacity:.9}
+.binc.is-extra{color:var(--choc);border-color:currentColor}
+
+/* ── Strawberry cups to order ─────────────────────────────── */
+.cups{
+  display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(1.5rem,4vw,3.5rem);align-items:center;
+  margin-top:clamp(3rem,6vw,5rem);padding-top:clamp(2.5rem,5vw,4rem);
+  border-top:1px solid rgba(70,50,44,.2);
+}
+.cups__img{width:100%;border-radius:var(--r);aspect-ratio:1/1;object-fit:cover}
+.cups__body p{color:var(--ink-soft);margin:0 0 1.8rem;max-width:52ch}
+@media (max-width:760px){
+  .cups{grid-template-columns:1fr}
+  .cups__img{aspect-ratio:16/10}
 }
 
 /* ── Events ───────────────────────────────────────────────── */
