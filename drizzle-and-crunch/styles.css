@@ -263,7 +263,8 @@ a{color:inherit}
 }
 
 /* ── Builder ──────────────────────────────────────────────── */
-.build__hero{width:100%;aspect-ratio:2/1;object-fit:cover;object-position:center 34%;border-radius:var(--r);margin:0 0 clamp(2rem,4vw,3rem)}
+/* shown whole, not cropped: the pans across the top are the point of the shot */
+.build__hero{display:block;width:100%;max-width:860px;height:auto;border-radius:var(--r);margin:0 auto clamp(2rem,4vw,3rem)}
 .builder{border:0;padding:0;margin:0}
 .bstep{border:0;padding:0;margin:0 0 clamp(1.8rem,3.5vw,2.6rem)}
 .bstep legend{
