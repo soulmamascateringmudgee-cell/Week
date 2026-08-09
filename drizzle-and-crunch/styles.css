@@ -173,7 +173,15 @@ a{color:inherit}
 .drip--up{transform:scaleY(-1);margin-top:0;margin-bottom:-1px}
 
 /* ── Find us ──────────────────────────────────────────────── */
-.findgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.1rem;margin-bottom:clamp(3rem,6vw,4.5rem)}
+/* ── Find us layout ───────────────────────────────────────── */
+.findwrap{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(2rem,5vw,4rem);align-items:center}
+.findwrap__img{width:100%;border-radius:var(--r);aspect-ratio:3/4;object-fit:cover}
+@media (max-width:860px){
+  .findwrap{grid-template-columns:1fr}
+  .findwrap__img{aspect-ratio:4/3;order:-1}
+}
+
+.findgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.1rem}
 .find{
   display:block;text-decoration:none;background:transparent;
   border:2px solid rgba(70,50,44,.22);border-radius:var(--r);
