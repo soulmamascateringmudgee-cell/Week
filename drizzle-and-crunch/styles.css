@@ -228,6 +228,21 @@ a{color:inherit}
 .price em{display:block;font-style:normal;font-size:.85rem;opacity:.6;line-height:1.4}
 .price--stack>div{padding:.8rem 0}
 
+/* ── Drinks ───────────────────────────────────────────────── */
+.drinks{margin-top:clamp(2.5rem,5vw,4rem);padding-top:clamp(2rem,4vw,3rem);border-top:1px solid rgba(249,222,194,.2)}
+.drinks__h{
+  font-family:var(--f-disp);font-weight:800;text-transform:lowercase;letter-spacing:-.015em;
+  font-size:clamp(1.4rem,2.4vw,1.85rem);color:var(--cream);margin:0 0 1.6rem;
+}
+.drinks__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:1.1rem 2rem}
+.drink{padding-bottom:1rem;border-bottom:1px solid rgba(249,222,194,.14)}
+.drink__t{
+  display:flex;align-items:baseline;justify-content:space-between;gap:1rem;
+  margin:0 0 .3rem;font-weight:700;color:var(--cream);
+}
+.drink__t b{font-family:var(--f-disp);font-weight:800;font-size:1.1rem;flex:none}
+.drink__l{margin:0;font-size:.9rem;line-height:1.5;color:rgba(249,222,194,.62)}
+
 .allergen{
   margin-top:clamp(2.5rem,5vw,4rem);padding-top:1.5rem;
   border-top:1px solid rgba(249,222,194,.2);
