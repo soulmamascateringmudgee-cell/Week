@@ -177,10 +177,10 @@ a{color:inherit}
 /* ── Find us ──────────────────────────────────────────────── */
 /* ── Find us layout ───────────────────────────────────────── */
 .findwrap{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(2rem,5vw,4rem);align-items:center}
-.findwrap__img{width:100%;border-radius:var(--r);aspect-ratio:3/4;object-fit:cover}
+.findwrap__img{width:100%;height:auto;border-radius:var(--r)}
 @media (max-width:860px){
   .findwrap{grid-template-columns:1fr}
-  .findwrap__img{aspect-ratio:4/3;order:-1}
+  .findwrap__img{order:-1}
 }
 
 .findgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.1rem}
@@ -322,9 +322,8 @@ a{color:inherit}
 /* ── Our story ────────────────────────────────────────────── */
 .story{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(2rem,5vw,4.5rem);align-items:center}
 .story__pics{display:grid;gap:1rem}
-.story__pics img{width:100%;border-radius:var(--r);object-fit:cover}
-.story__pics img:first-child{aspect-ratio:4/3}
-.story__pics img:last-child{aspect-ratio:3/2}
+/* natural ratio, no crop: these are portrait shots and cover was eating them */
+.story__pics img{width:100%;height:auto;border-radius:var(--r)}
 .story__body p{color:var(--ink-soft);margin:0 0 1.15rem;max-width:54ch}
 .story__body .h2{margin-bottom:1.4rem}
 .story__sign{
@@ -336,8 +335,7 @@ a{color:inherit}
 }
 @media (max-width:860px){
   .story{grid-template-columns:1fr}
-  .story__pics{grid-template-columns:1fr 1fr;order:2}
-  .story__pics img:first-child,.story__pics img:last-child{aspect-ratio:1/1}
+  .story__pics{grid-template-columns:1fr 1fr;order:2;align-items:start}
 }
 
 .opt__note{
@@ -353,11 +351,10 @@ a{color:inherit}
   margin-top:clamp(3rem,6vw,5rem);padding-top:clamp(2.5rem,5vw,4rem);
   border-top:1px solid rgba(70,50,44,.2);
 }
-.cups__img{width:100%;border-radius:var(--r);aspect-ratio:1/1;object-fit:cover}
+.cups__img{width:100%;height:auto;border-radius:var(--r)}
 .cups__body p{color:var(--ink-soft);margin:0 0 1.8rem;max-width:52ch}
 @media (max-width:760px){
   .cups{grid-template-columns:1fr}
-  .cups__img{aspect-ratio:16/10}
 }
 
 /* ── Events ───────────────────────────────────────────────── */
@@ -374,8 +371,8 @@ a{color:inherit}
   content:"";position:absolute;left:0;top:.55em;width:9px;height:9px;
   background:var(--pink);border-radius:50%;
 }
-.ev__pics{display:grid;gap:1rem}
-.ev__pics img{width:100%;border-radius:var(--r);aspect-ratio:4/3;object-fit:cover}
+.ev__pics{display:grid;gap:1rem;align-items:start}
+.ev__pics img{width:100%;height:auto;border-radius:var(--r)}
 @media (max-width:860px){.ev{grid-template-columns:1fr}}
 
 /* ── Form ─────────────────────────────────────────────────── */
