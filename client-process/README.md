@@ -12,6 +12,8 @@ The system behind every website build: what you ask clients up front, what you t
 | [`build-checklist.md`](build-checklist.md) | The full SOP — enquiry through to the 7-day post-launch check |
 | [`checklist.html`](checklist.html) | The same checklist, tickable, saves per client, prints to PDF |
 
+Workshop registration forms live in [`../workshop-forms/`](../workshop-forms/README.md).
+
 ## Setting up the forms
 
 **The fast way** — open [script.google.com](https://script.google.com), start a new project, paste in `create-forms.gs`, choose `createBothForms` from the function dropdown and hit Run. Approve the permission prompt (it's your own script, so the "unverified app" warning is expected — click Advanced, then go through). The execution log gives you the edit and share links for both forms.
