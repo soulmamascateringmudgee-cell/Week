@@ -52,6 +52,27 @@ alpha channel. These are for **pale** backgrounds — the artwork is dark ink, s
 disappear on a dark ground. A reversed light-on-dark version would need to be made
 separately.
 
+## Social covers
+
+`social/` holds cover sizes built from `country-detour-2-goldfields.png`:
+
+| File | Size | For |
+| --- | --- | --- |
+| `facebook-cover-1640x924.png` | 1640 × 924 | Facebook page cover |
+| `facebook-cover-1640x924-sprig.png` | 1640 × 924 | as above, with the eucalyptus accent |
+| `x-header-1500x500.png` | 1500 × 500 | X / Twitter header |
+| `x-header-1500x500-sprig.png` | 1500 × 500 | as above, with the eucalyptus accent |
+| `linkedin-cover-1128x376.png` | 1128 × 376 | LinkedIn company page cover |
+| `share-card-1200x630.png` | 1200 × 630 | link previews (Open Graph) |
+
+The logo is kept inside each platform's safe area, so nothing important is lost to
+mobile cropping or to the profile picture that sits over the bottom-left corner on X and
+LinkedIn. The `-sprig` versions carry a faded, mirrored copy of the blossom cluster off
+the right edge to balance the wide formats.
+
+Rebuild them with `python3 social.py`, which reads the logo and writes `social/`. Point
+`LOGO` at a different colourway to reshoot the whole set.
+
 ## Regenerating
 
 ```
