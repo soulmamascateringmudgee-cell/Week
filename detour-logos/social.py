@@ -20,6 +20,8 @@ BOX = {                       # (width fraction, height fraction) per logo shape
                 'linkedin-cover-1128x376': (0.52, 0.70), 'share-card-1200x630': (0.72, 0.70)},
     'gulgong': {'facebook-cover-1640x924': (0.42, 0.80), 'x-header-1500x500': (0.30, 0.84),
                 'linkedin-cover-1128x376': (0.28, 0.86), 'share-card-1200x630': (0.44, 0.82)},
+    'hillend': {'facebook-cover-1640x924': (0.42, 0.80), 'x-header-1500x500': (0.30, 0.84),
+                'linkedin-cover-1128x376': (0.28, 0.86), 'share-card-1200x630': (0.44, 0.82)},
 }
 LOGOS = {
     'country': dict(file='country-detour-2-goldfields.png', crop=(141, 355, 1093, 892),
@@ -27,6 +29,7 @@ LOGOS = {
                                                            'x-header-1500x500')),
     'gulgong': dict(file='gulgong-detour-2-goldfields.png', crop=(137, 89, 1155, 1152),
                     accent=None, sprig_on=()),
+    'hillend': dict(file='hill-end-detour.png', crop=None, accent=None, sprig_on=()),
 }
 
 
@@ -58,7 +61,8 @@ shutil.rmtree(OUT, ignore_errors=True)
 for name, cfg in LOGOS.items():
     os.makedirs(f'{OUT}/{name}', exist_ok=True)
     src = Image.open(cfg['file'])
-    art = to_rgba(src).crop(cfg['crop'])
+    art = to_rgba(src)
+    art = art.crop(cfg['crop'] or art.getbbox())
     sprig = to_rgba(src).crop(cfg['accent']) if cfg['accent'] else None
     for size, w, h, cx, cy in SIZES:
         bw, bh = BOX[name][size]

@@ -1,10 +1,11 @@
-# Detour logos — colour work
+# Detour logos
 
 Recoloured versions of **The Gulgong Detour** and **The Country Detour Co**, so their
-drawn elements carry colour the way **The Mudgee Detour** does.
+drawn elements carry colour the way **The Mudgee Detour** does — plus a new
+**The Hill End Detour** built to match.
 
-The original artwork is untouched underneath — every line, stroke and letterform is the
-same drawing. Only the ink colour and its strength have changed.
+For the recoloured pair, the original artwork is untouched underneath: every line, stroke
+and letterform is the same drawing, and only the ink colour and its strength have changed.
 
 ## Palette
 
@@ -45,6 +46,34 @@ All three darken the lettering ("The Country" into deep rust, "Detour" and the t
 into deep olive) and strengthen the drawn line work. The eucalyptus foliage is sage, the
 dirt road khaki olive, the windmill terracotta and the kangaroo icon olive.
 
+## The Hill End Detour
+
+`hill-end-detour.png` — a new badge, not a recolour, built to sit in the same family.
+
+The shared furniture is lifted straight from the Gulgong badge: the circle arcs, the
+`DETOUR` wordmark, the rule and dot, `EXPLORE. DISCOVER. INDULGE.`, and the 4WD, dashed
+track and map pin. That is the same artwork, not a copy of it, so the lockup matches
+exactly.
+
+What is new:
+
+- **The Royal Hotel**, in the clock-tower terracotta the Opera House and windmill use
+- **Holtermann's nugget** in goldfields ochre, in a vignette frame where Gulgong has the
+  Henry Lawson portrait
+- **The poplars**, in leaf sage with the same soft fill as the eucalyptus
+- The ridge the town sits on, in khaki olive
+- The wordmark, set in **Great Vibes**, which is a close match for the script on the
+  other three
+
+The illustration is vector — `hill-end/illustration.svg` opens in any vector editor if
+you want to redraw a part of it. It is drawn line art rather than the etched, hatched
+style of the other three, since those came out of an image generator and this did not.
+Swapping in a matching engraving later is a drop-in change: replace the SVG and rebuild.
+
+Rebuild with `python3 build-hill-end.py`. It reads `gulgong-detour-2-goldfields.png` for
+the furniture, writes `illustration.svg`, and rasterises it with the bundled Chromium.
+Fonts are in `hill-end/fonts/`, both under the SIL Open Font License.
+
 ## Leaf fill
 
 The eucalyptus blades and the Gulgong gum leaves are washed with sage inside their
@@ -59,8 +88,8 @@ alpha channel. These are for **pale** backgrounds — see below for dark ones.
 
 ## Reversed, for dark backgrounds
 
-Built from the goldfields colourway of each logo, for dark website headers, merch and
-photo overlays:
+Built from the goldfields colourway of the Gulgong and Country logos, and from the Hill
+End badge, for dark website headers, merch and photo overlays:
 
 | File | What it is |
 | --- | --- |
@@ -76,8 +105,8 @@ colourway.
 
 ## Social covers
 
-`social/country/` and `social/gulgong/` hold cover sizes built from each logo's
-goldfields colourway:
+`social/country/`, `social/gulgong/` and `social/hillend/` hold cover sizes for each
+logo:
 
 | File | Size | For |
 | --- | --- | --- |
@@ -92,8 +121,8 @@ LinkedIn.
 
 The Country covers also come in `-sprig` versions of the two banner formats, carrying a
 faded, mirrored copy of the blossom cluster off the right edge — the wide formats leave a
-lot of empty cream around a centred logo. The Gulgong badge is close to square, so it is
-simply scaled up to fill those formats instead.
+lot of empty cream around a centred logo. The Gulgong and Hill End badges are close to
+square, so they are simply scaled up to fill those formats instead.
 
 Rebuild with `python3 social.py`. Its `LOGOS` and `BOX` tables hold the source file, the
 crop and the per-format sizing for each logo.
