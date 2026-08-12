@@ -22,6 +22,10 @@ BOX = {                       # (width fraction, height fraction) per logo shape
                 'linkedin-cover-1128x376': (0.28, 0.86), 'share-card-1200x630': (0.44, 0.82)},
     'hillend': {'facebook-cover-1640x924': (0.42, 0.80), 'x-header-1500x500': (0.30, 0.84),
                 'linkedin-cover-1128x376': (0.28, 0.86), 'share-card-1200x630': (0.44, 0.82)},
+    'rylstone': {'facebook-cover-1640x924': (0.42, 0.80), 'x-header-1500x500': (0.30, 0.84),
+                 'linkedin-cover-1128x376': (0.28, 0.86), 'share-card-1200x630': (0.44, 0.82)},
+    'kandos': {'facebook-cover-1640x924': (0.42, 0.80), 'x-header-1500x500': (0.30, 0.84),
+               'linkedin-cover-1128x376': (0.28, 0.86), 'share-card-1200x630': (0.44, 0.82)},
 }
 LOGOS = {
     'country': dict(file='country-detour-2-goldfields.png', crop=(141, 355, 1093, 892),
@@ -30,6 +34,8 @@ LOGOS = {
     'gulgong': dict(file='gulgong-detour-2-goldfields.png', crop=(137, 89, 1155, 1152),
                     accent=None, sprig_on=()),
     'hillend': dict(file='hill-end-detour.png', crop=None, accent=None, sprig_on=()),
+    'rylstone': dict(file='rylstone-detour.png', crop=None, accent=None, sprig_on=()),
+    'kandos': dict(file='kandos-detour.png', crop=None, accent=None, sprig_on=()),
 }
 
 

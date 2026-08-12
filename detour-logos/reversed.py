@@ -7,7 +7,9 @@ BG = np.array([249., 241., 236.])
 GROUND = np.array([35., 38., 25.])          # deep olive-black, drawn from the brand olive
 PAIRS = [('country-detour-2-goldfields', 'country-detour-2-goldfields-reversed'),
          ('gulgong-detour-2-goldfields', 'gulgong-detour-2-goldfields-reversed'),
-         ('hill-end-detour', 'hill-end-detour-reversed')]
+         ('hill-end-detour', 'hill-end-detour-reversed'),
+         ('rylstone-detour', 'rylstone-detour-reversed'),
+         ('kandos-detour', 'kandos-detour-reversed')]
 
 
 MONO = np.array([242., 233., 221.])         # warm off-white, for the single-colour version
