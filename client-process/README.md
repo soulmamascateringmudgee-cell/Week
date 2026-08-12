@@ -1,12 +1,14 @@
 # Country Smart AI — client process
 
-The system behind every website build: what you ask clients up front, what you tick off while you build, and how you keep revisions from dribbling in all week.
+The system behind every client: how you work out what they need, what you ask them up front, what you tick off while you build, and how you keep revisions from dribbling in all week.
 
 ## What's here
 
 | File | What it's for |
 |---|---|
-| [`intake-form.md`](intake-form.md) | Every question in the client intake form, section by section, with help text |
+| [`onboarding-form.md`](onboarding-form.md) | New client onboarding — the diagnostic that finds where they need the most support, plus how to read the answers |
+| [`create-onboarding-form.gs`](create-onboarding-form.gs) | Apps Script that builds the onboarding form |
+| [`intake-form.md`](intake-form.md) | Every question in the website intake form, section by section, with help text |
 | [`revision-request-form.md`](revision-request-form.md) | The revision request form, plus the wording to send with the preview link |
 | [`create-forms.gs`](create-forms.gs) | Google Apps Script that builds **both** forms for you in about 30 seconds |
 | [`build-checklist.md`](build-checklist.md) | The full SOP — enquiry through to the 7-day post-launch check |
@@ -14,7 +16,11 @@ The system behind every website build: what you ask clients up front, what you t
 
 Workshop registration forms live in [`../workshop-forms/`](../workshop-forms/README.md).
 
+**Which form when.** Onboarding comes first and asks *what do you need* — run it on any new client, whatever they've approached you about. The website intake form comes later and asks *what do I need from you to build it*, once a website is the agreed answer. A client who only wants help with their social media never sees the intake form at all.
+
 ## Setting up the forms
+
+Two scripts, each its own Apps Script project: `create-forms.gs` builds the intake and revision forms, `create-onboarding-form.gs` builds the onboarding form (function name `createOnboardingForm`, and no file-upload fix-ups needed afterwards).
 
 **The fast way** — open [script.google.com](https://script.google.com), start a new project, paste in `create-forms.gs`, choose `createBothForms` from the function dropdown and hit Run. Approve the permission prompt (it's your own script, so the "unverified app" warning is expected — click Advanced, then go through). The execution log gives you the edit and share links for both forms.
 
