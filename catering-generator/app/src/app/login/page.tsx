@@ -5,9 +5,18 @@ import { useSearchParams } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client.ts";
 
+/** Why a sign-in link didn't work, in words a chef can act on. */
+const PROBLEMS: Record<string, string> = {
+  "same-browser":
+    "That link has to be opened in the same browser you asked for it from. Request a new one here, then open the email on this device.",
+  expired:
+    "That link has already been used or has expired. They're good once, for an hour. Request a fresh one below.",
+};
+
 function LoginForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/jobs";
+  const problem = searchParams.get("problem");
 
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
@@ -53,6 +62,9 @@ function LoginForm() {
 
   return (
     <form onSubmit={submit}>
+      {problem && PROBLEMS[problem] && (
+        <p className="notice">{PROBLEMS[problem]}</p>
+      )}
       <div className="card">
         <label htmlFor="email">
           Email
