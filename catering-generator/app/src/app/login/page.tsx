@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client.ts";
 
@@ -14,14 +14,44 @@ const PROBLEMS: Record<string, string> = {
 };
 
 function LoginForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/jobs";
   const problem = searchParams.get("problem");
 
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  /**
+   * The email sender is rate limited and links are fussy about which browser
+   * opens them. A password always works, from any device, immediately — which
+   * matters at 6am when service starts at 7.
+   */
+  async function signInWithPassword(formEvent: React.FormEvent) {
+    formEvent.preventDefault();
+    setBusy(true);
+    setError("");
+
+    const { error: signInError } = await createClient().auth.signInWithPassword(
+      { email, password },
+    );
+
+    if (signInError) {
+      setError(
+        signInError.message === "Invalid login credentials"
+          ? "That email and password don't match. Check both, or use a sign-in link instead."
+          : signInError.message,
+      );
+      setBusy(false);
+      return;
+    }
+
+    router.push(next);
+    router.refresh();
+  }
 
   async function submit(formEvent: React.FormEvent) {
     formEvent.preventDefault();
@@ -61,39 +91,79 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={submit}>
+    <>
       {problem && PROBLEMS[problem] && (
         <p className="notice">{PROBLEMS[problem]}</p>
       )}
-      <div className="card">
-        <label htmlFor="email">
-          Email
-          <span className="hint">
-            We&rsquo;ll send you a link to sign in. No password. Access is by
-            invitation, so use the address you were set up with.
-          </span>
-        </label>
-        <input
-          id="email"
-          type="email"
-          required
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@yourbusiness.com.au"
-        />
-        {error && (
-          <p className="notice" style={{ marginTop: 12 }}>
-            <strong>{error}</strong>
-          </p>
-        )}
-        <div className="actions">
-          <button type="submit" disabled={busy || email.trim() === ""}>
-            {busy ? "Sending…" : "Send me a link"}
-          </button>
+
+      <form onSubmit={signInWithPassword}>
+        <div className="card">
+          <label htmlFor="email">
+            Email
+            <span className="hint">
+              Access is by invitation, so use the address you were set up with.
+            </span>
+          </label>
+          <input
+            id="email"
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@yourbusiness.com.au"
+          />
+
+          <label htmlFor="password" style={{ marginTop: 14 }}>
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          {error && (
+            <p className="notice" style={{ marginTop: 12 }}>
+              <strong>{error}</strong>
+            </p>
+          )}
+
+          <div className="actions">
+            <button
+              type="submit"
+              disabled={busy || email.trim() === "" || password === ""}
+            >
+              {busy ? "Signing in…" : "Sign in"}
+            </button>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+
+      <form onSubmit={submit}>
+        <div className="card">
+          <h2>No password?</h2>
+          <p className="basis">
+            We&rsquo;ll email a link to the address above instead. Open it in
+            this same browser — links are tied to the device that asked for
+            them. Sending is capped at a couple an hour, so a password is the
+            reliable way in.
+          </p>
+          <div className="actions">
+            <button
+              type="button"
+              className="secondary"
+              onClick={submit}
+              disabled={busy || email.trim() === ""}
+            >
+              {busy ? "Sending…" : "Email me a link"}
+            </button>
+          </div>
+        </div>
+      </form>
+    </>
   );
 }
 
