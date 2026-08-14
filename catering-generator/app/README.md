@@ -25,8 +25,9 @@ stripping, so there's no test framework to install.
 Zero config. Import the repo, set the **root directory** to
 `catering-generator/app`, and deploy. Framework preset: Next.js.
 
-Environment variables — copy `.env.local.example` to `.env.local` for local dev,
-and paste the same values into Vercel's project settings:
+Environment variables — copy `.env.local.example` to `.env.local` for local dev.
+The two Supabase values are also committed in `.env.production`, so a deploy
+needs no dashboard fiddling:
 
 | Variable | Needed for | If missing |
 |---|---|---|
@@ -36,7 +37,9 @@ and paste the same values into Vercel's project settings:
 
 The Supabase publishable key is designed to ship in the browser — it grants
 nothing on its own, and row-level security is what protects the data. It is
-safe in the example file and in Vercel's plain environment variables.
+safe in the example file, in `.env.production`, and in Vercel's plain
+environment variables. `ANTHROPIC_API_KEY` is a real secret and is in none of
+them: set it in Vercel's project settings if you want it.
 
 **Set the redirect URL in Supabase** before the first real sign-in:
 *Authentication → URL Configuration → Site URL* must be your deployed origin,
@@ -47,9 +50,11 @@ it the emailed link bounces to localhost.
 
 ```
 supabase/migrations/     The schema. Apply in order to a fresh project.
-src/middleware.ts        Refreshes the session and gates every page except
-                         /, /login and /auth/*. API routes answer for
-                         themselves with a 401 rather than redirecting.
+src/middleware.ts        Refreshes the session, gates every page except
+                         /, /login, /auth/* and /no-access, then checks the
+                         invite list. API routes answer for themselves with a
+                         401/403 rather than redirecting.
+src/lib/access.ts        is_invited() and is_admin(), both failing closed.
 src/lib/supabase/        Browser and server clients.
 src/lib/tables.ts        The yields, per-head figures, attach rates, buffers.
                          Server-only — this is the product.
@@ -88,6 +93,22 @@ not a computer person.
 
 Every page except the landing page and login is gated, so the app is worth
 paying for: a buyer gets an account rather than a copy of the files.
+
+**It is invite-only.** Anyone on the internet can ask Supabase for a magic
+link, so an account by itself means nothing — the `allowed_emails` table is the
+permission. Sign in with an address that isn't on it and you land on
+`/no-access` with no data and no way to make any. Manage the list at `/admin`,
+which only an admin row can reach.
+
+The rule is enforced in three places, and the one that counts is the last:
+middleware redirects (or returns a JSON 403 on `/api/*`), the invites route
+checks before it writes, and the row-level security policies on `jobs` require
+`is_invited()` on every read and write. Turn the app off entirely and an
+uninvited account still reaches nothing.
+
+To add an operator: `/admin` → their email → *Add to the list*. To cut one off:
+*Remove*. Their saved jobs stay in the database, out of reach, in case they
+come back.
 
 Saved jobs store the **form** as typed, not the computed plan. Opening a job
 recomputes the numbers, so a correction to the tables reaches old jobs too and

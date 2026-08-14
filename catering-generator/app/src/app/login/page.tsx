@@ -57,7 +57,8 @@ function LoginForm() {
         <label htmlFor="email">
           Email
           <span className="hint">
-            We&rsquo;ll send you a link to sign in. No password.
+            We&rsquo;ll send you a link to sign in. No password. Access is by
+            invitation, so use the address you were set up with.
           </span>
         </label>
         <input
