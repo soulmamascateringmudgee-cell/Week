@@ -56,6 +56,45 @@ function createBothWorkshopForms() {
   Logger.log('');
   Logger.log('Send the Share links. Keep the Edit links for yourself.');
   Logger.log('=====================================================');
+
+  emailTheLinks_('Your Country Smart AI workshop forms', [
+    'Both workshop forms have been created. Here are the links - keep this email.',
+    '',
+    'FREE WORKSHOP REGISTRATION',
+    '  Edit (yours):    ' + free.getEditUrl(),
+    '  Share (public):  ' + free.getPublishedUrl(),
+    '',
+    'PAID WORKSHOP BOOKING',
+    '  Edit (yours):    ' + paid.getEditUrl(),
+    '  Share (public):  ' + paid.getPublishedUrl(),
+    '',
+    'Remember to add the date, time and venue to each form description.',
+    '',
+    'The forms live in the Google account this email arrived in.',
+    'Find them any time at https://forms.google.com'
+  ].join('\n'));
+}
+
+/**
+ * Emails the links to whoever ran the script.
+ *
+ * The execution log disappears the moment you close the tab, which is a good
+ * way to lose track of a form. This puts the links somewhere permanent, and
+ * the account the email lands in is proof of where the forms were created.
+ */
+function emailTheLinks_(subject, body) {
+  try {
+    var address = Session.getEffectiveUser().getEmail();
+    if (!address) {
+      Logger.log('Could not work out your email address, so no email sent.');
+      return;
+    }
+    MailApp.sendEmail(address, subject, body);
+    Logger.log('These links have also been emailed to ' + address);
+  } catch (err) {
+    Logger.log('Could not send the email: ' + err.message);
+    Logger.log('The links above still work - copy them out of this log.');
+  }
 }
 
 /** Shared answer options, so the free and paid forms stay comparable. */

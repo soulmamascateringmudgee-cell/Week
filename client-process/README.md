@@ -16,7 +16,9 @@ Workshop registration forms live in [`../workshop-forms/`](../workshop-forms/REA
 
 ## Setting up the forms
 
-**The fast way** — open [script.google.com](https://script.google.com), start a new project, paste in `create-forms.gs`, choose `createBothForms` from the function dropdown and hit Run. Approve the permission prompt (it's your own script, so the "unverified app" warning is expected — click Advanced, then go through). The execution log gives you the edit and share links for both forms.
+**The fast way** — open [script.google.com](https://script.google.com), start a new project, paste in `create-forms.gs`, choose `createBothForms` from the function dropdown and hit Run. Approve the permission prompt (it's your own script, so the "unverified app" warning is expected — click Advanced, then go through). The execution log gives you the edit and share links for both forms, **and the script emails them to you as well** — the log vanishes when you close the tab, an email doesn't.
+
+That email is also how you tell which Google account the forms went to: they live in whichever account it arrives in. Forms never show up in Gmail on their own, and they're easy to scroll past in Drive — [forms.google.com](https://forms.google.com) is the page that reliably lists them.
 
 Google's script API can't create **File upload** questions, so the script leaves three clearly marked placeholders — two in the intake form, one in the revision form. Open each form, switch those questions to File upload, and delete the `[CHANGE THIS TO A FILE UPLOAD QUESTION]` note from the help text. Takes a minute.
 
