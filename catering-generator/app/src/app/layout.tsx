@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
+import SignOutButton from "@/components/SignOutButton.tsx";
+import { createClient } from "@/lib/supabase/server.ts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -8,11 +11,16 @@ export const metadata: Metadata = {
     "Turns a menu and a number of people into quantities you can order.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <html lang="en-AU">
       <body>
@@ -22,8 +30,16 @@ export default function RootLayout({
               Prep&nbsp;&amp;&nbsp;Ordering
             </Link>
             <nav className="modes">
-              <Link href="/event">Event</Link>
-              <Link href="/service">Weekly service</Link>
+              {user ? (
+                <>
+                  <Link href="/event">Event</Link>
+                  <Link href="/service">Weekly service</Link>
+                  <Link href="/jobs">Saved jobs</Link>
+                  <SignOutButton />
+                </>
+              ) : (
+                <Link href="/login">Sign in</Link>
+              )}
             </nav>
           </div>
         </header>

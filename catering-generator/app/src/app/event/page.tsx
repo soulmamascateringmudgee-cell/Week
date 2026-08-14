@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import EventResult from "@/components/EventResult.tsx";
+import SaveJob from "@/components/SaveJob.tsx";
 import {
   MENU_WEIGHT_CHOICES,
   PROTEIN_CHOICES,
@@ -24,48 +26,90 @@ const DIETARY_LABELS = [
 const fieldId = (label: string) =>
   `diet-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
-export default function EventPage() {
-  const [today, setToday] = useState("");
-  const [guests, setGuests] = useState(80);
-  const [eventDate, setEventDate] = useState("");
-  const [style, setStyle] = useState<EventInput["style"]>("shared");
-  const [menuWeight, setMenuWeight] =
-    useState<EventInput["menuWeight"]>("standard");
-  const [proteins, setProteins] = useState<string[]>([
-    "brisket",
-    "chickenThigh",
-  ]);
-  const [sidesCount, setSidesCount] = useState(3);
-  const [starch, setStarch] = useState<EventInput["starch"]>("potato");
-  const [bread, setBread] = useState(true);
-  const [dessert, setDessert] = useState<EventInput["dessert"]>("shared");
-  const [grazing, setGrazing] = useState<EventInput["grazing"]>("none");
-  const [canapes, setCanapes] = useState<EventInput["canapes"]>("none");
-  const [drinksService, setDrinksService] = useState(false);
-  const [hotOrOutdoors, setHotOrOutdoors] = useState(false);
-  const [vanItem, setVanItem] = useState<NonNullable<EventInput["vanItem"]>>(
-    "burgers",
-  );
-  const [serviceWindowHours, setServiceWindowHours] = useState(3);
-  const [dietaries, setDietaries] = useState<Record<string, number>>({});
+/**
+ * The form as the operator sees it. This is what gets saved, so opening a job
+ * later restores exactly what was typed — including the van fields, whether or
+ * not that job was a van job.
+ */
+interface EventForm {
+  guests: number;
+  eventDate: string;
+  style: EventInput["style"];
+  menuWeight: EventInput["menuWeight"];
+  proteins: string[];
+  sidesCount: number;
+  starch: EventInput["starch"];
+  bread: boolean;
+  dessert: EventInput["dessert"];
+  grazing: EventInput["grazing"];
+  canapes: EventInput["canapes"];
+  drinksService: boolean;
+  hotOrOutdoors: boolean;
+  vanItem: NonNullable<EventInput["vanItem"]>;
+  serviceWindowHours: number;
+  dietaries: Record<string, number>;
+}
 
+const BLANK: EventForm = {
+  guests: 80,
+  eventDate: "",
+  style: "shared",
+  menuWeight: "standard",
+  proteins: ["brisket", "chickenThigh"],
+  sidesCount: 3,
+  starch: "potato",
+  bread: true,
+  dessert: "shared",
+  grazing: "none",
+  canapes: "none",
+  drinksService: false,
+  hotOrOutdoors: false,
+  vanItem: "burgers",
+  serviceWindowHours: 3,
+  dietaries: {},
+};
+
+function EventPlanner() {
+  const searchParams = useSearchParams();
+  const jobId = searchParams.get("job");
+
+  const [form, setForm] = useState<EventForm>(BLANK);
+  const [today, setToday] = useState("");
   const [plan, setPlan] = useState<EventPlan | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  // Set on the client only — rendering today's date on the server would make
-  // the first paint disagree with the browser.
+  // Client-only: rendering today's date on the server would make the first
+  // paint disagree with the browser.
   useEffect(() => {
     setToday(new Date().toISOString().slice(0, 10));
   }, []);
 
-  const toggleProtein = (key: string) => {
-    setProteins((current) =>
-      current.includes(key)
-        ? current.filter((k) => k !== key)
-        : [...current, key],
-    );
-  };
+  // Opening a saved job restores the form exactly as it was typed.
+  useEffect(() => {
+    if (!jobId) return;
+    let cancelled = false;
+    void (async () => {
+      const response = await fetch(`/api/jobs/${jobId}`);
+      if (!response.ok || cancelled) return;
+      const body = await response.json();
+      if (body.job?.input) setForm({ ...BLANK, ...body.job.input });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [jobId]);
+
+  const set = <K extends keyof EventForm>(key: K, value: EventForm[K]) =>
+    setForm((current) => ({ ...current, [key]: value }));
+
+  const toggleProtein = (key: string) =>
+    setForm((current) => ({
+      ...current,
+      proteins: current.proteins.includes(key)
+        ? current.proteins.filter((k) => k !== key)
+        : [...current.proteins, key],
+    }));
 
   async function submit(formEvent: React.FormEvent) {
     formEvent.preventDefault();
@@ -73,25 +117,28 @@ export default function EventPage() {
     setError("");
 
     const input: EventInput = {
-      guests,
-      eventDate,
+      guests: form.guests,
+      eventDate: form.eventDate,
       today,
-      style,
-      menuWeight,
-      proteins,
-      sidesCount,
-      starch,
-      bread,
-      dessert,
-      grazing,
-      canapes,
-      drinksService,
-      hotOrOutdoors,
-      dietaries: Object.entries(dietaries)
+      style: form.style,
+      menuWeight: form.menuWeight,
+      proteins: form.proteins,
+      sidesCount: form.sidesCount,
+      starch: form.starch,
+      bread: form.bread,
+      dessert: form.dessert,
+      grazing: form.grazing,
+      canapes: form.canapes,
+      drinksService: form.drinksService,
+      hotOrOutdoors: form.hotOrOutdoors,
+      dietaries: Object.entries(form.dietaries)
         .filter(([, count]) => count > 0)
         .map(([label, count]) => ({ label, count })),
-      ...(style === "van"
-        ? { vanItem, serviceWindowHours }
+      ...(form.style === "van"
+        ? {
+            vanItem: form.vanItem,
+            serviceWindowHours: form.serviceWindowHours,
+          }
         : {}),
     };
 
@@ -118,12 +165,6 @@ export default function EventPage() {
 
   return (
     <>
-      <h1>Event order list</h1>
-      <p className="lede">
-        One date, one guest count, one menu. Order day is T-7 — seven days
-        before the event.
-      </p>
-
       <form onSubmit={submit}>
         <div className="card">
           <h2>The job</h2>
@@ -139,8 +180,8 @@ export default function EventPage() {
                 min={1}
                 max={5000}
                 required
-                value={guests}
-                onChange={(e) => setGuests(Number(e.target.value))}
+                value={form.guests}
+                onChange={(e) => set("guests", Number(e.target.value))}
               />
             </div>
             <div>
@@ -149,8 +190,8 @@ export default function EventPage() {
                 id="eventDate"
                 type="date"
                 required
-                value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
+                value={form.eventDate}
+                onChange={(e) => set("eventDate", e.target.value)}
               />
             </div>
             <div>
@@ -170,9 +211,9 @@ export default function EventPage() {
               <label htmlFor="style">Service style</label>
               <select
                 id="style"
-                value={style}
+                value={form.style}
                 onChange={(e) =>
-                  setStyle(e.target.value as EventInput["style"])
+                  set("style", e.target.value as EventInput["style"])
                 }
               >
                 {STYLE_CHOICES.map((c) => (
@@ -189,9 +230,9 @@ export default function EventPage() {
               </label>
               <select
                 id="menuWeight"
-                value={menuWeight}
+                value={form.menuWeight}
                 onChange={(e) =>
-                  setMenuWeight(e.target.value as EventInput["menuWeight"])
+                  set("menuWeight", e.target.value as EventInput["menuWeight"])
                 }
               >
                 {MENU_WEIGHT_CHOICES.map((c) => (
@@ -215,7 +256,7 @@ export default function EventPage() {
               <label className="check" key={c.key}>
                 <input
                   type="checkbox"
-                  checked={proteins.includes(c.key)}
+                  checked={form.proteins.includes(c.key)}
                   onChange={() => toggleProtein(c.key)}
                 />
                 {c.label}
@@ -234,17 +275,17 @@ export default function EventPage() {
                 type="number"
                 min={0}
                 max={6}
-                value={sidesCount}
-                onChange={(e) => setSidesCount(Number(e.target.value))}
+                value={form.sidesCount}
+                onChange={(e) => set("sidesCount", Number(e.target.value))}
               />
             </div>
             <div>
               <label htmlFor="starch">Starch</label>
               <select
                 id="starch"
-                value={starch}
+                value={form.starch}
                 onChange={(e) =>
-                  setStarch(e.target.value as EventInput["starch"])
+                  set("starch", e.target.value as EventInput["starch"])
                 }
               >
                 {STARCH_CHOICES.map((c) => (
@@ -258,9 +299,9 @@ export default function EventPage() {
               <label htmlFor="dessert">Dessert</label>
               <select
                 id="dessert"
-                value={dessert}
+                value={form.dessert}
                 onChange={(e) =>
-                  setDessert(e.target.value as EventInput["dessert"])
+                  set("dessert", e.target.value as EventInput["dessert"])
                 }
               >
                 <option value="none">None</option>
@@ -272,9 +313,9 @@ export default function EventPage() {
               <label htmlFor="grazing">Grazing</label>
               <select
                 id="grazing"
-                value={grazing}
+                value={form.grazing}
                 onChange={(e) =>
-                  setGrazing(e.target.value as EventInput["grazing"])
+                  set("grazing", e.target.value as EventInput["grazing"])
                 }
               >
                 <option value="none">None</option>
@@ -286,9 +327,9 @@ export default function EventPage() {
               <label htmlFor="canapes">Canapés</label>
               <select
                 id="canapes"
-                value={canapes}
+                value={form.canapes}
                 onChange={(e) =>
-                  setCanapes(e.target.value as EventInput["canapes"])
+                  set("canapes", e.target.value as EventInput["canapes"])
                 }
               >
                 <option value="none">None</option>
@@ -302,31 +343,31 @@ export default function EventPage() {
             <label className="check">
               <input
                 type="checkbox"
-                checked={bread}
-                onChange={(e) => setBread(e.target.checked)}
+                checked={form.bread}
+                onChange={(e) => set("bread", e.target.checked)}
               />
               Bread on the table
             </label>
             <label className="check">
               <input
                 type="checkbox"
-                checked={drinksService}
-                onChange={(e) => setDrinksService(e.target.checked)}
+                checked={form.drinksService}
+                onChange={(e) => set("drinksService", e.target.checked)}
               />
               We&rsquo;re running drinks and coffee
             </label>
             <label className="check">
               <input
                 type="checkbox"
-                checked={hotOrOutdoors}
-                onChange={(e) => setHotOrOutdoors(e.target.checked)}
+                checked={form.hotOrOutdoors}
+                onChange={(e) => set("hotOrOutdoors", e.target.checked)}
               />
               Outdoors, or over 28&deg;C
             </label>
           </div>
         </div>
 
-        {style === "van" && (
+        {form.style === "van" && (
           <div className="card">
             <h2>Van service</h2>
             <div className="grid">
@@ -334,9 +375,10 @@ export default function EventPage() {
                 <label htmlFor="vanItem">What you&rsquo;re serving</label>
                 <select
                   id="vanItem"
-                  value={vanItem}
+                  value={form.vanItem}
                   onChange={(e) =>
-                    setVanItem(
+                    set(
+                      "vanItem",
                       e.target.value as NonNullable<EventInput["vanItem"]>,
                     )
                   }
@@ -358,9 +400,9 @@ export default function EventPage() {
                   type="number"
                   min={0.5}
                   step={0.5}
-                  value={serviceWindowHours}
+                  value={form.serviceWindowHours}
                   onChange={(e) =>
-                    setServiceWindowHours(Number(e.target.value))
+                    set("serviceWindowHours", Number(e.target.value))
                   }
                 />
               </div>
@@ -382,11 +424,14 @@ export default function EventPage() {
                   id={fieldId(label)}
                   type="number"
                   min={0}
-                  value={dietaries[label] ?? 0}
+                  value={form.dietaries[label] ?? 0}
                   onChange={(e) =>
-                    setDietaries((current) => ({
+                    setForm((current) => ({
                       ...current,
-                      [label]: Number(e.target.value),
+                      dietaries: {
+                        ...current.dietaries,
+                        [label]: Number(e.target.value),
+                      },
                     }))
                   }
                 />
@@ -406,18 +451,41 @@ export default function EventPage() {
             {busy ? "Working it out…" : "Build the order list"}
           </button>
           {plan && (
-            <button
-              type="button"
-              className="secondary"
-              onClick={() => window.print()}
-            >
-              Print / save as PDF
-            </button>
+            <>
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => window.print()}
+              >
+                Print / save as PDF
+              </button>
+              <SaveJob
+                mode="event"
+                input={form}
+                eventDate={form.eventDate}
+                defaultTitle={`${form.guests} guests, ${form.eventDate}`}
+              />
+            </>
           )}
         </div>
       </form>
 
       {plan && <EventResult plan={plan} />}
+    </>
+  );
+}
+
+export default function EventPage() {
+  return (
+    <>
+      <h1>Event order list</h1>
+      <p className="lede">
+        One date, one guest count, one menu. Order day is T-7 — seven days
+        before the event.
+      </p>
+      <Suspense fallback={<div className="card">Loading…</div>}>
+        <EventPlanner />
+      </Suspense>
     </>
   );
 }

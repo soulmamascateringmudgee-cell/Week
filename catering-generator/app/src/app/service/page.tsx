@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
+import SaveJob from "@/components/SaveJob.tsx";
 import ServiceResult from "@/components/ServiceResult.tsx";
 import {
   PROTEIN_CHOICES,
@@ -27,24 +29,28 @@ const BLANK_ITEM: ServiceItem = {
   onHandKg: 0,
 };
 
-export default function ServicePage() {
-  const [venueType, setVenueType] =
-    useState<ServiceInput["venueType"]>("restaurant");
-  const [covers, setCovers] = useState<Record<Weekday, number>>({
-    Mon: 0,
-    Tue: 90,
-    Wed: 90,
-    Thu: 100,
-    Fri: 140,
-    Sat: 160,
-    Sun: 120,
-  });
-  const [deliveryDays, setDeliveryDays] = useState<Weekday[]>(["Tue", "Fri"]);
-  const [leadTimeHours, setLeadTimeHours] = useState(12);
-  const [fridgeCapacityKg, setFridgeCapacityKg] = useState<string>("");
-  const [prepHoursAvailable, setPrepHoursAvailable] = useState<string>("");
-  const [serviceWindowHours, setServiceWindowHours] = useState<string>("");
-  const [items, setItems] = useState<ServiceItem[]>([
+/** Saved verbatim, so opening a job restores exactly what was typed. */
+interface ServiceForm {
+  venueType: ServiceInput["venueType"];
+  covers: Record<Weekday, number>;
+  deliveryDays: Weekday[];
+  leadTimeHours: number;
+  /** Kept as strings — an empty box means "didn't say", not zero. */
+  fridgeCapacityKg: string;
+  prepHoursAvailable: string;
+  serviceWindowHours: string;
+  items: ServiceItem[];
+}
+
+const BLANK: ServiceForm = {
+  venueType: "restaurant",
+  covers: { Mon: 0, Tue: 90, Wed: 90, Thu: 100, Fri: 140, Sat: 160, Sun: 120 },
+  deliveryDays: ["Tue", "Fri"],
+  leadTimeHours: 12,
+  fridgeCapacityKg: "",
+  prepHoursAvailable: "",
+  serviceWindowHours: "",
+  items: [
     {
       name: "Braised beef",
       category: "main",
@@ -68,30 +74,54 @@ export default function ServicePage() {
       shelfLife: "short",
       onHandKg: 0,
     },
-  ]);
+  ],
+};
 
+function ServicePlanner() {
+  const searchParams = useSearchParams();
+  const jobId = searchParams.get("job");
+
+  const [form, setForm] = useState<ServiceForm>(BLANK);
   const [menuText, setMenuText] = useState("");
   const [parsingAvailable, setParsingAvailable] = useState(true);
   const [parsing, setParsing] = useState(false);
   const [parseNote, setParseNote] = useState("");
-
   const [plan, setPlan] = useState<ServicePlan | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const updateItem = (index: number, patch: Partial<ServiceItem>) => {
-    setItems((current) =>
-      current.map((item, i) => (i === index ? { ...item, ...patch } : item)),
-    );
-  };
+  useEffect(() => {
+    if (!jobId) return;
+    let cancelled = false;
+    void (async () => {
+      const response = await fetch(`/api/jobs/${jobId}`);
+      if (!response.ok || cancelled) return;
+      const body = await response.json();
+      if (body.job?.input) setForm({ ...BLANK, ...body.job.input });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [jobId]);
 
-  const toggleDelivery = (day: Weekday) => {
-    setDeliveryDays((current) =>
-      current.includes(day)
-        ? current.filter((d) => d !== day)
-        : [...current, day],
-    );
-  };
+  const set = <K extends keyof ServiceForm>(key: K, value: ServiceForm[K]) =>
+    setForm((current) => ({ ...current, [key]: value }));
+
+  const updateItem = (index: number, patch: Partial<ServiceItem>) =>
+    setForm((current) => ({
+      ...current,
+      items: current.items.map((item, i) =>
+        i === index ? { ...item, ...patch } : item,
+      ),
+    }));
+
+  const toggleDelivery = (day: Weekday) =>
+    setForm((current) => ({
+      ...current,
+      deliveryDays: current.deliveryDays.includes(day)
+        ? current.deliveryDays.filter((d) => d !== day)
+        : [...current.deliveryDays, day],
+    }));
 
   async function parseMenu() {
     setParsing(true);
@@ -107,7 +137,8 @@ export default function ServicePage() {
         if (response.status === 503) setParsingAvailable(false);
         setParseNote(body.error ?? "Couldn't read that menu.");
       } else if (Array.isArray(body.items) && body.items.length > 0) {
-        setItems(
+        set(
+          "items",
           body.items.map((item: ServiceItem) => ({ ...item, onHandKg: 0 })),
         );
         setParseNote(
@@ -129,19 +160,19 @@ export default function ServicePage() {
     setError("");
 
     const input: ServiceInput = {
-      venueType,
-      covers,
-      deliveryDays,
-      leadTimeHours,
-      items: items.filter((item) => item.name.trim() !== ""),
-      ...(fridgeCapacityKg !== ""
-        ? { fridgeCapacityKg: Number(fridgeCapacityKg) }
+      venueType: form.venueType,
+      covers: form.covers,
+      deliveryDays: form.deliveryDays,
+      leadTimeHours: form.leadTimeHours,
+      items: form.items.filter((item) => item.name.trim() !== ""),
+      ...(form.fridgeCapacityKg !== ""
+        ? { fridgeCapacityKg: Number(form.fridgeCapacityKg) }
         : {}),
-      ...(prepHoursAvailable !== ""
-        ? { prepHoursAvailable: Number(prepHoursAvailable) }
+      ...(form.prepHoursAvailable !== ""
+        ? { prepHoursAvailable: Number(form.prepHoursAvailable) }
         : {}),
-      ...(serviceWindowHours !== ""
-        ? { serviceWindowHours: Number(serviceWindowHours) }
+      ...(form.serviceWindowHours !== ""
+        ? { serviceWindowHours: Number(form.serviceWindowHours) }
         : {}),
     };
 
@@ -168,12 +199,6 @@ export default function ServicePage() {
 
   return (
     <>
-      <h1>Weekly par levels</h1>
-      <p className="lede">
-        Forecast covers in, par levels out. The order is always par minus what
-        you counted on hand — count before you send it.
-      </p>
-
       <form onSubmit={submit}>
         <div className="card">
           <h2>The operation</h2>
@@ -182,9 +207,9 @@ export default function ServicePage() {
               <label htmlFor="venue">Venue type</label>
               <select
                 id="venue"
-                value={venueType}
+                value={form.venueType}
                 onChange={(e) =>
-                  setVenueType(e.target.value as ServiceInput["venueType"])
+                  set("venueType", e.target.value as ServiceInput["venueType"])
                 }
               >
                 {VENUE_CHOICES.map((c) => (
@@ -203,8 +228,8 @@ export default function ServicePage() {
                 id="lead"
                 type="number"
                 min={0}
-                value={leadTimeHours}
-                onChange={(e) => setLeadTimeHours(Number(e.target.value))}
+                value={form.leadTimeHours}
+                onChange={(e) => set("leadTimeHours", Number(e.target.value))}
               />
             </div>
             <div>
@@ -217,8 +242,8 @@ export default function ServicePage() {
                 type="number"
                 min={0}
                 placeholder="optional"
-                value={fridgeCapacityKg}
-                onChange={(e) => setFridgeCapacityKg(e.target.value)}
+                value={form.fridgeCapacityKg}
+                onChange={(e) => set("fridgeCapacityKg", e.target.value)}
               />
             </div>
             <div>
@@ -231,11 +256,11 @@ export default function ServicePage() {
                 type="number"
                 min={0}
                 placeholder="optional"
-                value={prepHoursAvailable}
-                onChange={(e) => setPrepHoursAvailable(e.target.value)}
+                value={form.prepHoursAvailable}
+                onChange={(e) => set("prepHoursAvailable", e.target.value)}
               />
             </div>
-            {venueType === "kiosk" && (
+            {form.venueType === "kiosk" && (
               <div>
                 <label htmlFor="window">
                   Service window
@@ -246,8 +271,8 @@ export default function ServicePage() {
                   type="number"
                   min={0}
                   step={0.5}
-                  value={serviceWindowHours}
-                  onChange={(e) => setServiceWindowHours(e.target.value)}
+                  value={form.serviceWindowHours}
+                  onChange={(e) => set("serviceWindowHours", e.target.value)}
                 />
               </div>
             )}
@@ -257,8 +282,8 @@ export default function ServicePage() {
         <div className="card">
           <h2>Forecast covers</h2>
           <p className="basis">
-            {VENUE_COVERS_HELP[venueType]} Leave a day at zero if you&rsquo;re
-            closed.
+            {VENUE_COVERS_HELP[form.venueType]} Leave a day at zero if
+            you&rsquo;re closed.
           </p>
           <div className="grid">
             {WEEKDAY_CHOICES.map((day) => (
@@ -268,11 +293,11 @@ export default function ServicePage() {
                   id={`covers-${day}`}
                   type="number"
                   min={0}
-                  value={covers[day]}
+                  value={form.covers[day]}
                   onChange={(e) =>
-                    setCovers((current) => ({
+                    setForm((current) => ({
                       ...current,
-                      [day]: Number(e.target.value),
+                      covers: { ...current.covers, [day]: Number(e.target.value) },
                     }))
                   }
                 />
@@ -289,7 +314,7 @@ export default function ServicePage() {
               <label className="check" key={day}>
                 <input
                   type="checkbox"
-                  checked={deliveryDays.includes(day)}
+                  checked={form.deliveryDays.includes(day)}
                   onChange={() => toggleDelivery(day)}
                 />
                 {day}
@@ -320,7 +345,7 @@ export default function ServicePage() {
                 <button
                   type="button"
                   className="secondary"
-                  onClick={parseMenu}
+                  onClick={() => void parseMenu()}
                   disabled={parsing || menuText.trim().length < 10}
                 >
                   {parsing ? "Reading…" : "Read the menu"}
@@ -331,7 +356,7 @@ export default function ServicePage() {
           {parseNote && <p className="notice">{parseNote}</p>}
 
           <h3>Items</h3>
-          {items.map((item, index) => (
+          {form.items.map((item, index) => (
             <div className="row-item" key={index}>
               <div>
                 <label htmlFor={`name-${index}`}>Dish</label>
@@ -429,15 +454,15 @@ export default function ServicePage() {
             <button
               type="button"
               className="secondary"
-              onClick={() => setItems((current) => [...current, BLANK_ITEM])}
+              onClick={() => set("items", [...form.items, BLANK_ITEM])}
             >
               Add an item
             </button>
-            {items.length > 1 && (
+            {form.items.length > 1 && (
               <button
                 type="button"
                 className="secondary"
-                onClick={() => setItems((current) => current.slice(0, -1))}
+                onClick={() => set("items", form.items.slice(0, -1))}
               >
                 Remove the last
               </button>
@@ -456,18 +481,40 @@ export default function ServicePage() {
             {busy ? "Working it out…" : "Build the par levels"}
           </button>
           {plan && (
-            <button
-              type="button"
-              className="secondary"
-              onClick={() => window.print()}
-            >
-              Print / save as PDF
-            </button>
+            <>
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => window.print()}
+              >
+                Print / save as PDF
+              </button>
+              <SaveJob
+                mode="service"
+                input={form}
+                defaultTitle={`${VENUE_CHOICES.find((c) => c.key === form.venueType)?.label} — weekly par`}
+              />
+            </>
           )}
         </div>
       </form>
 
       {plan && <ServiceResult plan={plan} />}
+    </>
+  );
+}
+
+export default function ServicePage() {
+  return (
+    <>
+      <h1>Weekly par levels</h1>
+      <p className="lede">
+        Forecast covers in, par levels out. The order is always par minus what
+        you counted on hand — count before you send it.
+      </p>
+      <Suspense fallback={<div className="card">Loading…</div>}>
+        <ServicePlanner />
+      </Suspense>
     </>
   );
 }

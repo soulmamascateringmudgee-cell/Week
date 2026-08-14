@@ -25,18 +25,32 @@ stripping, so there's no test framework to install.
 Zero config. Import the repo, set the **root directory** to
 `catering-generator/app`, and deploy. Framework preset: Next.js.
 
-The only environment variable is optional:
+Environment variables — copy `.env.local.example` to `.env.local` for local dev,
+and paste the same values into Vercel's project settings:
 
 | Variable | Needed for | If missing |
 |---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Logins and saved jobs | Sign-in fails |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Logins and saved jobs | Sign-in fails |
 | `ANTHROPIC_API_KEY` | The "paste your menu" shortcut on `/service` | The route returns 503 and the form hides the paste box. Everything else works. |
 
-No database. Nothing is stored between requests — every plan is computed from
-the form and returned.
+The Supabase publishable key is designed to ship in the browser — it grants
+nothing on its own, and row-level security is what protects the data. It is
+safe in the example file and in Vercel's plain environment variables.
+
+**Set the redirect URL in Supabase** before the first real sign-in:
+*Authentication → URL Configuration → Site URL* must be your deployed origin,
+and *Redirect URLs* must include `https://<your-domain>/auth/confirm`. Without
+it the emailed link bounces to localhost.
 
 ## How it's laid out
 
 ```
+supabase/migrations/     The schema. Apply in order to a fresh project.
+src/middleware.ts        Refreshes the session and gates every page except
+                         /, /login and /auth/*. API routes answer for
+                         themselves with a 401 rather than redirecting.
+src/lib/supabase/        Browser and server clients.
 src/lib/tables.ts        The yields, per-head figures, attach rates, buffers.
                          Server-only — this is the product.
 src/lib/event-engine.ts  Guest count + menu → order list, countdown, risks.
@@ -66,10 +80,27 @@ Edit `src/lib/tables.ts` and run `npm test`. The tests pin the published worked
 example (100 guests, standard dinner, three proteins → 17 kg brisket, 12.5 kg
 chicken thigh, 11.5 kg fish), so if a change moves that, you'll know.
 
+## Accounts and saved jobs
+
+Sign-in is a magic link — the operator types an email, gets a link, and
+they're in. No passwords to reset, which matters when the buyer is a chef and
+not a computer person.
+
+Every page except the landing page and login is gated, so the app is worth
+paying for: a buyer gets an account rather than a copy of the files.
+
+Saved jobs store the **form** as typed, not the computed plan. Opening a job
+recomputes the numbers, so a correction to the tables reaches old jobs too and
+you can never print a stale order list. Each job also takes a
+*what you actually used* note — the number to scale from next time, which
+beats every table in here.
+
+> Supabase's built-in email sending is rate-limited on the free tier (a handful
+> an hour) and sometimes lands in junk. Fine for the first few operators; wire
+> up a proper email sender before you have a queue of them.
+
 ## What's not built yet
 
-- Accounts and login (Supabase)
-- Subscription billing (Stripe)
-- Saved jobs, and scaling from a previous run of the same menu
+- Subscription billing (Stripe) — invoice by hand until the volume justifies it
 - Supplier emails
 - Food cost per head and margin
