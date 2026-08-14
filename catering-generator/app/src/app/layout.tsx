@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import SignOutButton from "@/components/SignOutButton.tsx";
+import { isAdmin } from "@/lib/access.ts";
 import { createClient } from "@/lib/supabase/server.ts";
 import "./globals.css";
 
@@ -20,6 +21,7 @@ export default async function RootLayout({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const owner = user ? await isAdmin(supabase) : false;
 
   return (
     <html lang="en-AU">
@@ -35,6 +37,7 @@ export default async function RootLayout({
                   <Link href="/event">Event</Link>
                   <Link href="/service">Weekly service</Link>
                   <Link href="/jobs">Saved jobs</Link>
+                  {owner && <Link href="/admin">Who&rsquo;s allowed in</Link>}
                   <SignOutButton />
                 </>
               ) : (

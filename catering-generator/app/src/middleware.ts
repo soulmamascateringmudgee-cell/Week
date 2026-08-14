@@ -1,8 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { isInvited } from "@/lib/access.ts";
+
 /** Pages anyone can see. Everything else needs a signed-in operator. */
-const PUBLIC_PATHS = ["/", "/login", "/auth"];
+const PUBLIC_PATHS = ["/", "/login", "/auth", "/no-access"];
 
 function isPublic(pathname: string): boolean {
   return PUBLIC_PATHS.some(
@@ -42,15 +44,35 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  const isApi = pathname.startsWith("/api/");
+
+  if (isPublic(pathname)) return response;
+
   // API routes answer for themselves with a 401 and a JSON body. Redirecting
   // them to the login page would hand the caller HTML, which every fetch() in
   // this app would then fail to parse.
-  if (!user && !isPublic(pathname) && !pathname.startsWith("/api/")) {
+  if (!user) {
+    if (isApi) return response;
     const login = request.nextUrl.clone();
     login.pathname = "/login";
     // Send them back where they were headed once they're in.
     login.searchParams.set("next", pathname);
     return NextResponse.redirect(login);
+  }
+
+  // Signed in is not the same as allowed in. Anyone can ask for a magic link,
+  // so the account only means something once the email is on the invite list.
+  if (!(await isInvited(supabase))) {
+    if (isApi) {
+      return NextResponse.json(
+        { error: "This account hasn't been invited." },
+        { status: 403 },
+      );
+    }
+    const blocked = request.nextUrl.clone();
+    blocked.pathname = "/no-access";
+    blocked.search = "";
+    return NextResponse.redirect(blocked);
   }
 
   return response;
