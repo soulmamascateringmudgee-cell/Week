@@ -41,7 +41,7 @@ flags on anything that won't survive to the next delivery.
 
 The value isn't the AI. It's the numbers:
 
-- Yield factors for [N] proteins — the multiplier from served weight to raw weight
+- Yield factors for 13 proteins — the multiplier from served weight to raw weight
 - Per-head served figures across light lunch, standard dinner and big feasting
 - Sides, grazing, canapés, van items, dessert, drinks and ice
 - Buffer rules that scale with guest count
@@ -49,7 +49,7 @@ The value isn't the AI. It's the numbers:
 - Par-level maths built on delivery cycles, sales mix and shelf life
 - The countdown and packaging checklists
 
-[Years] of running [YOUR BUSINESS], written down.
+[YEARS] years of running [YOUR BUSINESS], written down.
 
 ## What it isn't
 
@@ -79,7 +79,7 @@ one habit is worth more than the pack costs.
 | | |
 |---|---|
 | **Pack, one-off** | $[XXX] + GST — yours to keep, 12 months of updates and email support |
-| **Pack + a setup session** | $[XXX] + GST — the above plus [60] minutes with me, tuning it to your menus and your numbers |
+| **Pack + a setup session** | $[XXX] + GST — the above plus [MINUTES] minutes with me, tuning it to your menus and your numbers |
 | **Founding operator** | $[XXX] + GST — reduced, for the first [N] operators, in exchange for feedback while it's being built out |
 
 One business, any number of your own sites. 14-day refund, no reason needed.

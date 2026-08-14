@@ -5,6 +5,7 @@ set of numbers.
 
 ```
 pack/     The sellable kit — hand it over, invoice it, done. Ready now.
+          `./build-pack.sh` makes the zip you send a buyer.
 app/      The web app — they log in, you never send files. v1 works; no
           accounts or billing yet.
 ```
@@ -45,7 +46,8 @@ Claude; they pay you for the pack.
 | `pack/LICENCE.md` | Single-business licence, disclaimer, ACL carve-out |
 | `pack/SALES-SHEET.md` | One-pager to send prospects |
 
-**Before you send it to anyone:** fill in the bracketed fields in `LICENCE.md`
+**Before you send it to anyone:** work through `BEFORE-YOU-SELL.md` — it covers
+the fill-in fields, prices, the invoice, and the handover email. Fill in `LICENCE.md`
 and `SALES-SHEET.md` — business name, ABN, email, phone, prices. Have a
 solicitor read the licence before you sell at volume.
 
