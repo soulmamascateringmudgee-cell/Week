@@ -20,3 +20,26 @@ export function roundUnits(units: number): number {
 export function round1(value: number): number {
   return Math.round(value * 10) / 10;
 }
+
+/**
+ * Round a scaled recipe quantity to something you can actually order.
+ * Weights and volumes get sensible steps; anything you count gets rounded up,
+ * because you can't buy 3.4 bunches of broccolini.
+ */
+export function roundForUnit(qty: number, unit: string): number {
+  switch (unit) {
+    case "kg":
+      return roundKg(qty);
+    case "L":
+      return roundL(qty);
+    case "g":
+    case "ml":
+      return qty >= 100 ? Math.round(qty / 10) * 10 : Math.round(qty);
+    case "tsp":
+    case "tbsp":
+    case "cup":
+      return round1(qty);
+    default:
+      return roundUnits(qty);
+  }
+}

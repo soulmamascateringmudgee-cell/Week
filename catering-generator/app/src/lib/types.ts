@@ -54,8 +54,32 @@ export interface Dietary {
   count: number;
 }
 
+/** One line of a recipe, in the quantity the operator actually buys. */
+export interface RecipeIngredient {
+  item: string;
+  qty: number;
+  unit: string;
+  category: Category;
+}
+
+/**
+ * A dish in the operator's own numbers. `serves` is how many people the
+ * ingredient quantities below are written for — everything scales from that.
+ */
+export interface Recipe {
+  id?: string;
+  name: string;
+  course?: string | null;
+  serves: number;
+  ingredients: RecipeIngredient[];
+  method?: string | null;
+  notes?: string | null;
+}
+
 export interface EventInput {
   guests: number;
+  /** Dishes from the operator's recipe book, scaled to this job. */
+  recipes?: Recipe[];
   /** ISO yyyy-mm-dd */
   eventDate: string;
   /** ISO yyyy-mm-dd */

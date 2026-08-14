@@ -31,7 +31,7 @@ import {
   sideGramsPerPerson,
 } from "./tables.ts";
 import { addDays, daysBetween, formatDate, parseISODate } from "./dates.ts";
-import { round1, roundKg, roundL, roundUnits } from "./round.ts";
+import { round1, roundForUnit, roundKg, roundL, roundUnits } from "./round.ts";
 import type {
   CountdownStep,
   EventInput,
@@ -88,6 +88,43 @@ export function planEvent(input: EventInput): EventPlan {
       basis: `${basisPrefix} → ${Math.round(gramsPerPerson)} g/head × ${effectiveGuests} (incl. ${CREW_MEALS} crew) × ${(1 + bufferPct).toFixed(2)} buffer`,
     });
   };
+
+  // -------------------------------------------------------------- recipes
+  //
+  // The operator's own dishes, in their own quantities. These are already
+  // ordering weights — what you buy for `serves` people — so they scale
+  // straight off the headcount with no yield multiplier on top. A recipe
+  // saying 5 kg of brisket means order 5 kg.
+
+  const recipes = input.recipes ?? [];
+
+  for (const recipe of recipes) {
+    if (!Number.isFinite(recipe.serves) || recipe.serves < 1) {
+      throw new Error(
+        `"${recipe.name}" doesn't say how many it serves, so it can't be scaled.`,
+      );
+    }
+    const factor = scale / recipe.serves;
+
+    for (const ingredient of recipe.ingredients) {
+      if (!Number.isFinite(ingredient.qty) || ingredient.qty <= 0) continue;
+      const scaled = ingredient.qty * factor;
+      orders.push({
+        item: ingredient.item,
+        qty: roundForUnit(scaled, ingredient.unit),
+        unit: ingredient.unit,
+        category: ingredient.category,
+        forDish: recipe.name,
+        basis: `${ingredient.qty} ${ingredient.unit} per ${recipe.serves} → ×${factor.toFixed(2)} for ${effectiveGuests} (incl. ${CREW_MEALS} crew) + ${Math.round(bufferPct * 100)}% buffer`,
+      });
+    }
+  }
+
+  if (recipes.length > 0 && input.sidesCount > 0) {
+    warnings.push(
+      `You've attached ${recipes.length} recipe${recipes.length === 1 ? "" : "s"} and also asked for ${input.sidesCount} generic side${input.sidesCount === 1 ? "" : "s"}. Check you're not ordering the same food twice — if the recipes cover your sides, set the sides count to 0.`,
+    );
+  }
 
   // ------------------------------------------------------------- proteins
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import EventResult from "@/components/EventResult.tsx";
@@ -48,6 +49,15 @@ interface EventForm {
   vanItem: NonNullable<EventInput["vanItem"]>;
   serviceWindowHours: number;
   dietaries: Record<string, number>;
+  /** Dishes from the recipe book, by id. */
+  recipeIds: string[];
+}
+
+interface RecipeChoice {
+  id: string;
+  name: string;
+  course: string | null;
+  serves: number;
 }
 
 const BLANK: EventForm = {
@@ -67,6 +77,7 @@ const BLANK: EventForm = {
   vanItem: "burgers",
   serviceWindowHours: 3,
   dietaries: {},
+  recipeIds: [],
 };
 
 function EventPlanner() {
@@ -74,6 +85,7 @@ function EventPlanner() {
   const jobId = searchParams.get("job");
 
   const [form, setForm] = useState<EventForm>(BLANK);
+  const [library, setLibrary] = useState<RecipeChoice[]>([]);
   const [today, setToday] = useState("");
   const [plan, setPlan] = useState<EventPlan | null>(null);
   const [error, setError] = useState("");
@@ -100,8 +112,30 @@ function EventPlanner() {
     };
   }, [jobId]);
 
+  // The recipe book, so dishes can be attached to this job.
+  useEffect(() => {
+    void (async () => {
+      try {
+        const response = await fetch("/api/recipes");
+        if (!response.ok) return;
+        const body = await response.json();
+        setLibrary(body.recipes as RecipeChoice[]);
+      } catch {
+        // The form still works without the library; nothing to say here.
+      }
+    })();
+  }, []);
+
   const set = <K extends keyof EventForm>(key: K, value: EventForm[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
+
+  const toggleRecipe = (id: string) =>
+    setForm((current) => ({
+      ...current,
+      recipeIds: current.recipeIds.includes(id)
+        ? current.recipeIds.filter((r) => r !== id)
+        : [...current.recipeIds, id],
+    }));
 
   const toggleProtein = (key: string) =>
     setForm((current) => ({
@@ -116,7 +150,9 @@ function EventPlanner() {
     setBusy(true);
     setError("");
 
-    const input: EventInput = {
+    // recipeIds rides along beside the engine's own input — the route resolves
+    // them to recipes against the operator's saved rows.
+    const input: EventInput & { recipeIds: string[] } = {
       guests: form.guests,
       eventDate: form.eventDate,
       today,
@@ -131,6 +167,7 @@ function EventPlanner() {
       canapes: form.canapes,
       drinksService: form.drinksService,
       hotOrOutdoors: form.hotOrOutdoors,
+      recipeIds: form.recipeIds,
       dietaries: Object.entries(form.dietaries)
         .filter(([, count]) => count > 0)
         .map(([label, count]) => ({ label, count })),
@@ -263,6 +300,43 @@ function EventPlanner() {
               </label>
             ))}
           </div>
+        </div>
+
+        <div className="card">
+          <h2>Your dishes</h2>
+          {library.length === 0 ? (
+            <p className="basis">
+              Nothing in your recipe book yet.{" "}
+              <Link href="/recipes">Add your dishes</Link> and they&rsquo;ll
+              appear here to tick onto a job — your own quantities, scaled to
+              the headcount, instead of the generic side lines below.
+            </p>
+          ) : (
+            <>
+              <p className="basis">
+                Tick what&rsquo;s on this menu. Each one scales from what you
+                wrote it for, with the crew meals and buffer already in.
+              </p>
+              <div className="checks">
+                {library.map((recipe) => (
+                  <label className="check" key={recipe.id}>
+                    <input
+                      type="checkbox"
+                      checked={form.recipeIds.includes(recipe.id)}
+                      onChange={() => toggleRecipe(recipe.id)}
+                    />
+                    {recipe.name}
+                    <span className="basis"> · for {recipe.serves}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="basis" style={{ marginTop: 12 }}>
+                Using recipes for your sides? Set the sides count below to 0 so
+                you don&rsquo;t order the same food twice.{" "}
+                <Link href="/recipes">Edit your recipes</Link>
+              </p>
+            </>
+          )}
         </div>
 
         <div className="card">

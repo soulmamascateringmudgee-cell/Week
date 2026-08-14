@@ -36,6 +36,7 @@ export default async function RootLayout({
                 <>
                   <Link href="/event">Event</Link>
                   <Link href="/service">Weekly service</Link>
+                  <Link href="/recipes">Recipes</Link>
                   <Link href="/jobs">Saved jobs</Link>
                   {owner && <Link href="/admin">Who&rsquo;s allowed in</Link>}
                   <SignOutButton />
