@@ -102,3 +102,29 @@ def to_rgba(rgb):
     safe = np.maximum(a, 1e-4)[..., None]
     col = np.clip((rgb - BG * (1 - safe)) / safe, 0, 255)
     return np.dstack([col, a * 255])
+
+
+def leaf_shapes(img, x0, y0, x1, y1, outline_lum=180, min_size=900):
+    """Leaf bodies, found by filling the bold outlines only — the pale veins are ignored."""
+    from scipy.ndimage import binary_fill_holes, binary_dilation, binary_erosion, label
+    lum = img @ [0.299, 0.587, 0.114]
+    zone = np.zeros(lum.shape, bool)
+    zone[y0:y1, x0:x1] = True
+    filled = binary_fill_holes(binary_dilation((lum < outline_lum) & zone, iterations=2))
+    lab, n = label(filled)
+    sizes = np.bincount(lab.ravel())
+    keep = np.zeros(lum.shape, bool)
+    for i in range(1, n + 1):
+        if sizes[i] >= min_size:
+            keep |= lab == i
+    return binary_erosion(keep, iterations=2)
+
+
+def underlay(rgb, mask, colour, strength=0.26, blur=1.2):
+    """Wash colour in behind the line work, the way the Mudgee grape leaves are filled."""
+    m = (gaussian_filter(mask.astype(float), blur) * strength)[..., None]
+    base = BG * (1 - m) + colour * m
+    a = np.clip(((BG - rgb) / BG).max(2), 0, 1)[..., None]
+    safe = np.maximum(a, 1e-4)
+    ink = np.clip((rgb - BG * (1 - safe)) / safe, 0, 255)
+    return np.clip(base * (1 - a) + ink * a, 0, 255)

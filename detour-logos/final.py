@@ -40,7 +40,8 @@ def gulgong(blossom, leaf, building, street, name):
         field, gain = paint(field, m, blossom), gain * (1 + 1.0 * m)
     out = compose(gimg, field, np.clip(alpha_from_darkness(gimg) * gain, 0, 1))
     green, rust = ink_masks(gimg)
-    write(np.where((green | rust)[..., None], gimg, out), name)
+    out = np.where((green | rust)[..., None], gimg, out)
+    write(underlay(out, leaf_shapes(gimg, 900, 130, 1180, 730), leaf), name)
 
 
 gulgong(TERRA, SAGE, TERRA, SAGE_GREY, 'gulgong-detour-1-terracotta')
@@ -71,7 +72,8 @@ def country(blossom, leaf, road, serif, script, boost, name):
     field = paint(field, green.astype(float), script)
     field = paint(field, rust.astype(float), serif)
     gain = np.where(green | rust, 1.0, gain)
-    write(compose(cimg, field, np.clip(alpha_from_darkness(cimg) * gain, 0, 1)), name)
+    out = compose(cimg, field, np.clip(alpha_from_darkness(cimg) * gain, 0, 1))
+    write(underlay(out, leaf_shapes(cimg, 100, 488, 445, 800), leaf), name)
 
 
 country(TERRA, SAGE, SAGE_GREY, TERRA_DEEP, OLIVE_DEEP, 1.0, 'country-detour-1-terracotta')
