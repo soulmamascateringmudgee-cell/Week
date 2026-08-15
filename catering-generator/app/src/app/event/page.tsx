@@ -90,6 +90,12 @@ function EventPlanner() {
   const [plan, setPlan] = useState<EventPlan | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [jobStatus, setJobStatus] = useState<
+    | { state: "none" }
+    | { state: "loading" }
+    | { state: "loaded"; title: string }
+    | { state: "failed"; message: string }
+  >({ state: "none" });
 
   // Client-only: rendering today's date on the server would make the first
   // paint disagree with the browser.
@@ -98,15 +104,53 @@ function EventPlanner() {
   }, []);
 
   // Opening a saved job restores the form exactly as it was typed.
+  //
+  // This used to fail silently: a failed fetch left the blank form sitting
+  // there, which looks exactly like starting a new job. Losing an afternoon's
+  // typing and not being told is the worst thing this page can do, so every
+  // outcome now says something.
   useEffect(() => {
     if (!jobId) return;
     let cancelled = false;
+    setJobStatus({ state: "loading" });
+
     void (async () => {
-      const response = await fetch(`/api/jobs/${jobId}`);
-      if (!response.ok || cancelled) return;
-      const body = await response.json();
-      if (body.job?.input) setForm({ ...BLANK, ...body.job.input });
+      try {
+        const response = await fetch(`/api/jobs/${jobId}`);
+        const body = await response.json().catch(() => ({}));
+        if (cancelled) return;
+
+        if (!response.ok) {
+          setJobStatus({
+            state: "failed",
+            message:
+              body.error ??
+              "Couldn't open that saved job. It's still saved — go back to Saved jobs and try again.",
+          });
+          return;
+        }
+        if (!body.job?.input) {
+          setJobStatus({
+            state: "failed",
+            message:
+              "That job opened but had nothing in it. Nothing has been lost — tell whoever set this up.",
+          });
+          return;
+        }
+
+        setForm({ ...BLANK, ...body.job.input });
+        setJobStatus({ state: "loaded", title: body.job.title });
+      } catch {
+        if (!cancelled) {
+          setJobStatus({
+            state: "failed",
+            message:
+              "Couldn't reach the server to open that job. It's still saved — try again in a moment.",
+          });
+        }
+      }
     })();
+
     return () => {
       cancelled = true;
     };
@@ -202,6 +246,22 @@ function EventPlanner() {
 
   return (
     <>
+      {jobStatus.state === "loading" && (
+        <p className="notice">Opening your saved job…</p>
+      )}
+      {jobStatus.state === "failed" && (
+        <p className="notice">
+          <strong>{jobStatus.message}</strong>
+        </p>
+      )}
+      {jobStatus.state === "loaded" && (
+        <p className="notice">
+          Opened <strong>{jobStatus.title}</strong>. Change anything you like
+          and build it again — saving makes a new job rather than overwriting
+          this one.
+        </p>
+      )}
+
       <form onSubmit={submit}>
         <div className="card">
           <h2>The job</h2>

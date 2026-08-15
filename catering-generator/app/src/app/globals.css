@@ -218,6 +218,35 @@ button.secondary {
   color: var(--accent);
 }
 
+/*
+ * A link that looks like a button. A <button> nested inside an <a> is invalid
+ * HTML, and browsers disagree about which one gets the tap — on a phone the
+ * button often swallows it and the navigation never happens. Anything that
+ * navigates is a link; anything that acts is a button.
+ */
+a.btn {
+  display: inline-block;
+  font: inherit;
+  font-weight: 600;
+  padding: 11px 20px;
+  border-radius: 7px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a.btn:hover {
+  filter: brightness(1.08);
+  color: #fff;
+}
+
+a.btn.secondary {
+  background: transparent;
+  color: var(--accent);
+}
+
 .actions {
   display: flex;
   gap: 10px;

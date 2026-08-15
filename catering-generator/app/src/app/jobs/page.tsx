@@ -65,13 +65,11 @@ export default function JobsPage() {
       </p>
 
       <div className="actions" style={{ marginBottom: 20 }}>
-        <Link href="/event">
-          <button type="button">New event</button>
+        <Link href="/event" className="btn">
+          New event
         </Link>
-        <Link href="/service">
-          <button type="button" className="secondary">
-            New weekly service
-          </button>
+        <Link href="/service" className="btn secondary">
+          New weekly service
         </Link>
       </div>
 
@@ -133,8 +131,8 @@ export default function JobsPage() {
                 <p style={{ whiteSpace: "pre-wrap" }}>{job.actuals_note}</p>
               )}
               <div className="actions">
-                <Link href={`/${job.mode}?job=${job.id}`}>
-                  <button type="button">Open</button>
+                <Link href={`/${job.mode}?job=${job.id}`} className="btn">
+                  Open
                 </Link>
                 <button
                   type="button"
