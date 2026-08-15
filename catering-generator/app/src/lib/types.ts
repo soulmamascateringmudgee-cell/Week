@@ -90,6 +90,10 @@ export interface EventInput {
   recipes?: Recipe[];
   /** Defaults to "standard" when not given. */
   biteSize?: BiteSize;
+  /** The operator's price list, for costing the order. */
+  prices?: IngredientPrice[];
+  /** Total food budget for this job, in dollars. */
+  budget?: number;
   /** ISO yyyy-mm-dd */
   eventDate: string;
   /** ISO yyyy-mm-dd */
@@ -112,8 +116,34 @@ export interface EventInput {
   serviceWindowHours?: number;
 }
 
+/** What one ingredient costs, per unit, from the operator's price list. */
+export interface IngredientPrice {
+  id?: string;
+  item: string;
+  unit: string;
+  price: number;
+  supplier?: string | null;
+}
+
+export interface JobCosting {
+  /** Total of the lines that could be costed — not necessarily the whole job. */
+  total: number;
+  perHead: number;
+  priced: { item: string; cost: number; basis: string }[];
+  /** Ingredients with no price on file. */
+  unpriced: string[];
+  /** Priced, but in a unit that can't be reconciled with the order line. */
+  mismatched: string[];
+  /** True only when every line was costed. */
+  complete: boolean;
+  budget?: number;
+  budgetPerHead?: number;
+  verdict: "under" | "over" | "incomplete" | "no-budget";
+}
+
 export interface EventPlan {
   guests: number;
+  costing?: JobCosting;
   crewMeals: number;
   effectiveGuests: number;
   bufferPct: number;

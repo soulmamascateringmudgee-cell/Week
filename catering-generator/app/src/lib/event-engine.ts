@@ -32,6 +32,7 @@ import {
   sideGramsPerPerson,
 } from "./tables.ts";
 import { combineOrders } from "./combine.ts";
+import { costOrders } from "./costing.ts";
 import { addDays, daysBetween, formatDate, parseISODate } from "./dates.ts";
 import { round1, roundForUnit, roundKg, roundL, roundUnits } from "./round.ts";
 import type {
@@ -507,6 +508,14 @@ export function planEvent(input: EventInput): EventPlan {
     "Is the guest count confirmed or an estimate? If it's an estimate, when do you get the final number?",
   );
 
+  // Costing runs on the combined lines, so bacon is priced once against its
+  // total rather than three times against three part-quantities.
+  const combinedOrders = combineOrders(orders);
+  const costing =
+    (input.prices ?? []).length > 0 || input.budget !== undefined
+      ? costOrders(combinedOrders, input.prices ?? [], guests, input.budget)
+      : undefined;
+
   return {
     guests,
     crewMeals: CREW_MEALS,
@@ -516,7 +525,8 @@ export function planEvent(input: EventInput): EventPlan {
     servedPerProtein: round1(servedPerProtein),
     // One line per ingredient, not one per dish. Three bacon lines is three
     // chances to order the wrong amount.
-    orders: combineOrders(orders),
+    orders: combinedOrders,
+    costing,
     dietaryNotes,
     packaging,
     countdown,
