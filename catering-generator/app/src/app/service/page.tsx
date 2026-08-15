@@ -89,16 +89,49 @@ function ServicePlanner() {
   const [plan, setPlan] = useState<ServicePlan | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [jobStatus, setJobStatus] = useState<
+    | { state: "none" }
+    | { state: "loading" }
+    | { state: "loaded"; title: string }
+    | { state: "failed"; message: string }
+  >({ state: "none" });
 
+  // Every outcome says something. A failed load used to leave the blank form
+  // sitting there, which looks exactly like starting from scratch.
   useEffect(() => {
     if (!jobId) return;
     let cancelled = false;
+    setJobStatus({ state: "loading" });
+
     void (async () => {
-      const response = await fetch(`/api/jobs/${jobId}`);
-      if (!response.ok || cancelled) return;
-      const body = await response.json();
-      if (body.job?.input) setForm({ ...BLANK, ...body.job.input });
+      try {
+        const response = await fetch(`/api/jobs/${jobId}`);
+        const body = await response.json().catch(() => ({}));
+        if (cancelled) return;
+
+        if (!response.ok || !body.job?.input) {
+          setJobStatus({
+            state: "failed",
+            message:
+              body.error ??
+              "Couldn't open that saved job. It's still saved — go back to Saved jobs and try again.",
+          });
+          return;
+        }
+
+        setForm({ ...BLANK, ...body.job.input });
+        setJobStatus({ state: "loaded", title: body.job.title });
+      } catch {
+        if (!cancelled) {
+          setJobStatus({
+            state: "failed",
+            message:
+              "Couldn't reach the server to open that job. It's still saved — try again in a moment.",
+          });
+        }
+      }
     })();
+
     return () => {
       cancelled = true;
     };
@@ -199,6 +232,21 @@ function ServicePlanner() {
 
   return (
     <>
+      {jobStatus.state === "loading" && (
+        <p className="notice">Opening your saved job…</p>
+      )}
+      {jobStatus.state === "failed" && (
+        <p className="notice">
+          <strong>{jobStatus.message}</strong>
+        </p>
+      )}
+      {jobStatus.state === "loaded" && (
+        <p className="notice">
+          Opened <strong>{jobStatus.title}</strong>. Saving makes a new job
+          rather than overwriting this one.
+        </p>
+      )}
+
       <form onSubmit={submit}>
         <div className="card">
           <h2>The operation</h2>
