@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import EventResult from "@/components/EventResult.tsx";
 import SaveJob from "@/components/SaveJob.tsx";
 import {
+  BITE_SIZE_CHOICES,
   MENU_WEIGHT_CHOICES,
   PROTEIN_CHOICES,
   STARCH_CHOICES,
@@ -51,6 +52,7 @@ interface EventForm {
   dietaries: Record<string, number>;
   /** Dishes from the recipe book, by id. */
   recipeIds: string[];
+  biteSize: EventInput["biteSize"];
 }
 
 interface RecipeChoice {
@@ -78,6 +80,7 @@ const BLANK: EventForm = {
   serviceWindowHours: 3,
   dietaries: {},
   recipeIds: [],
+  biteSize: "standard",
 };
 
 function EventPlanner() {
@@ -212,6 +215,7 @@ function EventPlanner() {
       drinksService: form.drinksService,
       hotOrOutdoors: form.hotOrOutdoors,
       recipeIds: form.recipeIds,
+      biteSize: form.biteSize,
       dietaries: Object.entries(form.dietaries)
         .filter(([, count]) => count > 0)
         .map(([label, count]) => ({ label, count })),
@@ -347,8 +351,24 @@ function EventPlanner() {
           <h2>Proteins</h2>
           <p className="basis">
             The served protein for the menu weight is split evenly across
-            whatever you tick, then multiplied out by each one&rsquo;s yield.
+            whatever you tick, then multiplied out by each one&rsquo;s yield.{" "}
+            <strong>
+              Leave them all unticked if your recipes cover the food
+            </strong>{" "}
+            — a canapé menu has no &ldquo;main&rdquo;, and a 9 kg mince line on
+            it helps nobody.
           </p>
+          {form.proteins.length > 0 && (
+            <div className="actions" style={{ marginTop: 0, marginBottom: 12 }}>
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => set("proteins", [])}
+              >
+                Clear all — my recipes cover it
+              </button>
+            </div>
+          )}
           <div className="checks">
             {PROTEIN_CHOICES.map((c) => (
               <label className="check" key={c.key}>
@@ -391,9 +411,31 @@ function EventPlanner() {
                   </label>
                 ))}
               </div>
-              <p className="basis" style={{ marginTop: 12 }}>
-                Using recipes for your sides? Set the sides count below to 0 so
-                you don&rsquo;t order the same food twice.{" "}
+              <label htmlFor="biteSize" style={{ marginTop: 16 }}>
+                How much are people eating?
+                <span className="hint">
+                  Scales your recipes up or down. Nothing else on this page
+                  changes.
+                </span>
+              </label>
+              <select
+                id="biteSize"
+                value={form.biteSize}
+                onChange={(e) =>
+                  set("biteSize", e.target.value as EventInput["biteSize"])
+                }
+              >
+                {BITE_SIZE_CHOICES.map((c) => (
+                  <option key={c.key} value={c.key}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+
+              <p className="basis" style={{ marginTop: 14 }}>
+                If your recipes are the whole menu, untick every protein below
+                and set sides to 0 — otherwise you&rsquo;ll get a generic
+                &ldquo;Main&rdquo; line on top of your own dishes.{" "}
                 <Link href="/recipes">Edit your recipes</Link>
               </p>
             </>

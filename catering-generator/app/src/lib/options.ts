@@ -30,6 +30,12 @@ export const STYLE_CHOICES = [
   { key: "multiday", label: "Multi-day / retreat" },
 ] as const;
 
+export const BITE_SIZE_CHOICES = [
+  { key: "smaller", label: "Smaller bites — grazing alongside other food" },
+  { key: "standard", label: "Standard — as your recipes are written" },
+  { key: "bigger", label: "Bigger bites — this is the meal" },
+] as const;
+
 export const MENU_WEIGHT_CHOICES = [
   { key: "light", label: "Light lunch / daytime" },
   { key: "standard", label: "Standard dinner" },

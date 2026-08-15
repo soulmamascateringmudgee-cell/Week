@@ -32,6 +32,11 @@ export interface OrderLine {
   basis: string;
   /** True when a figure came from a default rather than something the user told us. */
   assumption?: boolean;
+  /**
+   * The figure before rounding. Totalling rounded numbers rounds twice and
+   * drifts upward, so anything that adds lines together uses this.
+   */
+  rawQty?: number;
 }
 
 export interface CountdownStep {
@@ -76,10 +81,15 @@ export interface Recipe {
   notes?: string | null;
 }
 
+/** How hungry the room is. Scales your recipes, not the built-in tables. */
+export type BiteSize = "smaller" | "standard" | "bigger";
+
 export interface EventInput {
   guests: number;
   /** Dishes from the operator's recipe book, scaled to this job. */
   recipes?: Recipe[];
+  /** Defaults to "standard" when not given. */
+  biteSize?: BiteSize;
   /** ISO yyyy-mm-dd */
   eventDate: string;
   /** ISO yyyy-mm-dd */
