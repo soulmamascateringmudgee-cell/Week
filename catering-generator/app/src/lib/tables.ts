@@ -30,12 +30,14 @@ export function bufferFor(guests: number): number {
 export const CREW_MEALS = 2;
 
 /**
- * How hungry the room is, as a multiplier on your own recipes.
+ * How big each piece is, as a multiplier on your own recipes.
  *
- * A canapé menu written for 30 can be right or wildly wrong depending on
- * whether it's an hour of drinks before dinner or the whole meal. This is the
- * dial for that, and it only touches recipes — the built-in tables already
- * have their own per-head figures.
+ * This is about the size of the bite, not the course it belongs to. A slider
+ * is a bigger bite than a tart, and both are still finger food — the same
+ * canapé menu can be one or two mouthfuls a piece or something more
+ * substantial, and the ingredient quantities move with it.
+ *
+ * Only touches recipes; the built-in tables have their own per-head figures.
  */
 export const BITE_SIZE: Record<string, number> = {
   smaller: 0.75,

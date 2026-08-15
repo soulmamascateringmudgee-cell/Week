@@ -31,9 +31,9 @@ export const STYLE_CHOICES = [
 ] as const;
 
 export const BITE_SIZE_CHOICES = [
-  { key: "smaller", label: "Smaller bites — grazing alongside other food" },
+  { key: "smaller", label: "Smaller bites — one or two mouthfuls each" },
   { key: "standard", label: "Standard — as your recipes are written" },
-  { key: "bigger", label: "Bigger bites — this is the meal" },
+  { key: "bigger", label: "Bigger bites — sliders and the like" },
 ] as const;
 
 export const MENU_WEIGHT_CHOICES = [

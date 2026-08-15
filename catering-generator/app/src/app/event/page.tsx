@@ -434,7 +434,7 @@ function EventPlanner() {
                 ))}
               </div>
               <label htmlFor="biteSize" style={{ marginTop: 16 }}>
-                How much are people eating?
+                How big is each piece?
                 <span className="hint">
                   Scales your recipes up or down. Nothing else on this page
                   changes.
