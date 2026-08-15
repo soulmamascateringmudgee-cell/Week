@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import EventResult from "@/components/EventResult.tsx";
+import RecipePicker from "@/components/RecipePicker.tsx";
+import type { RecipeChoice } from "@/components/RecipePicker.tsx";
 import SaveJob from "@/components/SaveJob.tsx";
 import {
   BITE_SIZE_CHOICES,
@@ -55,13 +57,6 @@ interface EventForm {
   biteSize: EventInput["biteSize"];
   /** Kept as a string — an empty box means "no budget", not zero. */
   budget: string;
-}
-
-interface RecipeChoice {
-  id: string;
-  name: string;
-  course: string | null;
-  serves: number;
 }
 
 const BLANK: EventForm = {
@@ -416,23 +411,12 @@ function EventPlanner() {
             </p>
           ) : (
             <>
-              <p className="basis">
-                Tick what&rsquo;s on this menu. Each one scales from what you
-                wrote it for, with the crew meals and buffer already in.
-              </p>
-              <div className="checks">
-                {library.map((recipe) => (
-                  <label className="check" key={recipe.id}>
-                    <input
-                      type="checkbox"
-                      checked={form.recipeIds.includes(recipe.id)}
-                      onChange={() => toggleRecipe(recipe.id)}
-                    />
-                    {recipe.name}
-                    <span className="basis"> · for {recipe.serves}</span>
-                  </label>
-                ))}
-              </div>
+              <RecipePicker
+                library={library}
+                selected={form.recipeIds}
+                onToggle={toggleRecipe}
+                onClear={() => set("recipeIds", [])}
+              />
               <label htmlFor="biteSize" style={{ marginTop: 16 }}>
                 How big is each piece?
                 <span className="hint">

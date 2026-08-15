@@ -30,6 +30,27 @@ export const STYLE_CHOICES = [
   { key: "multiday", label: "Multi-day / retreat" },
 ] as const;
 
+/**
+ * Courses, in the order they'd appear on a menu rather than alphabetically.
+ * The recipe form writes one of these into `recipes.course`; the job page
+ * groups by them. Shared so the two can't drift apart and leave a dish filed
+ * under a heading the picker doesn't show.
+ *
+ * `course` is free text in the database, and older rows may hold something
+ * that isn't on this list. Anything unrecognised — or missing — groups under
+ * "Other" rather than disappearing.
+ */
+export const COURSE_CHOICES = [
+  "Entrée",
+  "Main",
+  "Side",
+  "Sauce",
+  "Dessert",
+  "Other",
+] as const;
+
+export const OTHER_COURSE = "Other";
+
 export const BITE_SIZE_CHOICES = [
   { key: "smaller", label: "Smaller bites — one or two mouthfuls each" },
   { key: "standard", label: "Standard — as your recipes are written" },
