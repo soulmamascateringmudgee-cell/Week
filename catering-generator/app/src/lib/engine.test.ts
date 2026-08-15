@@ -120,7 +120,10 @@ test("van throughput is reported as a constraint, not more food", () => {
 
 test("rejects input that would produce a nonsense order", () => {
   assert.throws(() => planEvent({ ...baseEvent, guests: 0 }), /at least 1/);
-  assert.throws(() => planEvent({ ...baseEvent, proteins: [] }), /at least one protein/);
+  assert.throws(
+    () => planEvent({ ...baseEvent, proteins: [] }),
+    /Add a dish from your recipes/,
+  );
   assert.throws(() => planEvent({ ...baseEvent, eventDate: "14/03/2026" }), /yyyy-mm-dd/);
   assert.throws(() => planEvent({ ...baseEvent, eventDate: "2026-02-31" }), /Not a real date/);
 });

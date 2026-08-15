@@ -1,4 +1,5 @@
 import {
+  BITE_SIZE,
   BREAD_PIECES,
   BUTTER_G,
   CANAPE_PIECES,
@@ -30,6 +31,7 @@ import {
   protein,
   sideGramsPerPerson,
 } from "./tables.ts";
+import { combineOrders } from "./combine.ts";
 import { addDays, daysBetween, formatDate, parseISODate } from "./dates.ts";
 import { round1, roundForUnit, roundKg, roundL, roundUnits } from "./round.ts";
 import type {
@@ -47,8 +49,13 @@ function validate(input: EventInput): void {
   if (input.guests > 5000) {
     throw new Error("Guest count over 5000 — check the number before ordering.");
   }
-  if (input.proteins.length === 0) {
-    throw new Error("Pick at least one protein, or the maths has nothing to divide.");
+  // No proteins is fine when the menu is made of the operator's own recipes —
+  // a canapé job doesn't have a "main", and printing a 9 kg mince line on it
+  // is worse than printing nothing.
+  if (input.proteins.length === 0 && (input.recipes ?? []).length === 0) {
+    throw new Error(
+      "Add a dish from your recipes, or tick a protein — otherwise there's nothing to work out.",
+    );
   }
   for (const key of input.proteins) {
     if (!protein(key)) throw new Error(`Unknown protein: "${key}"`);
@@ -84,6 +91,7 @@ export function planEvent(input: EventInput): EventPlan {
     orders.push({
       ...line,
       qty: roundKg(kg),
+      rawQty: kg,
       unit: "kg",
       basis: `${basisPrefix} → ${Math.round(gramsPerPerson)} g/head × ${effectiveGuests} (incl. ${CREW_MEALS} crew) × ${(1 + bufferPct).toFixed(2)} buffer`,
     });
@@ -97,6 +105,8 @@ export function planEvent(input: EventInput): EventPlan {
   // saying 5 kg of brisket means order 5 kg.
 
   const recipes = input.recipes ?? [];
+  const biteSize = input.biteSize ?? "standard";
+  const appetite = BITE_SIZE[biteSize] ?? 1;
 
   for (const recipe of recipes) {
     if (!Number.isFinite(recipe.serves) || recipe.serves < 1) {
@@ -104,7 +114,7 @@ export function planEvent(input: EventInput): EventPlan {
         `"${recipe.name}" doesn't say how many it serves, so it can't be scaled.`,
       );
     }
-    const factor = scale / recipe.serves;
+    const factor = (scale / recipe.serves) * appetite;
 
     for (const ingredient of recipe.ingredients) {
       if (!Number.isFinite(ingredient.qty) || ingredient.qty <= 0) continue;
@@ -112,10 +122,13 @@ export function planEvent(input: EventInput): EventPlan {
       orders.push({
         item: ingredient.item,
         qty: roundForUnit(scaled, ingredient.unit),
+        rawQty: scaled,
         unit: ingredient.unit,
         category: ingredient.category,
         forDish: recipe.name,
-        basis: `${ingredient.qty} ${ingredient.unit} per ${recipe.serves} → ×${factor.toFixed(2)} for ${effectiveGuests} (incl. ${CREW_MEALS} crew) + ${Math.round(bufferPct * 100)}% buffer`,
+        basis:
+          `${ingredient.qty} ${ingredient.unit} per ${recipe.serves} → ×${factor.toFixed(2)} for ${effectiveGuests} (incl. ${CREW_MEALS} crew) + ${Math.round(bufferPct * 100)}% buffer` +
+          (biteSize === "standard" ? "" : `, ${biteSize} bites`),
       });
     }
   }
@@ -128,8 +141,15 @@ export function planEvent(input: EventInput): EventPlan {
 
   // ------------------------------------------------------------- proteins
 
-  const servedProteinPerPerson = MENU_WEIGHT_G[input.menuWeight];
-  const servedPerProtein = servedProteinPerPerson / input.proteins.length;
+  // Zero proteins means the menu is entirely the operator's own recipes, so
+  // there is no "main" to divide up. Dividing by zero here would put Infinity
+  // on an order sheet.
+  const servedProteinPerPerson =
+    input.proteins.length > 0 ? MENU_WEIGHT_G[input.menuWeight] : 0;
+  const servedPerProtein =
+    input.proteins.length > 0
+      ? servedProteinPerPerson / input.proteins.length
+      : 0;
 
   for (const key of input.proteins) {
     const p = protein(key)!;
@@ -494,7 +514,9 @@ export function planEvent(input: EventInput): EventPlan {
     bufferPct,
     servedProteinPerPerson,
     servedPerProtein: round1(servedPerProtein),
-    orders,
+    // One line per ingredient, not one per dish. Three bacon lines is three
+    // chances to order the wrong amount.
+    orders: combineOrders(orders),
     dietaryNotes,
     packaging,
     countdown,

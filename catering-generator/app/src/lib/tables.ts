@@ -29,6 +29,20 @@ export function bufferFor(guests: number): number {
 /** Always cook for the crew. */
 export const CREW_MEALS = 2;
 
+/**
+ * How hungry the room is, as a multiplier on your own recipes.
+ *
+ * A canapé menu written for 30 can be right or wildly wrong depending on
+ * whether it's an hour of drinks before dinner or the whole meal. This is the
+ * dial for that, and it only touches recipes — the built-in tables already
+ * have their own per-head figures.
+ */
+export const BITE_SIZE: Record<string, number> = {
+  smaller: 0.75,
+  standard: 1,
+  bigger: 1.3,
+};
+
 // ------------------------------------------------------------------ PROTEIN
 
 /** Total *served* protein per person, grams, by how heavy the menu is. */

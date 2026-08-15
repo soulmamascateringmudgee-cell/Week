@@ -280,6 +280,31 @@ export function parseIngredientLine(rawLine: string): ParsedIngredient | null {
     }
   }
 
+  // "Bacon: 225g" / "Pork mince - 750 g" / "Chicken thigh 2kg" — the amount
+  // written after the ingredient, which is how most people write a shopping
+  // list. Without this the line survives as "1 ea", and an order sheet saying
+  // "2 ea bacon" is worse than useless at the butcher's counter.
+  const trailing = /^(.+?)\s*[:\-–—]?\s*([\d.,/]+)\s*([a-zA-Z]+)\.?$/.exec(line);
+  if (trailing) {
+    const qty = parseQty(trailing[2]);
+    if (qty !== null) {
+      const resolved = resolveUnit(trailing[3], qty);
+      // Only when the tail is a real unit — "Chicken thigh 2" or "Onion x2"
+      // shouldn't be read as a weight.
+      if (resolved) {
+        const item = trailing[1].replace(/[:\-–—\s]+$/, "").trim();
+        if (item !== "") {
+          return {
+            item,
+            qty: resolved.qty,
+            unit: resolved.unit,
+            category: categoryFor(item),
+          };
+        }
+      }
+    }
+  }
+
   // "Salt and pepper" — no quantity given. Keep it: a line on the order sheet
   // with no number is still better than forgetting it entirely.
   return { item: line, qty: 1, unit: "ea", category: categoryFor(line) };

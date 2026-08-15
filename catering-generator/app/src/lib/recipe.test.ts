@@ -202,3 +202,105 @@ test("returns nothing when the page has no readable recipe", () => {
   assert.equal(extractRecipe("<html><body>just a blog</body></html>"), null);
   assert.equal(extractRecipe('<script type="application/ld+json">{bad json</script>'), null);
 });
+
+// ------------------------------------------- amount written after the item
+
+test("reads the amount when it comes after the ingredient", () => {
+  assert.deepEqual(parseIngredientLine("Bacon: 225g"), {
+    item: "Bacon",
+    qty: 225,
+    unit: "g",
+    category: "Meat/Seafood",
+  });
+  assert.deepEqual(parseIngredientLine("Chicken breast/thigh: 2kg"), {
+    item: "Chicken breast/thigh",
+    qty: 2,
+    unit: "kg",
+    category: "Meat/Seafood",
+  });
+  assert.equal(parseIngredientLine("Pork mince - 750 g")?.qty, 750);
+});
+
+test("a trailing word that isn't a unit stays part of the name", () => {
+  // "Sourdough loaf" must not be read as 0 of some unit.
+  const parsed = parseIngredientLine("Salt and pepper");
+  assert.equal(parsed?.item, "Salt and pepper");
+  assert.equal(parsed?.unit, "ea");
+});
+
+// ------------------------------------------------------------- bite size
+
+test("bigger bites order more of the operator's recipes", () => {
+  const standard = planEvent({ ...BASE, recipes: [SLAW] });
+  const bigger = planEvent({ ...BASE, recipes: [SLAW], biteSize: "bigger" });
+  const smaller = planEvent({ ...BASE, recipes: [SLAW], biteSize: "smaller" });
+
+  const fennel = (p: ReturnType<typeof planEvent>) =>
+    p.orders.find((o) => o.item === "Fennel")!.qty;
+
+  assert.ok(bigger.orders.length > 0);
+  assert.ok(fennel(bigger) > fennel(standard));
+  assert.ok(fennel(smaller) < fennel(standard));
+});
+
+// --------------------------------------------------- no main, and totals
+
+test("a menu of only recipes needs no protein ticked", () => {
+  const plan = planEvent({ ...BASE, proteins: [], recipes: [SLAW] });
+  assert.ok(!plan.orders.some((o) => o.forDish === "Main"));
+  assert.equal(plan.servedPerProtein, 0);
+});
+
+test("with no recipes and no proteins it says what's missing", () => {
+  assert.throws(
+    () => planEvent({ ...BASE, proteins: [], recipes: [] }),
+    /Add a dish from your recipes/,
+  );
+});
+
+test("the same ingredient across dishes becomes one total", () => {
+  const plan = planEvent({
+    ...BASE,
+    guests: 28,
+    proteins: [],
+    recipes: [
+      {
+        name: "Sausage rolls",
+        serves: 30,
+        ingredients: [{ item: "Bacon", qty: 225, unit: "g", category: "Meat/Seafood" }],
+      },
+      {
+        name: "Mini quiche",
+        serves: 30,
+        ingredients: [{ item: "bacon", qty: 188, unit: "g", category: "Meat/Seafood" }],
+      },
+    ],
+  });
+
+  const bacon = plan.orders.filter((o) => o.item.toLowerCase() === "bacon");
+  assert.equal(bacon.length, 1, "bacon should appear once, not once per dish");
+  assert.equal(bacon[0].forDish, "Sausage rolls, Mini quiche");
+  // 30 guests + 2 crew = 30 × 1.1 = 33 ÷ 30 = 1.1 → (225 + 188) × 1.1 = 454
+  assert.equal(bacon[0].qty, 450);
+  assert.match(bacon[0].basis, /2 dishes added together/);
+});
+
+test("units that can't be added together stay on separate lines", () => {
+  const plan = planEvent({
+    ...BASE,
+    proteins: [],
+    recipes: [
+      {
+        name: "A",
+        serves: 100,
+        ingredients: [{ item: "Parsley", qty: 2, unit: "bunches", category: "Produce" }],
+      },
+      {
+        name: "B",
+        serves: 100,
+        ingredients: [{ item: "Parsley", qty: 50, unit: "g", category: "Produce" }],
+      },
+    ],
+  });
+  assert.equal(plan.orders.filter((o) => o.item === "Parsley").length, 2);
+});
