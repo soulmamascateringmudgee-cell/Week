@@ -214,6 +214,7 @@ function EventPlanner() {
               <input
                 id="guests"
                 type="number"
+                onFocus={(e) => e.target.select()}
                 min={1}
                 max={5000}
                 required
@@ -347,6 +348,7 @@ function EventPlanner() {
               <input
                 id="sides"
                 type="number"
+                onFocus={(e) => e.target.select()}
                 min={0}
                 max={6}
                 value={form.sidesCount}
@@ -472,6 +474,7 @@ function EventPlanner() {
                 <input
                   id="window"
                   type="number"
+                  onFocus={(e) => e.target.select()}
                   min={0.5}
                   step={0.5}
                   value={form.serviceWindowHours}
@@ -497,6 +500,7 @@ function EventPlanner() {
                 <input
                   id={fieldId(label)}
                   type="number"
+                  onFocus={(e) => e.target.select()}
                   min={0}
                   value={form.dietaries[label] ?? 0}
                   onChange={(e) =>

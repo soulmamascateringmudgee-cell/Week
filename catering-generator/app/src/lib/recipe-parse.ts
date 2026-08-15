@@ -26,6 +26,33 @@ export interface ParsedIngredient {
   category: Category;
 }
 
+/**
+ * Imperial units, converted on the way in.
+ *
+ * American recipe sites are full of pounds and ounces, and nobody orders in
+ * pounds from a Mudgee butcher. Mass converts to mass and volume to volume —
+ * both exact. Cups deliberately stay as cups: a cup of flour and a cup of oil
+ * are different weights, so "convert" would mean "guess", and a guess with a
+ * unit on it is worse than leaving it alone.
+ */
+const CONVERSIONS: Record<string, { factor: number; unit: string }> = {
+  oz: { factor: 28.3495, unit: "g" },
+  ounce: { factor: 28.3495, unit: "g" },
+  ounces: { factor: 28.3495, unit: "g" },
+  lb: { factor: 0.453592, unit: "kg" },
+  lbs: { factor: 0.453592, unit: "kg" },
+  pound: { factor: 0.453592, unit: "kg" },
+  pounds: { factor: 0.453592, unit: "kg" },
+  "fl oz": { factor: 29.5735, unit: "ml" },
+  floz: { factor: 29.5735, unit: "ml" },
+  pint: { factor: 473.176, unit: "ml" },
+  pints: { factor: 473.176, unit: "ml" },
+  quart: { factor: 946.353, unit: "ml" },
+  quarts: { factor: 946.353, unit: "ml" },
+  gallon: { factor: 3.78541, unit: "L" },
+  gallons: { factor: 3.78541, unit: "L" },
+};
+
 /** Units we recognise, mapped to how they should be written back out. */
 const UNITS: Record<string, string> = {
   kg: "kg",
@@ -135,6 +162,32 @@ function categoryFor(item: string): Category {
   return "Dry goods";
 }
 
+/** Round a converted figure without pretending to a precision it hasn't got. */
+function tidy(value: number): number {
+  if (value >= 100) return Math.round(value);
+  if (value >= 10) return Math.round(value * 10) / 10;
+  return Math.round(value * 100) / 100;
+}
+
+/**
+ * Resolve a unit word to how it should be stored, converting imperial to
+ * metric on the way. Returns null when the word isn't a unit at all.
+ */
+function resolveUnit(
+  word: string,
+  qty: number,
+): { qty: number; unit: string } | null {
+  const key = word.toLowerCase();
+
+  const conversion = CONVERSIONS[key];
+  if (conversion) {
+    return { qty: tidy(qty * conversion.factor), unit: conversion.unit };
+  }
+
+  const unit = UNITS[key];
+  return unit ? { qty, unit } : null;
+}
+
 /** "1/2" → 0.5, "1 1/2" → 1.5, "2.5" → 2.5 */
 function parseQty(raw: string): number | null {
   const text = raw.trim();
@@ -168,29 +221,48 @@ export function parseIngredientLine(rawLine: string): ParsedIngredient | null {
   if (multipack) {
     const packs = parseQty(multipack[1]);
     const size = parseQty(multipack[2]);
-    const unit = UNITS[multipack[3].toLowerCase()];
-    if (packs !== null && size !== null && unit) {
+    if (packs !== null && size !== null) {
+      const resolved = resolveUnit(multipack[3], packs * size);
+      if (resolved) {
+        return {
+          item: multipack[4].trim(),
+          qty: Number(resolved.qty.toFixed(3)),
+          unit: resolved.unit,
+          category: categoryFor(multipack[4]),
+        };
+      }
+    }
+  }
+
+  // "8 fl oz cream" — the only two-word unit worth handling.
+  const flOz = /^([\d.,/ ]+?)\s*fl\.?\s*oz\.?\s+(.+)$/i.exec(line);
+  if (flOz) {
+    const qty = parseQty(flOz[1]);
+    if (qty !== null) {
+      const resolved = resolveUnit("fl oz", qty)!;
       return {
-        item: multipack[4].trim(),
-        qty: Number((packs * size).toFixed(3)),
-        unit,
-        category: categoryFor(multipack[4]),
+        item: flOz[2].trim(),
+        qty: resolved.qty,
+        unit: resolved.unit,
+        category: categoryFor(flOz[2]),
       };
     }
   }
 
-  // "5 kg beef brisket" / "500g butter" / "2 bunches broccolini"
+  // "5 kg beef brisket" / "500g butter" / "2 lb chuck" / "2 bunches broccolini"
   const withUnit = /^([\d.,/ ]+?)\s*([a-zA-Z]+)\.?\s+(.+)$/.exec(line);
   if (withUnit) {
     const qty = parseQty(withUnit[1]);
-    const unit = UNITS[withUnit[2].toLowerCase()];
-    if (qty !== null && unit) {
-      return {
-        item: withUnit[3].trim(),
-        qty,
-        unit,
-        category: categoryFor(withUnit[3]),
-      };
+    if (qty !== null) {
+      const resolved = resolveUnit(withUnit[2], qty);
+      if (resolved) {
+        return {
+          item: withUnit[3].trim(),
+          qty: resolved.qty,
+          unit: resolved.unit,
+          category: categoryFor(withUnit[3]),
+        };
+      }
     }
   }
 
