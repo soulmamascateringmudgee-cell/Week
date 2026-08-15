@@ -149,6 +149,7 @@ label .hint {
 input[type="text"],
 input[type="number"],
 input[type="date"],
+input[type="search"],
 select,
 textarea {
   width: 100%;
@@ -303,6 +304,82 @@ td.num {
   color: var(--accent);
   margin-left: 6px;
   vertical-align: 1px;
+}
+
+/* Recipe picker: courses that open one at a time, and the running list of
+   what's been chosen. The chosen list sits above the sections on purpose —
+   a folded section must never be the only place a ticked dish appears. */
+.courses {
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.courses details {
+  border-bottom: 1px solid var(--line);
+}
+
+.courses summary {
+  cursor: pointer;
+  padding: 11px 2px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.courses summary::marker {
+  color: var(--muted);
+}
+
+.courses summary:hover {
+  color: var(--accent);
+}
+
+.courses details > .checks {
+  padding: 2px 0 14px 18px;
+}
+
+.chosen {
+  background: var(--accent-soft);
+  border-radius: 7px;
+  padding: 11px 13px;
+  margin-bottom: 4px;
+}
+
+.chosen-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.92rem;
+}
+
+.chips {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Big enough to hit with a thumb in a kitchen, not a mouse in an office. */
+.chip {
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: #fff;
+  color: inherit;
+  border: 1px solid var(--line);
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  filter: none;
 }
 
 .notice {

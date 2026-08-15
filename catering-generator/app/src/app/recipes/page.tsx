@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { COURSE_CHOICES } from "@/lib/options.ts";
 import { parseIngredients } from "@/lib/recipe-parse.ts";
 import type { Category, RecipeIngredient } from "@/lib/types.ts";
 
@@ -23,8 +24,6 @@ const CATEGORIES: Category[] = [
   "Drinks",
   "Packaging",
 ];
-
-const COURSES = ["Main", "Side", "Entrée", "Dessert", "Sauce", "Other"];
 
 const BLANK_ROW: RecipeIngredient = {
   item: "",
@@ -228,7 +227,7 @@ export default function RecipesPage() {
                 value={course}
                 onChange={(e) => setCourse(e.target.value)}
               >
-                {COURSES.map((c) => (
+                {COURSE_CHOICES.map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>
