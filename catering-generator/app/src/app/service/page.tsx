@@ -227,6 +227,7 @@ function ServicePlanner() {
               <input
                 id="lead"
                 type="number"
+                onFocus={(e) => e.target.select()}
                 min={0}
                 value={form.leadTimeHours}
                 onChange={(e) => set("leadTimeHours", Number(e.target.value))}
@@ -240,6 +241,7 @@ function ServicePlanner() {
               <input
                 id="fridge"
                 type="number"
+                onFocus={(e) => e.target.select()}
                 min={0}
                 placeholder="optional"
                 value={form.fridgeCapacityKg}
@@ -254,6 +256,7 @@ function ServicePlanner() {
               <input
                 id="prep"
                 type="number"
+                onFocus={(e) => e.target.select()}
                 min={0}
                 placeholder="optional"
                 value={form.prepHoursAvailable}
@@ -269,6 +272,7 @@ function ServicePlanner() {
                 <input
                   id="window"
                   type="number"
+                  onFocus={(e) => e.target.select()}
                   min={0}
                   step={0.5}
                   value={form.serviceWindowHours}
@@ -292,6 +296,7 @@ function ServicePlanner() {
                 <input
                   id={`covers-${day}`}
                   type="number"
+                  onFocus={(e) => e.target.select()}
                   min={0}
                   value={form.covers[day]}
                   onChange={(e) =>
@@ -409,6 +414,7 @@ function ServicePlanner() {
                 <input
                   id={`portion-${index}`}
                   type="number"
+                  onFocus={(e) => e.target.select()}
                   min={1}
                   value={item.portionG}
                   onChange={(e) =>
@@ -439,6 +445,7 @@ function ServicePlanner() {
                 <input
                   id={`hand-${index}`}
                   type="number"
+                  onFocus={(e) => e.target.select()}
                   min={0}
                   step={0.5}
                   value={item.onHandKg ?? 0}

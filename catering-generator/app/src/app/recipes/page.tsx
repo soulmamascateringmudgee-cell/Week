@@ -46,6 +46,8 @@ export default function RecipesPage() {
   const [rows, setRows] = useState<RecipeIngredient[]>([{ ...BLANK_ROW }]);
   const [method, setMethod] = useState("");
   const [paste, setPaste] = useState("");
+  const [link, setLink] = useState("");
+  const [importing, setImporting] = useState(false);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
 
@@ -79,6 +81,47 @@ export default function RecipesPage() {
     setMethod("");
     setPaste("");
     setNote("");
+  }
+
+  async function importFromLink() {
+    setImporting(true);
+    setNote("");
+    try {
+      const response = await fetch("/api/import-recipe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ url: link }),
+      });
+      const body = await response.json();
+
+      if (!response.ok) {
+        setNote(body.error ?? "Couldn't read that page.");
+        return;
+      }
+
+      const imported = body.recipe as {
+        name: string;
+        serves: number;
+        servesAssumed: boolean;
+        ingredients: RecipeIngredient[];
+      };
+
+      if (!editingId) setName(imported.name);
+      setServes(imported.serves);
+      setRows(imported.ingredients);
+      setLink("");
+      setNote(
+        `Read ${imported.ingredients.length} ingredients from that page` +
+          (imported.servesAssumed
+            ? ", but it didn't say how many it serves — I've put 4, change it to match the recipe before you save."
+            : `, written for ${imported.serves}.`) +
+          " Pounds and ounces have been converted; cups are left as cups, because a cup of flour and a cup of oil aren't the same weight. Check it over before saving.",
+      );
+    } catch {
+      setNote("Couldn't reach the server.");
+    } finally {
+      setImporting(false);
+    }
   }
 
   function readPaste() {
@@ -200,6 +243,7 @@ export default function RecipesPage() {
               <input
                 id="recipe-serves"
                 type="number"
+                onFocus={(e) => e.target.select()}
                 min={1}
                 required
                 value={serves}
@@ -208,8 +252,33 @@ export default function RecipesPage() {
             </div>
           </div>
 
+          <label htmlFor="recipe-link" style={{ marginTop: 18 }}>
+            Paste a recipe link
+            <span className="hint">
+              From a recipe site. It reads the ingredients off the page and
+              converts pounds and ounces to metric.
+            </span>
+          </label>
+          <input
+            id="recipe-link"
+            type="url"
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+            placeholder="https://…"
+          />
+          <div className="actions">
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => void importFromLink()}
+              disabled={importing || link.trim() === ""}
+            >
+              {importing ? "Reading the page…" : "Read the link"}
+            </button>
+          </div>
+
           <label htmlFor="recipe-paste" style={{ marginTop: 18 }}>
-            Paste the ingredients
+            Or paste the ingredients
             <span className="hint">
               One per line, straight off your recipe card — &ldquo;5 kg beef
               brisket&rdquo;, &ldquo;500g butter&rdquo;, &ldquo;2 bunches
@@ -251,6 +320,7 @@ export default function RecipesPage() {
                 <input
                   id={`ing-qty-${index}`}
                   type="number"
+                  onFocus={(e) => e.target.select()}
                   min={0}
                   step="any"
                   value={row.qty}
