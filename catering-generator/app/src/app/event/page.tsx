@@ -53,6 +53,8 @@ interface EventForm {
   /** Dishes from the recipe book, by id. */
   recipeIds: string[];
   biteSize: EventInput["biteSize"];
+  /** Kept as a string — an empty box means "no budget", not zero. */
+  budget: string;
 }
 
 interface RecipeChoice {
@@ -81,6 +83,7 @@ const BLANK: EventForm = {
   dietaries: {},
   recipeIds: [],
   biteSize: "standard",
+  budget: "",
 };
 
 function EventPlanner() {
@@ -216,6 +219,7 @@ function EventPlanner() {
       hotOrOutdoors: form.hotOrOutdoors,
       recipeIds: form.recipeIds,
       biteSize: form.biteSize,
+      ...(form.budget !== "" ? { budget: Number(form.budget) } : {}),
       dietaries: Object.entries(form.dietaries)
         .filter(([, count]) => count > 0)
         .map(([label, count]) => ({ label, count })),
@@ -284,6 +288,24 @@ function EventPlanner() {
                 required
                 value={form.guests}
                 onChange={(e) => set("guests", Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <label htmlFor="budget">
+                Food budget
+                <span className="hint">
+                  Optional. Costs the order against your price list.
+                </span>
+              </label>
+              <input
+                id="budget"
+                type="number"
+                onFocus={(e) => e.target.select()}
+                min={0}
+                step="1"
+                placeholder="e.g. 600"
+                value={form.budget}
+                onChange={(e) => set("budget", e.target.value)}
               />
             </div>
             <div>
