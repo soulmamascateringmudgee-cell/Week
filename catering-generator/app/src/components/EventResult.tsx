@@ -196,6 +196,38 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
         </ul>
       </div>
 
+      {plan.dishSheets.length > 0 && (
+        <div className="card">
+          <h2>Recipe sheets</h2>
+          <p className="note">
+            Each dish at this job&rsquo;s size. The order sheet says how much to
+            buy in total; this says how much goes into which pot.
+          </p>
+          {plan.dishSheets.map((sheet) => (
+            <div className="sheet" key={sheet.name}>
+              <div className="when">
+                {sheet.name}
+                {sheet.course && <span className="tag">{sheet.course}</span>}
+              </div>
+              <div className="date">{sheet.scaleNote}</div>
+              <table className="lines">
+                <tbody>
+                  {sheet.ingredients.map((line) => (
+                    <tr key={line.item}>
+                      <td>{line.item}</td>
+                      <td className="num">
+                        {line.qty} {line.unit}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {sheet.method && <p className="method">{sheet.method}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+
       {plan.prep.length > 0 && (
         <div className="card">
           <h2>Prep list</h2>
@@ -218,6 +250,13 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                   <li key={`${task.dish}-${task.task}`}>
                     {task.task}
                     <span className="because"> — {task.because}</span>
+                    {task.ingredients.length > 0 && (
+                      <div className="amounts">
+                        {task.ingredients
+                          .map((i) => `${i.qty} ${i.unit} ${i.item}`)
+                          .join(" · ")}
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>

@@ -13,7 +13,7 @@
  */
 
 import { addDays, formatDate, parseISODate } from "./dates.ts";
-import type { PrepDay, PrepTaskLine, Recipe } from "./types.ts";
+import type { DishSheet, PrepDay, PrepTaskLine, Recipe } from "./types.ts";
 
 /**
  * Each rule is tried in order and the first match wins, so the slowest,
@@ -127,19 +127,27 @@ function classify(recipe: Recipe): { daysOut: number; task: string; because: str
  */
 export function buildPrepPlan(
   recipes: Recipe[],
+  /** The same dishes at this job's size, so each task carries its amounts. */
+  sheets: DishSheet[],
   eventDateISO: string,
   todayISO: string,
 ): PrepDay[] {
   const eventDate = parseISODate(eventDateISO);
   const today = parseISODate(todayISO);
 
+  const amounts = new Map(sheets.map((sheet) => [sheet.name, sheet.ingredients]));
   const byDay = new Map<number, PrepTaskLine[]>();
 
   for (const recipe of recipes) {
     const hit = classify(recipe);
     if (!hit) continue;
     const lines = byDay.get(hit.daysOut) ?? [];
-    lines.push({ dish: recipe.name, task: hit.task, because: hit.because });
+    lines.push({
+      dish: recipe.name,
+      task: hit.task,
+      because: hit.because,
+      ingredients: amounts.get(recipe.name) ?? [],
+    });
     byDay.set(hit.daysOut, lines);
   }
 
@@ -151,6 +159,7 @@ export function buildPrepPlan(
     dish: "Load out",
     task: "Load the car cold — eskies and ice bricks, not just the boot",
     because: "cold chain is the one thing you cannot fix on site",
+    ingredients: [],
   });
   byDay.set(0, eventDay);
 

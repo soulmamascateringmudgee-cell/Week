@@ -37,6 +37,7 @@ import { addDays, daysBetween, formatDate, parseISODate } from "./dates.ts";
 import { round1, roundForUnit, roundKg, roundL, roundUnits } from "./round.ts";
 import type {
   CountdownStep,
+  DishSheet,
   EventInput,
   EventPlan,
   OrderLine,
@@ -110,6 +111,8 @@ export function planEvent(input: EventInput): EventPlan {
   const biteSize = input.biteSize ?? "standard";
   const appetite = BITE_SIZE[biteSize] ?? 1;
 
+  const dishSheets: DishSheet[] = [];
+
   for (const recipe of recipes) {
     if (!Number.isFinite(recipe.serves) || recipe.serves < 1) {
       throw new Error(
@@ -117,6 +120,23 @@ export function planEvent(input: EventInput): EventPlan {
       );
     }
     const factor = (scale / recipe.serves) * appetite;
+
+    // The same scaled numbers the order lines are built from, kept per dish so
+    // a cook can see how much of the shop belongs to which pot.
+    dishSheets.push({
+      name: recipe.name,
+      course: recipe.course ?? null,
+      scaleNote: `written for ${recipe.serves} → ×${factor.toFixed(2)} for ${effectiveGuests} (incl. ${CREW_MEALS} crew) + ${Math.round(bufferPct * 100)}% buffer`,
+      ingredients: recipe.ingredients
+        .filter((i) => Number.isFinite(i.qty) && i.qty > 0)
+        .map((i) => ({
+          item: i.item,
+          qty: roundForUnit(i.qty * factor, i.unit),
+          unit: i.unit,
+        })),
+      method: recipe.method ?? null,
+      notes: recipe.notes ?? null,
+    });
 
     for (const ingredient of recipe.ingredients) {
       if (!Number.isFinite(ingredient.qty) || ingredient.qty <= 0) continue;
@@ -395,7 +415,7 @@ export function planEvent(input: EventInput): EventPlan {
 
   // ---------------------------------------------------------------- prep
 
-  const prep = buildPrepPlan(recipes, input.eventDate, input.today);
+  const prep = buildPrepPlan(recipes, dishSheets, input.eventDate, input.today);
 
   // ----------------------------------------------------------- countdown
 
@@ -534,6 +554,7 @@ export function planEvent(input: EventInput): EventPlan {
     costing,
     dietaryNotes,
     packaging,
+    dishSheets,
     prep,
     countdown,
     risks: risks.slice(0, 3),

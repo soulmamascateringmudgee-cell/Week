@@ -47,12 +47,36 @@ export interface CountdownStep {
   items: string[];
 }
 
+/** One ingredient of a dish, already scaled to this job's headcount. */
+export interface ScaledIngredient {
+  item: string;
+  qty: number;
+  unit: string;
+}
+
+/**
+ * A dish written out at this job's size — what actually goes into the pot on
+ * the day, rather than the totals on the order sheet. The order sheet says buy
+ * 6 kg of onions; this says which dish wants how many of them.
+ */
+export interface DishSheet {
+  name: string;
+  course?: string | null;
+  /** "for 10, written for 10" */
+  scaleNote: string;
+  ingredients: ScaledIngredient[];
+  method?: string | null;
+  notes?: string | null;
+}
+
 /** One job on the prep list, tied to the dish that needs it. */
 export interface PrepTaskLine {
   dish: string;
   task: string;
   /** Why it sits on this day — shown so the timing can be argued with. */
   because: string;
+  /** What goes into this dish, at this job's size. */
+  ingredients: ScaledIngredient[];
 }
 
 /** One day of the prep list. `daysOut` counts back from the event. */
@@ -169,6 +193,8 @@ export interface EventPlan {
   orders: OrderLine[];
   dietaryNotes: string[];
   packaging: string[];
+  /** Every attached dish written out at this job's size. */
+  dishSheets: DishSheet[];
   /** Dated cooking prep, worked out from the dishes on the menu. */
   prep: PrepDay[];
   countdown: CountdownStep[];

@@ -423,6 +423,44 @@ td.num {
   color: var(--muted);
 }
 
+/* What goes into one dish, printed under its prep job. */
+.amounts {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 2px 0 6px;
+}
+
+/* One dish written out at this job's size. */
+.sheet {
+  padding: 0 0 14px 16px;
+  margin-left: 6px;
+  border-left: 2px solid var(--line);
+  break-inside: avoid;
+}
+
+.sheet .lines {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+  font-size: 0.92rem;
+}
+
+.sheet .lines td {
+  padding: 3px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.sheet .lines tr:last-child td {
+  border-bottom: none;
+}
+
+.sheet .method {
+  margin: 10px 0 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  white-space: pre-line;
+}
+
 ul.plain {
   margin: 6px 0 0;
   padding-left: 18px;
