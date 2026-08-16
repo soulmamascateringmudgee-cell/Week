@@ -47,6 +47,7 @@ export default function RecipesPage() {
   const [paste, setPaste] = useState("");
   const [link, setLink] = useState("");
   const [importing, setImporting] = useState(false);
+  const [readingPhoto, setReadingPhoto] = useState(false);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
 
@@ -80,6 +81,66 @@ export default function RecipesPage() {
     setMethod("");
     setPaste("");
     setNote("");
+  }
+
+  /**
+   * A photo of a recipe card, a cookbook page, or someone's handwriting. The
+   * fields it fills are the same editable fields as everything else — nothing
+   * is saved until the cook has looked at the numbers.
+   */
+  async function readPhoto(file: File) {
+    setReadingPhoto(true);
+    setNote("");
+    try {
+      const data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("read failed"));
+        // The result is a data: URL; the API wants the base64 payload alone.
+        reader.onload = () =>
+          resolve(String(reader.result).split(",")[1] ?? "");
+        reader.readAsDataURL(file);
+      });
+
+      const response = await fetch("/api/read-recipe-photo", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ mediaType: file.type, data }),
+      });
+      const body = await response.json();
+
+      if (!response.ok) {
+        setNote(body.error ?? "Couldn't read that photo.");
+        return;
+      }
+
+      const read = body.recipe as {
+        name: string;
+        serves: number;
+        ingredients: RecipeIngredient[];
+        method: string;
+        unreadable: string[];
+      };
+
+      if (!editingId && read.name) setName(read.name);
+      if (read.serves >= 1) setServes(read.serves);
+      setRows(read.ingredients);
+      if (read.method) setMethod(read.method);
+
+      const checks = [
+        `Read ${read.ingredients.length} ingredients from that photo`,
+        read.serves >= 1
+          ? `written for ${read.serves}`
+          : "it didn't say how many it serves, so set that yourself",
+        read.unreadable.length > 0
+          ? `couldn't make out: ${read.unreadable.join(", ")}`
+          : "",
+      ].filter(Boolean);
+      setNote(`${checks.join(" · ")}. Check every amount before you save.`);
+    } catch {
+      setNote("Couldn't read that photo.");
+    } finally {
+      setReadingPhoto(false);
+    }
   }
 
   async function importFromLink() {
@@ -250,6 +311,29 @@ export default function RecipesPage() {
               />
             </div>
           </div>
+
+          <label htmlFor="recipe-photo" style={{ marginTop: 18 }}>
+            Photograph a recipe
+            <span className="hint">
+              A recipe card, a page of a cookbook, your own handwriting. It
+              reads the amounts into the fields below for you to check. On a
+              phone this opens the camera.
+            </span>
+          </label>
+          <input
+            id="recipe-photo"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            disabled={readingPhoto}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              // Cleared so choosing the same photo twice still fires.
+              e.target.value = "";
+              if (file) void readPhoto(file);
+            }}
+          />
+          {readingPhoto && <p className="notice">Reading the photo…</p>}
 
           <label htmlFor="recipe-link" style={{ marginTop: 18 }}>
             Paste a recipe link
