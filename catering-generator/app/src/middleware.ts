@@ -3,8 +3,15 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { isInvited } from "@/lib/access.ts";
 
-/** Pages anyone can see. Everything else needs a signed-in operator. */
-const PUBLIC_PATHS = ["/", "/login", "/auth", "/no-access"];
+/**
+ * Pages anyone can see. Everything else needs a signed-in operator.
+ *
+ * `/signup` has to be here or an invited caterer can never set a password —
+ * they'd be bounced to a login page for an account that doesn't exist yet.
+ * `/privacy` is public because someone deciding whether to trust this app with
+ * their recipes has to be able to read it before they sign up.
+ */
+const PUBLIC_PATHS = ["/", "/login", "/signup", "/auth", "/no-access", "/privacy"];
 
 function isPublic(pathname: string): boolean {
   return PUBLIC_PATHS.some(

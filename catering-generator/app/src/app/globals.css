@@ -52,6 +52,38 @@ header.site a {
   text-decoration: none;
 }
 
+footer.site {
+  border-top: 1px solid var(--line);
+  border-bottom: none;
+  background: var(--card);
+}
+
+footer.site .wrap {
+  padding: 18px 20px;
+}
+
+footer.site a {
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+footer.site a:hover {
+  color: var(--ink);
+}
+
+/* Long URLs — a signup link an admin needs to copy — must wrap on a phone
+   rather than pushing the whole page sideways. */
+code {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  background: var(--paper);
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
 .brand {
   font-weight: 700;
   letter-spacing: -0.01em;
