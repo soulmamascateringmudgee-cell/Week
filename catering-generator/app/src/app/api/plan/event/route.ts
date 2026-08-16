@@ -38,7 +38,9 @@ export async function POST(request: Request) {
     if (recipeIds.length > 0) {
       const { data, error } = await supabase
         .from("recipes")
-        .select("id, name, course, serves, ingredients")
+        // `method` and `notes` carry the timings the prep list is built from —
+        // marinades, overnight cooks, what has to be made on the morning.
+        .select("id, name, course, serves, ingredients, method, notes")
         .in("id", recipeIds);
 
       if (error) {
