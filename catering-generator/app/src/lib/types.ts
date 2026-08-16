@@ -47,6 +47,23 @@ export interface CountdownStep {
   items: string[];
 }
 
+/** One job on the prep list, tied to the dish that needs it. */
+export interface PrepTaskLine {
+  dish: string;
+  task: string;
+  /** Why it sits on this day — shown so the timing can be argued with. */
+  because: string;
+}
+
+/** One day of the prep list. `daysOut` counts back from the event. */
+export interface PrepDay {
+  daysOut: number;
+  date: string;
+  label: string;
+  overdue: boolean;
+  tasks: PrepTaskLine[];
+}
+
 export interface Risk {
   risk: string;
   fix: string;
@@ -152,6 +169,8 @@ export interface EventPlan {
   orders: OrderLine[];
   dietaryNotes: string[];
   packaging: string[];
+  /** Dated cooking prep, worked out from the dishes on the menu. */
+  prep: PrepDay[];
   countdown: CountdownStep[];
   risks: Risk[];
   missing: string[];

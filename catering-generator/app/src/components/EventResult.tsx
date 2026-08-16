@@ -196,6 +196,36 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
         </ul>
       </div>
 
+      {plan.prep.length > 0 && (
+        <div className="card">
+          <h2>Prep list</h2>
+          <p className="note">
+            Worked out from the methods on the dishes you ticked. Anything with
+            no timing in its method is not on here.
+          </p>
+          {plan.prep.map((day) => (
+            <div
+              className={day.overdue ? "step overdue" : "step"}
+              key={day.daysOut}
+            >
+              <div className="when">
+                {day.label}
+                {day.overdue && <span className="tag">passed</span>}
+              </div>
+              <div className="date">{day.date}</div>
+              <ul className="plain">
+                {day.tasks.map((task) => (
+                  <li key={`${task.dish}-${task.task}`}>
+                    {task.task}
+                    <span className="because"> — {task.because}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="card">
         <h2>Countdown</h2>
         {plan.countdown.map((step) => (

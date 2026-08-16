@@ -42,6 +42,7 @@ import type {
   OrderLine,
   Risk,
 } from "./types.ts";
+import { buildPrepPlan } from "./prep.ts";
 
 function validate(input: EventInput): void {
   if (!Number.isFinite(input.guests) || input.guests < 1) {
@@ -392,6 +393,10 @@ export function planEvent(input: EventInput): EventPlan {
     ...PACKAGING_CREW,
   ];
 
+  // ---------------------------------------------------------------- prep
+
+  const prep = buildPrepPlan(recipes, input.eventDate, input.today);
+
   // ----------------------------------------------------------- countdown
 
   const countdown: CountdownStep[] = COUNTDOWN.map((step) => {
@@ -529,6 +534,7 @@ export function planEvent(input: EventInput): EventPlan {
     costing,
     dietaryNotes,
     packaging,
+    prep,
     countdown,
     risks: risks.slice(0, 3),
     missing,

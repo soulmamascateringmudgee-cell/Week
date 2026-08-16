@@ -411,6 +411,18 @@ td.num {
   font-size: 0.85rem;
 }
 
+/* Sits under a card heading to say where the list came from. */
+.card > .note {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Why a prep job sits on the day it does. */
+.because {
+  color: var(--muted);
+}
+
 ul.plain {
   margin: 6px 0 0;
   padding-left: 18px;
