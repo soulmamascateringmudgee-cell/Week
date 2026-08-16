@@ -100,6 +100,18 @@ cook trusts is worse than a gap they can see.
 If the image is not a recipe, return an empty ingredients array.`;
 
 export async function POST(request: Request) {
+  // Without a key the SDK throws something about authentication methods, which
+  // tells a cook nothing. Say what is actually missing and who fixes it.
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json(
+      {
+        error:
+          "Reading photos isn't switched on for this site yet — it needs an ANTHROPIC_API_KEY in the Vercel project settings. Until then, paste the ingredients in instead.",
+      },
+      { status: 503 },
+    );
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
