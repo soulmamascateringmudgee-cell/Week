@@ -210,13 +210,21 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                 {sheet.course && <span className="tag">{sheet.course}</span>}
               </div>
               <div className="date">{sheet.scaleNote}</div>
+              {sheet.unscalable && (
+                <p className="broken">
+                  These amounts are wrong. The quantities are written inside the
+                  ingredient names, so every line scales as &ldquo;1 ea&rdquo;.
+                  Open the dish and move the amounts into the Amount and Unit
+                  columns, then build this list again.
+                </p>
+              )}
               <table className="lines">
                 <tbody>
                   {sheet.ingredients.map((line) => (
                     <tr key={line.item}>
                       <td>{line.item}</td>
                       <td className="num">
-                        {line.qty} {line.unit}
+                        {sheet.unscalable ? "—" : `${line.qty} ${line.unit}`}
                       </td>
                     </tr>
                   ))}

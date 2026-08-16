@@ -64,6 +64,11 @@ export interface DishSheet {
   course?: string | null;
   /** "for 10, written for 10" */
   scaleNote: string;
+  /**
+   * True when the amounts are stuck in the ingredient names, so nothing on
+   * this sheet can be trusted until the recipe is fixed.
+   */
+  unscalable?: boolean;
   ingredients: ScaledIngredient[];
   method?: string | null;
   notes?: string | null;

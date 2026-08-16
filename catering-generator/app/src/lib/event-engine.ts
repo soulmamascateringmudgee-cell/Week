@@ -32,6 +32,7 @@ import {
   sideGramsPerPerson,
 } from "./tables.ts";
 import { combineOrders } from "./combine.ts";
+import { hasUnscalableAmounts, unscalableWarning } from "./recipe-health.ts";
 import { costOrders } from "./costing.ts";
 import { addDays, daysBetween, formatDate, parseISODate } from "./dates.ts";
 import { round1, roundForUnit, roundKg, roundL, roundUnits } from "./round.ts";
@@ -121,11 +122,17 @@ export function planEvent(input: EventInput): EventPlan {
     }
     const factor = (scale / recipe.serves) * appetite;
 
+    // A recipe whose amounts live in its ingredient names multiplies "1 ea" and
+    // produces a confidently wrong sheet. Say so rather than order from it.
+    const unscalable = hasUnscalableAmounts(recipe);
+    if (unscalable) warnings.push(unscalableWarning(recipe));
+
     // The same scaled numbers the order lines are built from, kept per dish so
     // a cook can see how much of the shop belongs to which pot.
     dishSheets.push({
       name: recipe.name,
       course: recipe.course ?? null,
+      unscalable,
       scaleNote: `written for ${recipe.serves} → ×${factor.toFixed(2)} for ${effectiveGuests} (incl. ${CREW_MEALS} crew) + ${Math.round(bufferPct * 100)}% buffer`,
       ingredients: recipe.ingredients
         .filter((i) => Number.isFinite(i.qty) && i.qty > 0)
