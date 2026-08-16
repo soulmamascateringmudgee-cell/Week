@@ -40,6 +40,7 @@ export default async function RootLayout({
                   <Link href="/prices">Prices</Link>
                   <Link href="/jobs">Saved jobs</Link>
                   {owner && <Link href="/admin">Who&rsquo;s allowed in</Link>}
+                  <Link href="/account">Account</Link>
                   <SignOutButton />
                 </>
               ) : (
@@ -49,6 +50,13 @@ export default async function RootLayout({
           </div>
         </header>
         <main className="wrap">{children}</main>
+        {/* Reachable from every page, signed in or not. Someone deciding
+            whether to type their recipes in shouldn't have to hunt for it. */}
+        <footer className="site">
+          <div className="wrap">
+            <Link href="/privacy">Your recipes are yours</Link>
+          </div>
+        </footer>
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { isAdmin } from "@/lib/access.ts";
+import { inviteEmail, sendEmail } from "@/lib/email.ts";
 import { createClient } from "@/lib/supabase/server.ts";
 
 /**
@@ -72,7 +73,32 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ error: "Couldn't add that invite." }, { status: 500 });
   }
-  return NextResponse.json({ email }, { status: 201 });
+
+  // They're on the list either way now. The email is what tells them, and a
+  // failure to send is reported rather than swallowed — an invite nobody has
+  // been told about is an invite that does nothing.
+  const signupUrl = new URL("/signup", new URL(request.url).origin);
+  signupUrl.searchParams.set("email", email);
+
+  const outcome = await sendEmail({
+    to: email,
+    replyTo: process.env.EMAIL_REPLY_TO,
+    ...inviteEmail({
+      signupUrl: signupUrl.toString(),
+      fromName: process.env.EMAIL_FROM_NAME ?? "Jessmyn",
+    }),
+  });
+
+  return NextResponse.json(
+    {
+      email,
+      emailed: outcome.sent,
+      // Only present when it didn't send, so the admin page can say what to
+      // do next instead of leaving her to guess whether they got it.
+      ...(outcome.sent ? {} : { emailProblem: outcome.reason, signupUrl: signupUrl.toString() }),
+    },
+    { status: 201 },
+  );
 }
 
 export async function DELETE(request: Request) {

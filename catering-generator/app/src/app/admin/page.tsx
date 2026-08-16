@@ -16,6 +16,13 @@ export default function AdminPage() {
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  // What happened to the invite email. Adding someone and telling them are two
+  // different things, and only the second one gets them in.
+  const [emailed, setEmailed] = useState<
+    | { state: "none" }
+    | { state: "sent"; to: string }
+    | { state: "failed"; to: string; reason: string; signupUrl: string }
+  >({ state: "none" });
 
   const load = useCallback(async () => {
     try {
@@ -51,6 +58,17 @@ export default function AdminPage() {
       if (!response.ok) {
         setError(body.error ?? "Couldn't add that invite.");
       } else {
+        const added = body.email as string;
+        setEmailed(
+          body.emailed
+            ? { state: "sent", to: added }
+            : {
+                state: "failed",
+                to: added,
+                reason: body.emailProblem ?? "The email didn't send.",
+                signupUrl: body.signupUrl ?? "",
+              },
+        );
         setEmail("");
         setNote("");
         setError("");
@@ -117,6 +135,24 @@ export default function AdminPage() {
           </div>
         </div>
       </form>
+
+      {emailed.state === "sent" && (
+        <p className="notice">
+          <strong>{emailed.to} is on the list and has been emailed</strong> a
+          link to set their own password. Nothing else for you to do.
+        </p>
+      )}
+
+      {emailed.state === "failed" && (
+        <p className="notice">
+          <strong>
+            {emailed.to} is on the list, but the email didn&rsquo;t send.
+          </strong>{" "}
+          {emailed.reason} They can still get in — send them this link yourself:
+          <br />
+          <code>{emailed.signupUrl}</code>
+        </p>
+      )}
 
       {error && (
         <p className="notice">

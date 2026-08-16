@@ -87,9 +87,27 @@ chicken thigh, 11.5 kg fish), so if a change moves that, you'll know.
 
 ## Accounts and saved jobs
 
-Sign-in is a magic link — the operator types an email, gets a link, and
-they're in. No passwords to reset, which matters when the buyer is a chef and
-not a computer person.
+Sign-in is a password, with a magic link as the fallback. Passwords came first
+because the link path depends on an email arriving inside an hour, from a
+sender that's rate-limited, into an inbox that may put it in junk — and none of
+that is any use at 6am when service starts at 7.
+
+**Setting up an account is self-serve.** Add someone at `/admin` and they get
+an email with a link to `/signup`, where they choose their own password and are
+signed in immediately. No confirmation link to click: the account is created
+already confirmed, because the invite list *is* the verification — Jessmyn
+typed that address in herself after speaking to the person, which is a stronger
+check than a link anyone with inbox access can press.
+
+That route (`/api/signup`) is the one place the app uses the Supabase secret
+key, held in `SUPABASE_SECRET_KEY`. It bypasses row-level security entirely, so
+it is server-only and used for nothing else. Without it set, `/signup` says so
+plainly and nobody can sign themselves up.
+
+Signed-in operators change their password at `/account`, which asks for the
+current one and actually checks it — Supabase doesn't require that on its own,
+and a laptop left open on a kitchen bench shouldn't be enough to lock the owner
+out of their own recipes.
 
 Every page except the landing page and login is gated, so the app is worth
 paying for: a buyer gets an account rather than a copy of the files.
@@ -116,9 +134,39 @@ you can never print a stale order list. Each job also takes a
 *what you actually used* note — the number to scale from next time, which
 beats every table in here.
 
-> Supabase's built-in email sending is rate-limited on the free tier (a handful
-> an hour) and sometimes lands in junk. Fine for the first few operators; wire
-> up a proper email sender before you have a queue of them.
+## Email
+
+Two separate senders, and it's worth knowing which is which.
+
+**Invite emails go out through Resend**, called directly from `src/lib/email.ts`
+over its REST API — no SDK, no dependency. Set `RESEND_API_KEY` and `EMAIL_FROM`
+(a verified sending domain) and adding someone at `/admin` emails them their
+signup link. Leave them unset and the invite still saves; the admin page says
+the email didn't send, gives the reason, and prints the link to send by hand.
+It never claims to have sent something it didn't.
+
+**Magic links and password resets go out through Supabase's own sender**, which
+on the free tier is capped at a couple an hour *across the whole project* and
+often lands in junk. Resend won't fix that on its own — the fix is pointing
+Supabase at Resend as custom SMTP:
+
+> Supabase dashboard → Project Settings → Authentication → SMTP Settings →
+> Enable Custom SMTP. Host `smtp.resend.com`, port `465`, username `resend`,
+> password = your Resend API key, sender = the same verified address as
+> `EMAIL_FROM`. The cap lifts as soon as it saves.
+
+Do this before more than a couple of operators are on the app, or the third
+person to ask for a link that hour silently gets nothing.
+
+## Privacy
+
+`/privacy` is a public page saying what's stored, who can read it, and how to
+get it back or deleted. It exists because asking a caterer to type their
+recipes into someone else's website is a real ask, and the outreach message
+makes a promise the page has to back up.
+
+Every claim on it is enforced by row-level security, not by the app being
+polite. **If that ever changes, change the page before the code.**
 
 ## What's not built yet
 
