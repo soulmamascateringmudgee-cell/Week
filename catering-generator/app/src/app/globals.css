@@ -579,6 +579,104 @@ ul.plain li {
   }
 }
 
+/* Dictation. The transcript box is deliberately prominent — it is the step
+   where a mishearing gets caught, and a cook who skips it ends up with four
+   of something instead of flour and salt. */
+.dictate textarea {
+  min-height: 90px;
+  font-size: 0.95rem;
+}
+
+/* The recording dot. Movement is the clearest signal that it is listening;
+   anyone who has turned motion down gets a steady dot, which still reads. */
+.rec {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #fff;
+  margin-right: 7px;
+  vertical-align: 1px;
+  animation: rec-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes rec-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rec {
+    animation: none;
+  }
+}
+
+/* Foldable result sections. A finished job is a page and a half of scrolling
+   otherwise, and the countdown — the part you need on the Thursday — is at
+   the bottom of it. Each heading carries its own size so a shut section still
+   says how much is inside. */
+.section {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+}
+
+.section > summary {
+  cursor: pointer;
+  padding: 16px 20px;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.section > summary:hover .section-title {
+  color: var(--accent);
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* A section that needs looking at before ordering — over budget, a passed
+   countdown step, dietaries to pack separately. Marked on the closed heading,
+   because that is where it has to be noticed. */
+.section.warn {
+  border-left: 3px solid var(--warn);
+}
+
+.section-body {
+  padding: 0 20px 20px;
+}
+
+.section-body > h3:first-child {
+  margin-top: 0;
+}
+
+/* The whole job in one line, above everything that folds. */
+.summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 26px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 14px;
+}
+
+.summary-strip .figure {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
 @media print {
   body {
     background: #fff;
@@ -601,5 +699,30 @@ ul.plain li {
   }
   h2 {
     break-after: avoid;
+  }
+  /* Sections are opened for printing by the beforeprint handler in
+     Section.tsx, not here — a CSS override of a closed <details> is not
+     reliable across browsers. These are only the paper cosmetics. */
+  .section {
+    border: none;
+    border-left: none;
+    margin-bottom: 8px;
+    break-inside: avoid;
+  }
+  .section > summary {
+    padding: 0;
+    list-style: none;
+  }
+  .section > summary::marker,
+  .section > summary::-webkit-details-marker {
+    display: none;
+  }
+  .section-body {
+    padding: 0;
+  }
+  .summary-strip {
+    border: none;
+    padding: 0;
+    gap: 20px;
   }
 }

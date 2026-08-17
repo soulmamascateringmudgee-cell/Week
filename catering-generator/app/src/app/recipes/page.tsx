@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import DictateRecipe from "@/components/DictateRecipe.tsx";
+import type { DictatedRecipe } from "@/components/DictateRecipe.tsx";
 import { COURSE_CHOICES } from "@/lib/options.ts";
 import { parseIngredients } from "@/lib/recipe-parse.ts";
 import type { Category, RecipeIngredient } from "@/lib/types.ts";
@@ -141,6 +143,28 @@ export default function RecipesPage() {
     } finally {
       setReadingPhoto(false);
     }
+  }
+
+  /**
+   * A recipe said out loud. The fields it fills are the same editable fields
+   * as everything else, and anything the reader was unsure about is named
+   * rather than smoothed over — a wrong number a cook trusts is worse than a
+   * gap they can see.
+   */
+  function readDictated(read: DictatedRecipe) {
+    if (!editingId && read.name) setName(read.name);
+    if (read.serves >= 1) setServes(read.serves);
+    setRows(read.ingredients);
+    if (read.method) setMethod(read.method);
+
+    const checks = [
+      `Read ${read.ingredients.length} ingredient${read.ingredients.length === 1 ? "" : "s"} from that`,
+      read.serves >= 1
+        ? `written for ${read.serves}`
+        : "you didn't say how many it serves, so set that yourself",
+      read.unclear.length > 0 ? `check: ${read.unclear.join(" · ")}` : "",
+    ].filter(Boolean);
+    setNote(`${checks.join(" · ")}. Check every amount before you save.`);
   }
 
   async function importFromLink() {
@@ -311,6 +335,8 @@ export default function RecipesPage() {
               />
             </div>
           </div>
+
+          <DictateRecipe onRead={readDictated} onNote={setNote} />
 
           <label htmlFor="recipe-photo" style={{ marginTop: 18 }}>
             Photograph a recipe
