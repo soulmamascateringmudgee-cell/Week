@@ -414,6 +414,11 @@ td.num {
   filter: none;
 }
 
+.tag.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
 .notice {
   border-left: 3px solid var(--warn);
   background: var(--warn-soft);

@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 
+import InvoiceReader from "@/components/InvoiceReader.tsx";
+import type { PriceChange } from "@/lib/price-change.ts";
+
 interface StoredPrice {
   id: string;
   item: string;
@@ -14,8 +17,17 @@ interface StoredPrice {
 
 const UNITS = ["kg", "L", "ea", "bunches", "punnets", "tins", "packets", "g", "ml"];
 
+interface PriceMove {
+  item: string;
+  change: PriceChange;
+  supplier: string | null;
+  when: string;
+}
+
 export default function PricesPage() {
   const [prices, setPrices] = useState<StoredPrice[]>([]);
+  const [moves, setMoves] = useState<PriceMove[]>([]);
+  const [note, setNote] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -38,6 +50,18 @@ export default function PricesPage() {
       setError("Couldn't reach the server.");
     } finally {
       setLoading(false);
+    }
+
+    // What's moved is a bonus on top of the price list. If it fails, the
+    // prices still load — losing the whole page over a sidebar would be daft.
+    try {
+      const response = await fetch("/api/prices/moves");
+      if (response.ok) {
+        const body = await response.json();
+        setMoves(body.moves as PriceMove[]);
+      }
+    } catch {
+      // Nothing to say. The list below is the page.
     }
   }, []);
 
@@ -84,6 +108,69 @@ export default function PricesPage() {
         &ldquo;bacon&rdquo; here covers the bacon in the sausage rolls and the
         bacon in the quiche.
       </p>
+
+      {note && (
+        <p className="notice">
+          <strong>{note}</strong>
+        </p>
+      )}
+
+      <InvoiceReader
+        current={prices.map(({ item, unit, price }) => ({ item, unit, price }))}
+        onApplied={(message) => {
+          setNote(message);
+          void load();
+        }}
+      />
+
+      {moves.length > 0 && (
+        <div className="card">
+          <h2>What&rsquo;s moved</h2>
+          <p className="basis">
+            Since the time before last on each of these. Only things with two
+            recorded prices can move — a first price is a starting point.
+          </p>
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Change</th>
+                  <th>When</th>
+                </tr>
+              </thead>
+              <tbody>
+                {moves.map((move) => (
+                  <tr key={move.item}>
+                    <td>
+                      {move.item}
+                      {move.supplier && (
+                        <div className="basis">{move.supplier}</div>
+                      )}
+                    </td>
+                    <td>
+                      <span
+                        className={
+                          move.change.kind === "up" ||
+                          move.change.kind === "unit-changed"
+                            ? "tag warn"
+                            : "tag"
+                        }
+                      >
+                        {move.change.kind === "unit-changed"
+                          ? "check"
+                          : move.change.kind}
+                      </span>
+                      <div className="basis">{move.change.note}</div>
+                    </td>
+                    <td className="basis">{move.when}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={add}>
         <div className="card">
