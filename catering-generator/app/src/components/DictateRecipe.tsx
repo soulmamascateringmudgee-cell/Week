@@ -35,12 +35,14 @@ export default function DictateRecipe({
   const {
     supported,
     listening,
+    finishing,
     error,
     transcript,
     interim,
     setTranscript,
     start,
     stop,
+    cancel,
     reset,
   } = useDictation();
   const [busy, setBusy] = useState(false);
@@ -93,16 +95,25 @@ export default function DictateRecipe({
       </label>
 
       <div className="actions" style={{ marginTop: 0, marginBottom: 10 }}>
-        {listening ? (
+        {listening && (
           <button type="button" onClick={stop}>
             <span className="rec" aria-hidden="true" /> Stop
           </button>
-        ) : (
+        )}
+        {/* "Finishing" is a real state, not a gap. The last phrase is often
+            still coming back from the recogniser, and saying so beats a button
+            that looks like it ignored the tap. */}
+        {finishing && (
+          <button type="button" onClick={cancel}>
+            Finishing… tap to stop now
+          </button>
+        )}
+        {!listening && !finishing && (
           <button type="button" onClick={start} disabled={busy}>
             {transcript ? "Keep talking" : "Start talking"}
           </button>
         )}
-        {transcript && !listening && (
+        {transcript && !listening && !finishing && (
           <button
             type="button"
             className="linklike"
@@ -121,12 +132,16 @@ export default function DictateRecipe({
         </p>
       )}
 
+      {finishing && (
+        <p className="basis">Catching the last bit — one second.</p>
+      )}
+
       {(transcript || interim) && (
         <textarea
           id="dictation"
           value={transcript + (interim ? ` ${interim}` : "")}
           onChange={(e) => setTranscript(e.target.value)}
-          readOnly={listening}
+          readOnly={listening || finishing}
           placeholder="What you say appears here…"
         />
       )}
@@ -137,7 +152,7 @@ export default function DictateRecipe({
         </p>
       )}
 
-      {transcript && !listening && (
+      {transcript && !listening && !finishing && (
         <div className="actions">
           <button type="button" onClick={() => void read()} disabled={busy}>
             {busy ? "Reading it…" : "Turn this into a recipe"}

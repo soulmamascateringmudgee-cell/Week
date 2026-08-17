@@ -10,8 +10,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * costs nothing and needs no second vendor.
  *
  * It is not available everywhere — Chrome and Safari have it, Firefox does not
- * — so `supported` is part of the contract rather than an afterthought. A
- * caller that ignores it shows a mic button that does nothing.
+ * — so `supported` is part of the contract rather than an afterthought.
+ *
+ * Stopping is the fiddly part and most of this file is about it. `stop()` on
+ * the Web Speech API is the *polite* stop: it asks the recogniser to finish
+ * and hand back the last phrase, and only then ends. Chrome's recognition is
+ * server-backed, so that round trip can stall — and while it stalls the
+ * microphone stays live with nothing to force it shut. So:
+ *
+ *   - "finishing" is a real state, not a gap. Tapping stop shows that the last
+ *     phrase is still coming in, instead of looking like it ignored you.
+ *   - A watchdog aborts outright if the polite stop hasn't landed in a couple
+ *     of seconds. A lost final word beats a microphone that won't switch off.
+ *   - Starting always tears the previous recogniser down first. Two taps used
+ *     to leave one running with nothing holding a reference to it — still on
+ *     the mic, still writing into the box.
  */
 
 /**
@@ -57,6 +70,9 @@ function getConstructor(): SpeechRecognitionCtor | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
+/** How long to wait for a polite stop before pulling the plug. */
+const STOP_TIMEOUT_MS = 2500;
+
 /** Why dictation stopped, in words a cook can act on. */
 const PROBLEMS: Record<string, string> = {
   "not-allowed":
@@ -70,11 +86,13 @@ const PROBLEMS: Record<string, string> = {
   "no-speech": "Didn't catch anything. Tap it again and speak up.",
 };
 
+export type DictationState = "idle" | "listening" | "finishing";
+
 export function useDictation() {
   // Read once on mount: `supported` must be false on the server and on the
-  // first client render, or the button flickers in and out during hydration.
+  // first client render, or the button flickers during hydration.
   const [supported, setSupported] = useState(false);
-  const [listening, setListening] = useState(false);
+  const [state, setState] = useState<DictationState>("idle");
   const [error, setError] = useState("");
   /** Everything recognised so far this session, as final phrases land. */
   const [transcript, setTranscript] = useState("");
@@ -82,24 +100,91 @@ export function useDictation() {
   const [interim, setInterim] = useState("");
 
   const recognition = useRef<SpeechRecognitionLike | null>(null);
+  const watchdog = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearWatchdog = useCallback(() => {
+    if (watchdog.current !== null) {
+      clearTimeout(watchdog.current);
+      watchdog.current = null;
+    }
+  }, []);
+
+  /**
+   * Pull the plug on whatever is running. Handlers come off first so a
+   * recogniser that is mid-flight can't write into state on its way out —
+   * that was the other half of "it wouldn't stop": text still arriving after
+   * the button said it had stopped.
+   */
+  const teardown = useCallback(() => {
+    clearWatchdog();
+    const engine = recognition.current;
+    recognition.current = null;
+    if (!engine) return;
+    engine.onresult = null;
+    engine.onerror = null;
+    engine.onend = null;
+    try {
+      engine.abort();
+    } catch {
+      // Already dead. Nothing to do — the handlers are off either way.
+    }
+  }, [clearWatchdog]);
 
   useEffect(() => {
     setSupported(getConstructor() !== null);
-    return () => {
-      // Leaving the page mid-sentence must release the microphone.
-      recognition.current?.abort();
-      recognition.current = null;
-    };
-  }, []);
+    // Leaving the page mid-sentence must release the microphone.
+    return teardown;
+  }, [teardown]);
 
   const stop = useCallback(() => {
-    recognition.current?.stop();
-    setListening(false);
-  }, []);
+    const engine = recognition.current;
+    if (!engine) {
+      setState("idle");
+      return;
+    }
+
+    // Ask politely first: the last phrase is often still in flight, and it's
+    // usually an ingredient.
+    setState("finishing");
+    try {
+      engine.stop();
+    } catch {
+      teardown();
+      setState("idle");
+      setInterim("");
+      return;
+    }
+
+    clearWatchdog();
+    watchdog.current = setTimeout(() => {
+      // The polite stop never landed. Losing the last word is a far smaller
+      // problem than a microphone that stays on.
+      teardown();
+      setState("idle");
+      setInterim("");
+    }, STOP_TIMEOUT_MS);
+  }, [clearWatchdog, teardown]);
+
+  /**
+   * Kill it now, keeping whatever has already been transcribed.
+   *
+   * The escape hatch behind the polite stop: a second tap always ends it
+   * immediately. Nobody should ever be left watching a button and wondering
+   * whether the microphone is still on.
+   */
+  const cancel = useCallback(() => {
+    teardown();
+    setState("idle");
+    setInterim("");
+  }, [teardown]);
 
   const start = useCallback(() => {
     const Ctor = getConstructor();
     if (!Ctor) return;
+
+    // Whatever was running goes first. Without this a second tap left the old
+    // recogniser alive on the microphone with nothing able to reach it.
+    teardown();
 
     setError("");
     setInterim("");
@@ -114,6 +199,8 @@ export function useDictation() {
     engine.interimResults = true;
 
     engine.onresult = (event) => {
+      // A result from a recogniser we've already replaced is not ours.
+      if (recognition.current !== engine) return;
       let settled = "";
       let pending = "";
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
@@ -122,50 +209,63 @@ export function useDictation() {
         else pending += result[0].transcript;
       }
       if (settled) {
-        setTranscript((current) => (current ? `${current} ${settled.trim()}` : settled.trim()));
+        setTranscript((current) =>
+          current ? `${current} ${settled.trim()}` : settled.trim(),
+        );
       }
       setInterim(pending);
     };
 
     engine.onerror = (event) => {
+      if (recognition.current !== engine) return;
       // "aborted" is what a deliberate stop looks like — not a problem.
       if (event.error === "aborted") return;
       setError(PROBLEMS[event.error] ?? "Dictation stopped unexpectedly.");
-      setListening(false);
+      clearWatchdog();
+      setState("idle");
+      setInterim("");
     };
 
     engine.onend = () => {
-      setListening(false);
+      if (recognition.current !== engine) return;
+      clearWatchdog();
+      recognition.current = null;
+      setState("idle");
       setInterim("");
     };
 
     recognition.current = engine;
     try {
       engine.start();
-      setListening(true);
+      setState("listening");
     } catch {
       // Chrome throws if start() is called while already running.
-      setError("Dictation is already running.");
+      teardown();
+      setState("idle");
+      setError("Dictation wouldn't start. Reload the page and try again.");
     }
-  }, []);
+  }, [clearWatchdog, teardown]);
 
   const reset = useCallback(() => {
-    recognition.current?.abort();
-    setListening(false);
+    teardown();
+    setState("idle");
     setTranscript("");
     setInterim("");
     setError("");
-  }, []);
+  }, [teardown]);
 
   return {
     supported,
-    listening,
+    state,
+    listening: state === "listening",
+    finishing: state === "finishing",
     error,
     transcript,
     interim,
     setTranscript,
     start,
     stop,
+    cancel,
     reset,
   };
 }
