@@ -1,5 +1,6 @@
 "use client";
 
+import Section from "@/components/Section.tsx";
 import { DISCLAIMER_TEXT } from "@/lib/options.ts";
 import type { Category, EventPlan, OrderLine } from "@/lib/types.ts";
 
@@ -22,7 +23,26 @@ function group(orders: OrderLine[]): [Category, OrderLine[]][] {
   ).filter(([, lines]) => lines.length > 0);
 }
 
+const count = (n: number, one: string, many = `${one}s`) =>
+  `${n} ${n === 1 ? one : many}`;
+
+/**
+ * A finished job, as foldable sections.
+ *
+ * The order sheet is the reason the page exists, so it's the one thing open
+ * when the results land. Everything else — costing, packaging, countdown,
+ * risks — folds, with its size on the heading so a shut section still says
+ * how much is in it.
+ *
+ * The two things that never fold are the warnings and the summary strip. A
+ * warning you have to open a drawer to find is a warning that gets missed, and
+ * the strip is the whole job in one line: headcount, cost, where it sits
+ * against the budget.
+ */
 export default function EventResult({ plan }: { plan: EventPlan }) {
+  const grouped = group(plan.orders);
+  const costing = plan.costing;
+
   return (
     <section>
       {plan.warnings.map((warning) => (
@@ -31,111 +51,36 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
         </p>
       ))}
 
-      {plan.costing && (
-        <div className="card">
-          <h2>Food cost</h2>
-
-          <p className="basis">
-            ${plan.costing.total.toFixed(2)} across the lines that have a price
-            — <strong>${plan.costing.perHead.toFixed(2)} a head</strong>
-            {plan.costing.budget !== undefined && (
-              <>
-                {" "}
-                against a ${plan.costing.budget.toFixed(2)} budget ($
-                {plan.costing.budgetPerHead?.toFixed(2)} a head)
-              </>
-            )}
-            .
-          </p>
-
-          {plan.costing.verdict === "over" && (
-            <p className="notice">
-              <strong>
-                Over budget by $
-                {(plan.costing.total - (plan.costing.budget ?? 0)).toFixed(2)}.
-              </strong>{" "}
-              The biggest lines are listed below — that&rsquo;s where the money
-              is, not in the garnish.
-            </p>
-          )}
-
-          {plan.costing.verdict === "under" && (
-            <p className="basis">
-              Inside the budget by $
-              {((plan.costing.budget ?? 0) - plan.costing.total).toFixed(2)}.
-              Every ingredient on this order has a price, so that&rsquo;s the
-              whole food cost — not counting packaging, gas, or your time.
-            </p>
-          )}
-
-          {plan.costing.verdict === "incomplete" && (
-            <p className="notice">
-              <strong>This is a partial total.</strong>{" "}
-              {plan.costing.unpriced.length > 0 && (
-                <>
-                  {plan.costing.unpriced.length} ingredient
-                  {plan.costing.unpriced.length === 1 ? " has" : "s have"} no
-                  price on file.{" "}
-                </>
-              )}
-              Don&rsquo;t quote off it until they&rsquo;re priced — a number
-              that leaves things out is worse than no number.
-            </p>
-          )}
-
-          {plan.costing.priced.length > 0 && (
-            <div className="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th style={{ textAlign: "right" }}>Cost</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {plan.costing.priced.map((line) => (
-                    <tr key={line.item}>
-                      <td>
-                        {line.item}
-                        <div className="basis">{line.basis}</div>
-                      </td>
-                      <td className="num">${line.cost.toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {plan.costing.unpriced.length > 0 && (
-            <>
-              <h3>No price on file</h3>
-              <p className="basis">
-                Add these on the Prices page and the total becomes the real one.
-              </p>
-              <ul className="plain">
-                {plan.costing.unpriced.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </>
-          )}
-
-          {plan.costing.mismatched.length > 0 && (
-            <>
-              <h3>Priced in a unit that doesn&rsquo;t match</h3>
-              <ul className="plain">
-                {plan.costing.mismatched.map((note) => (
-                  <li key={note}>{note}</li>
-                ))}
-              </ul>
-            </>
-          )}
+      {/* The whole job in one line, above everything that folds. */}
+      <div className="summary-strip">
+        <div>
+          <span className="figure">{plan.effectiveGuests}</span>
+          <span className="basis">
+            to feed — {plan.guests} guests + {plan.crewMeals} crew
+          </span>
         </div>
-      )}
+        <div>
+          <span className="figure">{count(plan.orders.length, "line")}</span>
+          <span className="basis">to order</span>
+        </div>
+        {costing && (
+          <div>
+            <span className="figure">${costing.perHead.toFixed(2)}</span>
+            <span className="basis">
+              a head
+              {costing.verdict === "over" && " · over budget"}
+              {costing.verdict === "under" && " · inside budget"}
+              {costing.verdict === "incomplete" && " · partial"}
+            </span>
+          </div>
+        )}
+      </div>
 
-      <div className="card">
-        <h2>The order</h2>
+      <Section
+        title="The order"
+        count={count(plan.orders.length, "line")}
+        open
+      >
         <p className="basis">
           {plan.guests} guests + {plan.crewMeals} crew ={" "}
           {plan.effectiveGuests}, buffer {Math.round(plan.bufferPct * 100)}%.{" "}
@@ -143,7 +88,7 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
           {plan.servedPerProtein} g each.
         </p>
 
-        {group(plan.orders).map(([category, lines]) => (
+        {grouped.map(([category, lines]) => (
           <div key={category}>
             <h3>{category}</h3>
             <div className="table-scroll">
@@ -174,107 +119,155 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
             </div>
           </div>
         ))}
-      </div>
+      </Section>
+
+      {costing && (
+        <Section
+          title="Food cost"
+          count={
+            costing.verdict === "incomplete"
+              ? `$${costing.total.toFixed(2)} — partial`
+              : `$${costing.total.toFixed(2)}`
+          }
+          tone={
+            costing.verdict === "over" || costing.verdict === "incomplete"
+              ? "warn"
+              : undefined
+          }
+        >
+          <p className="basis">
+            ${costing.total.toFixed(2)} across the lines that have a price —{" "}
+            <strong>${costing.perHead.toFixed(2)} a head</strong>
+            {costing.budget !== undefined && (
+              <>
+                {" "}
+                against a ${costing.budget.toFixed(2)} budget ($
+                {costing.budgetPerHead?.toFixed(2)} a head)
+              </>
+            )}
+            .
+          </p>
+
+          {costing.verdict === "over" && (
+            <p className="notice">
+              <strong>
+                Over budget by $
+                {(costing.total - (costing.budget ?? 0)).toFixed(2)}.
+              </strong>{" "}
+              The biggest lines are listed below — that&rsquo;s where the money
+              is, not in the garnish.
+            </p>
+          )}
+
+          {costing.verdict === "under" && (
+            <p className="basis">
+              Inside the budget by $
+              {((costing.budget ?? 0) - costing.total).toFixed(2)}. Every
+              ingredient on this order has a price, so that&rsquo;s the whole
+              food cost — not counting packaging, gas, or your time.
+            </p>
+          )}
+
+          {costing.verdict === "incomplete" && (
+            <p className="notice">
+              <strong>This is a partial total.</strong>{" "}
+              {costing.unpriced.length > 0 && (
+                <>
+                  {costing.unpriced.length} ingredient
+                  {costing.unpriced.length === 1 ? " has" : "s have"} no price on
+                  file.{" "}
+                </>
+              )}
+              Don&rsquo;t quote off it until they&rsquo;re priced — a number that
+              leaves things out is worse than no number.
+            </p>
+          )}
+
+          {costing.priced.length > 0 && (
+            <div className="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th style={{ textAlign: "right" }}>Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {costing.priced.map((line) => (
+                    <tr key={line.item}>
+                      <td>
+                        {line.item}
+                        <div className="basis">{line.basis}</div>
+                      </td>
+                      <td className="num">${line.cost.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {costing.unpriced.length > 0 && (
+            <>
+              <h3>No price on file</h3>
+              <p className="basis">
+                Add these on the Prices page and the total becomes the real one.
+              </p>
+              <ul className="plain">
+                {costing.unpriced.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {costing.mismatched.length > 0 && (
+            <>
+              <h3>Priced in a unit that doesn&rsquo;t match</h3>
+              <ul className="plain">
+                {costing.mismatched.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </Section>
+      )}
 
       {plan.dietaryNotes.length > 0 && (
-        <div className="card">
-          <h2>Dietary items — order and pack separately</h2>
+        <Section
+          title="Dietary — order and pack separately"
+          count={count(plan.dietaryNotes.length, "item")}
+          tone="warn"
+        >
           <ul className="plain">
             {plan.dietaryNotes.map((note) => (
               <li key={note}>{note}</li>
             ))}
           </ul>
-        </div>
+        </Section>
       )}
 
-      <div className="card">
-        <h2>Packaging and disposables</h2>
+      <Section
+        title="Packaging and disposables"
+        count={count(plan.packaging.length, "item")}
+      >
         <ul className="plain">
           {plan.packaging.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
-      </div>
+      </Section>
 
-      {plan.dishSheets.length > 0 && (
-        <div className="card">
-          <h2>Recipe sheets</h2>
-          <p className="note">
-            Each dish at this job&rsquo;s size. The order sheet says how much to
-            buy in total; this says how much goes into which pot.
-          </p>
-          {plan.dishSheets.map((sheet) => (
-            <div className="sheet" key={sheet.name}>
-              <div className="when">
-                {sheet.name}
-                {sheet.course && <span className="tag">{sheet.course}</span>}
-              </div>
-              <div className="date">{sheet.scaleNote}</div>
-              {sheet.unscalable && (
-                <p className="broken">
-                  These amounts are wrong. The quantities are written inside the
-                  ingredient names, so every line scales as &ldquo;1 ea&rdquo;.
-                  Open the dish and move the amounts into the Amount and Unit
-                  columns, then build this list again.
-                </p>
-              )}
-              <table className="lines">
-                <tbody>
-                  {sheet.ingredients.map((line) => (
-                    <tr key={line.item}>
-                      <td>{line.item}</td>
-                      <td className="num">
-                        {sheet.unscalable ? "—" : `${line.qty} ${line.unit}`}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {sheet.method && <p className="method">{sheet.method}</p>}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {plan.prep.length > 0 && (
-        <div className="card">
-          <h2>Prep list</h2>
-          <p className="note">
-            Worked out from the methods on the dishes you ticked. Anything with
-            no timing in its method is not on here.
-          </p>
-          {plan.prep.map((day) => (
-            <div
-              className={day.overdue ? "step overdue" : "step"}
-              key={day.daysOut}
-            >
-              <div className="when">
-                {day.label}
-                {day.overdue && <span className="tag">passed</span>}
-              </div>
-              <div className="date">{day.date}</div>
-              <ul className="plain">
-                {day.tasks.map((task) => (
-                  <li key={`${task.dish}-${task.task}`}>
-                    {task.task}
-                    <span className="because"> — {task.because}</span>
-                    {task.ingredients.length > 0 && (
-                      <div className="amounts">
-                        {task.ingredients
-                          .map((i) => `${i.qty} ${i.unit} ${i.item}`)
-                          .join(" · ")}
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="card">
-        <h2>Countdown</h2>
+      <Section
+        title="Countdown"
+        count={
+          plan.countdown.some((step) => step.overdue)
+            ? `${count(plan.countdown.length, "step")} · some passed`
+            : count(plan.countdown.length, "step")
+        }
+        tone={plan.countdown.some((step) => step.overdue) ? "warn" : undefined}
+      >
         {plan.countdown.map((step) => (
           <div
             className={step.overdue ? "step overdue" : "step"}
@@ -292,26 +285,27 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
             </ul>
           </div>
         ))}
-      </div>
+      </Section>
 
-      <div className="card">
-        <h2>Three risks on this job</h2>
+      <Section title="Three risks on this job" count={count(plan.risks.length, "risk")}>
         {plan.risks.map((risk) => (
           <div className="risk" key={risk.risk}>
             <div className="what">{risk.risk}</div>
             <div className="fix">{risk.fix}</div>
           </div>
         ))}
-      </div>
+      </Section>
 
-      <div className="card">
-        <h2>What this still needs to know</h2>
+      <Section
+        title="What this still needs to know"
+        count={count(plan.missing.length, "thing")}
+      >
         <ul className="plain">
           {plan.missing.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
-      </div>
+      </Section>
 
       <p className="disclaimer">{DISCLAIMER_TEXT}</p>
     </section>
