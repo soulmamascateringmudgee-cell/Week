@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import Link from "next/link";
 
+import NavLink from "@/components/NavLink.tsx";
 import SignOutButton from "@/components/SignOutButton.tsx";
 import { isAdmin } from "@/lib/access.ts";
 import { createClient } from "@/lib/supabase/server.ts";
@@ -69,17 +70,19 @@ export default async function RootLayout({
             <nav className="modes">
               {user ? (
                 <>
-                  <Link href="/event">Event</Link>
-                  <Link href="/service">Weekly service</Link>
-                  <Link href="/recipes">Recipes</Link>
-                  <Link href="/prices">Prices</Link>
-                  <Link href="/jobs">Saved jobs</Link>
-                  {owner && <Link href="/admin">Who&rsquo;s allowed in</Link>}
-                  <Link href="/account">Account</Link>
+                  <NavLink href="/event">Event</NavLink>
+                  <NavLink href="/service">Weekly service</NavLink>
+                  <NavLink href="/recipes">Recipes</NavLink>
+                  <NavLink href="/prices">Prices</NavLink>
+                  <NavLink href="/jobs">Saved jobs</NavLink>
+                  {owner && (
+                    <NavLink href="/admin">Who&rsquo;s allowed in</NavLink>
+                  )}
+                  <NavLink href="/account">Account</NavLink>
                   <SignOutButton />
                 </>
               ) : (
-                <Link href="/login">Sign in</Link>
+                <NavLink href="/login">Sign in</NavLink>
               )}
             </nav>
           </div>

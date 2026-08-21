@@ -22,44 +22,56 @@
  */
 
 :root {
-  /* Ink. Warm near-black, never pure #000 — it's harsh on cream. */
-  --ink: #221f1a;
-  --ink-soft: #46413a;
-  --muted: #6f6a61;
+  /* Charcoal, warm grey. Never pure #000 — it's harsh on cream. */
+  --ink: #292b29;
+  --ink-soft: #4a4d49;
+  --muted: #706d67;
 
-  /* Paper and rules. */
-  --paper: #f8f5ef;
-  --paper-warm: #fdf8ee;
-  --card: #fffdfa;
-  --line: #e6dfd3;
-  --line-strong: #d5cbb9;
+  /* Warm cream, soft ivory, soft sage-grey rules. */
+  --paper: #f7f3ec;
+  --paper-warm: #fdfbf5;
+  --card: #fffcf7;
+  --line: #d9ddd5;
+  --line-strong: #c2c8bd;
 
-  /* Terracotta. The doing colour: buttons, links, the active tab. The dark
-     one is for text and the bright one for fills, so text on paper always
-     clears contrast and a filled button still looks alive. */
-  --accent: #8f3a12;
-  --accent-bright: #b04a17;
-  --accent-soft: #f7ece3;
+  /* Deep sage — the doing colour. Buttons, links, focus, the active tab.
+     Clears 5.3:1 on cream as text and 5.8:1 white-on-sage as a button, so
+     it carries both jobs. Hover goes darker rather than lighter, because a
+     mid-tone green loses contrast as it brightens. */
+  --primary: #526b5a;
+  --primary-bright: #43594a;
+  --primary-soft: #eaefe7;
 
-  /* Eucalypt. The good-news colour: a price that fell, something saved. */
-  --sage: #4a5c40;
-  --sage-soft: #eef1e9;
+  /* Muted terracotta — the accent. Labels, tags, a rule that draws the eye.
+     Two values on purpose: the brief's #c9785c is lovely on a fill but only
+     reaches 3.0:1 as text on cream, well under the 4.5:1 a small label
+     needs. So the soft one is used where terracotta is *seen* — fills,
+     borders, marks — and the deep one wherever it is *read*. Same colour,
+     legible in a kitchen at arm's length. */
+  --accent: #c9785c;
+  --accent-ink: #a85436;
+  --accent-soft: #f9ece5;
+
+  /* The good-news colour: a price that fell, something saved. Sits in the
+     sage family, which is what "this went your way" should look like here. */
+  --good: #46644a;
+  --good-soft: #e8efe6;
 
   /* Wattle. Notice-worthy but not wrong: assumptions, things to check. */
   --gold: #7d6416;
-  --gold-soft: #f8f1dc;
+  --gold-soft: #f6efd9;
 
   /* The one that means look at this before you order. */
   --warn: #99281f;
-  --warn-soft: #fbeceb;
+  --warn-soft: #fbebe9;
 
   --radius-sm: 8px;
   --radius: 12px;
   --radius-lg: 18px;
 
-  --shadow-sm: 0 1px 2px rgba(60, 45, 30, 0.05), 0 1px 3px rgba(60, 45, 30, 0.04);
-  --shadow-md: 0 2px 4px rgba(60, 45, 30, 0.04), 0 8px 20px rgba(60, 45, 30, 0.07);
-  --shadow-lg: 0 4px 8px rgba(60, 45, 30, 0.05), 0 16px 40px rgba(60, 45, 30, 0.1);
+  --shadow-sm: 0 1px 2px rgba(45, 52, 44, 0.05), 0 1px 3px rgba(45, 52, 44, 0.04);
+  --shadow-md: 0 2px 4px rgba(45, 52, 44, 0.04), 0 8px 20px rgba(45, 52, 44, 0.07);
+  --shadow-lg: 0 4px 8px rgba(45, 52, 44, 0.05), 0 16px 40px rgba(45, 52, 44, 0.1);
 
   --font-display-stack: var(--font-display), ui-serif, Georgia, "Iowan Old Style",
     "Palatino Linotype", serif;
@@ -107,8 +119,8 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(900px 500px at 15% -120px, #fdf3e2 0%, transparent 65%),
-    radial-gradient(900px 500px at 90% -160px, #f2f3ea 0%, transparent 60%);
+    radial-gradient(900px 500px at 15% -120px, #fdf6e9 0%, transparent 65%),
+    radial-gradient(900px 500px at 90% -160px, #eef2ea 0%, transparent 60%);
 }
 
 .wrap {
@@ -124,7 +136,7 @@ header.site {
   top: 0;
   z-index: 20;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 253, 250, 0.88);
+  background: rgba(255, 252, 247, 0.88);
   backdrop-filter: saturate(180%) blur(10px);
   -webkit-backdrop-filter: saturate(180%) blur(10px);
 }
@@ -142,17 +154,21 @@ header.site a {
   text-decoration: none;
 }
 
-.brand {
+/* Scoped to beat `header.site a { color: inherit }` above, which is a more
+   specific selector than a bare `.brand` and was quietly winning — the name
+   rendered charcoal while the stylesheet said sage. */
+header.site a.brand {
   font-family: var(--font-display-stack);
   font-size: 1.16rem;
   font-weight: 600;
   letter-spacing: -0.015em;
   font-variation-settings: "SOFT" 30;
   white-space: nowrap;
+  color: var(--primary);
 }
 
-.brand:hover {
-  color: var(--accent);
+header.site a.brand:hover {
+  color: var(--primary-bright);
 }
 
 /* The nav scrolls sideways instead of wrapping. Seven links across a phone
@@ -191,8 +207,16 @@ nav.modes button.linklike {
 
 nav.modes a:hover,
 nav.modes button.linklike:hover {
-  color: var(--accent);
-  background: var(--accent-soft);
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+/* Where you are. Set from the URL in NavLink, so it survives a reload and a
+   link opened in a new tab — a highlight held in component state would not. */
+nav.modes a.active {
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-weight: 600;
 }
 
 footer.site {
@@ -211,7 +235,7 @@ footer.site a {
 }
 
 footer.site a:hover {
-  color: var(--accent);
+  color: var(--primary);
 }
 
 /* Long URLs — a signup link an admin needs to copy — must wrap on a phone
@@ -277,7 +301,7 @@ p.lede {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 /* ---- Surfaces ---------------------------------------------------------- */
@@ -355,15 +379,15 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
 }
 
 /* Keyboard users still get a visible ring on everything else. */
 a:focus-visible,
 button:focus-visible,
 summary:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
@@ -389,13 +413,13 @@ summary:focus-visible {
 }
 
 .check:hover {
-  background: var(--accent-soft);
+  background: var(--primary-soft);
 }
 
 .check input {
   width: auto;
   margin: 0;
-  accent-color: var(--accent);
+  accent-color: var(--primary);
   width: 17px;
   height: 17px;
   flex: none;
@@ -409,8 +433,8 @@ button {
   font-size: 0.95rem;
   padding: 11px 20px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--accent);
-  background: var(--accent);
+  border: 1px solid var(--primary);
+  background: var(--primary);
   color: #fff;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
@@ -419,8 +443,8 @@ button {
 }
 
 button:hover:not(:disabled) {
-  background: var(--accent-bright);
-  border-color: var(--accent-bright);
+  background: var(--primary-bright);
+  border-color: var(--primary-bright);
   box-shadow: var(--shadow-md);
 }
 
@@ -437,17 +461,20 @@ button:disabled {
 
 button.secondary {
   background: transparent;
-  color: var(--accent);
+  color: var(--primary);
   box-shadow: none;
 }
 
 button.secondary:hover:not(:disabled) {
-  background: var(--accent-soft);
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
   box-shadow: none;
 }
 
+/* Warm grey clears AA on cream by a hair and loses it on any tinted panel —
+   "Clear all" sits on the pale sage chosen-dishes box and came out at 4.4:1.
+   These are controls, not captions, so they take the darker ink. */
 button.linklike {
   background: none;
   border: none;
@@ -455,14 +482,14 @@ button.linklike {
   font: inherit;
   font-size: 0.92rem;
   font-weight: 400;
-  color: var(--muted);
+  color: var(--ink-soft);
   cursor: pointer;
   box-shadow: none;
 }
 
 button.linklike:hover {
   background: none;
-  color: var(--accent);
+  color: var(--primary);
   box-shadow: none;
 }
 
@@ -479,8 +506,8 @@ a.btn {
   font-size: 0.95rem;
   padding: 11px 20px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--accent);
-  background: var(--accent);
+  border: 1px solid var(--primary);
+  background: var(--primary);
   color: #fff;
   text-decoration: none;
   cursor: pointer;
@@ -489,21 +516,21 @@ a.btn {
 }
 
 a.btn:hover {
-  background: var(--accent-bright);
-  border-color: var(--accent-bright);
+  background: var(--primary-bright);
+  border-color: var(--primary-bright);
   color: #fff;
   box-shadow: var(--shadow-md);
 }
 
 a.btn.secondary {
   background: transparent;
-  color: var(--accent);
+  color: var(--primary);
   box-shadow: none;
 }
 
 a.btn.secondary:hover {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--primary-soft);
+  color: var(--primary);
   box-shadow: none;
 }
 
@@ -580,7 +607,7 @@ td.num {
   padding: 3px 8px;
   border-radius: 999px;
   background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--accent-ink);
   border: 1px solid transparent;
   margin-left: 6px;
   vertical-align: 1px;
@@ -593,8 +620,8 @@ td.num {
 }
 
 .tag.good {
-  background: var(--sage-soft);
-  color: var(--sage);
+  background: var(--good-soft);
+  color: var(--good);
 }
 
 .tag.check {
@@ -637,9 +664,9 @@ td.num {
 }
 
 .notice.ok {
-  border-left-color: var(--sage);
-  background: var(--sage-soft);
-  color: var(--sage);
+  border-left-color: var(--good);
+  background: var(--good-soft);
+  color: var(--good);
 }
 
 /* ---- Recipe picker ------------------------------------------------------
@@ -698,11 +725,11 @@ td.num {
 }
 
 .courses summary:hover {
-  color: var(--accent);
+  color: var(--primary);
 }
 
 .courses summary:hover::before {
-  border-color: var(--accent);
+  border-color: var(--primary);
 }
 
 .courses details > .checks {
@@ -710,7 +737,7 @@ td.num {
 }
 
 .chosen {
-  background: var(--accent-soft);
+  background: var(--primary-soft);
   border: 1px solid #eddfd2;
   border-radius: var(--radius-sm);
   padding: 13px 15px;
@@ -750,8 +777,8 @@ td.num {
 
 .chip:hover:not(:disabled) {
   background: #fff;
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--primary);
+  color: var(--primary);
   box-shadow: none;
 }
 
@@ -930,7 +957,7 @@ ul.plain li {
 
 .choice:hover {
   transform: translateY(-3px);
-  border-color: var(--accent);
+  border-color: var(--primary);
   box-shadow: var(--shadow-lg);
 }
 
@@ -951,18 +978,51 @@ ul.plain li {
 
 /* The arrow only moves on hover, so the card reads as a thing you press
    without needing a button inside a link. */
+/*
+ * The two calls to action, drawn as buttons rather than links with arrows.
+ *
+ * They're <span>s inside the card's <a>, not <button>s — a button nested in a
+ * link is invalid HTML and phones disagree about which one gets the tap. The
+ * whole card is the target; these just say so.
+ *
+ * One-off events are the common case, so that one is solid. The weekly one is
+ * outlined in the same sage: two filled buttons in different colours read as
+ * a decision between equals, which isn't what this is.
+ */
 .choice .go {
   display: inline-flex;
+  align-self: flex-start;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   /* Not flexible — the rule above matches this span too, and two growing
-     items split the slack between them, which left the two cards' arrows
+     items split the slack between them, which left the two cards' buttons
      sitting at different heights. Only the description stretches. */
   flex: none;
-  margin-top: 16px;
+  margin-top: 20px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #fff;
   font-size: 0.88rem;
   font-weight: 600;
-  color: var(--accent);
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+
+.choice:hover .go {
+  background: var(--primary-bright);
+  border-color: var(--primary-bright);
+}
+
+.choice .go.ghost {
+  background: transparent;
+  color: var(--primary);
+}
+
+.choice:hover .go.ghost {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .choice .go::after {
@@ -1133,7 +1193,7 @@ ul.plain li {
 }
 
 .section > summary:hover .section-title {
-  color: var(--accent);
+  color: var(--primary);
 }
 
 /* Sits at the right-hand end of the heading and turns over when the section
@@ -1156,7 +1216,7 @@ ul.plain li {
 }
 
 .section > summary:hover::after {
-  border-color: var(--accent);
+  border-color: var(--primary);
 }
 
 .section-title {
@@ -1209,7 +1269,7 @@ ul.plain li {
 }
 
 .subsection > summary:hover .subsection-title {
-  color: var(--accent);
+  color: var(--primary);
 }
 
 .subsection-title {
@@ -1238,7 +1298,7 @@ ul.plain li {
 }
 
 .subsection > summary:hover::after {
-  border-color: var(--accent);
+  border-color: var(--primary);
 }
 
 .subsection-body {
