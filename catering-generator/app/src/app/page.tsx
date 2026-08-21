@@ -28,7 +28,7 @@ export default function Home() {
             Repeating covers. Restaurants, cafes, kiosks, canteens, a van on a
             regular pitch. Anchored on the delivery cycle.
           </span>
-          <span className="go ghost">Set up a week</span>
+          <span className="go alt">Set up a week</span>
         </Link>
       </div>
 

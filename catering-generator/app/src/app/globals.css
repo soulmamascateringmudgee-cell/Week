@@ -50,6 +50,7 @@
      legible in a kitchen at arm's length. */
   --accent: #c9785c;
   --accent-ink: #a85436;
+  --accent-deep: #8f4429;
   --accent-soft: #f9ece5;
 
   /* The good-news colour: a price that fell, something saved. Sits in the
@@ -985,9 +986,11 @@ ul.plain li {
  * link is invalid HTML and phones disagree about which one gets the tap. The
  * whole card is the target; these just say so.
  *
- * One-off events are the common case, so that one is solid. The weekly one is
- * outlined in the same sage: two filled buttons in different colours read as
- * a decision between equals, which isn't what this is.
+ * One-off events take the sage, weekly service takes the terracotta. Two
+ * filled buttons in the two brand colours, side by side — which is the right
+ * call here after all: these genuinely are two doors into the same app rather
+ * than a primary action and a lesser one, and a caterer who runs a weekly
+ * pitch should not arrive to find their door drawn as the afterthought.
  */
 .choice .go {
   display: inline-flex;
@@ -1014,15 +1017,24 @@ ul.plain li {
   border-color: var(--primary-bright);
 }
 
-.choice .go.ghost {
-  background: transparent;
-  color: var(--primary);
+/*
+ * The weekly-service button, in terracotta.
+ *
+ * It fills with the deep terracotta rather than the brief's #c9785c, for the
+ * same reason the labels do: white on #c9785c is 3.3:1 and charcoal on it is
+ * 4.3:1, so neither clears the 4.5:1 that button text at this size needs.
+ * Filled with #a85436 it reads at 5.3:1 and still plainly says terracotta.
+ */
+.choice .go.alt {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink);
+  color: #fff;
 }
 
-.choice:hover .go.ghost {
-  background: var(--primary-soft);
-  border-color: var(--primary);
-  color: var(--primary);
+.choice:hover .go.alt {
+  background: var(--accent-deep);
+  border-color: var(--accent-deep);
+  color: #fff;
 }
 
 .choice .go::after {
