@@ -23,6 +23,24 @@ interface ReadInvoice {
   notes: string[];
 }
 
+/**
+ * What each kind of change looks like in the review table.
+ *
+ * A price going up costs money on the next job, so it's the loud one. A
+ * price going down is good news and reads that way. `unit-changed` is
+ * neither — it means the docket priced this by the kilo where the list has
+ * it by the each, so the two can't be compared at all and somebody has to
+ * look. That's a different thing from a rise and shouldn't borrow its
+ * colour.
+ */
+const TONE: Record<PriceChange["kind"], string> = {
+  up: "warn",
+  down: "good",
+  new: "",
+  same: "",
+  "unit-changed": "check",
+};
+
 /** A line after review — what will actually be saved. */
 interface ReviewRow {
   item: string;
@@ -189,7 +207,7 @@ export default function InvoiceReader({
       {reading && <p className="notice">Reading the invoice…</p>}
 
       {error && (
-        <p className="notice" style={{ marginTop: 12 }}>
+        <p className="notice warn" style={{ marginTop: 12 }}>
           <strong>{error}</strong>
         </p>
       )}
@@ -204,7 +222,7 @@ export default function InvoiceReader({
           </h3>
 
           {invoice.notes.length > 0 && (
-            <p className="notice">
+            <p className="notice check">
               {invoice.notes.map((note) => (
                 <span key={note}>{note} </span>
               ))}
@@ -257,14 +275,7 @@ export default function InvoiceReader({
                       <div className="basis">a {row.unit}</div>
                     </td>
                     <td>
-                      <span
-                        className={
-                          row.change.kind === "up" ||
-                          row.change.kind === "unit-changed"
-                            ? "tag warn"
-                            : "tag"
-                        }
-                      >
+                      <span className={`tag ${TONE[row.change.kind]}`}>
                         {row.change.kind === "unit-changed"
                           ? "check"
                           : row.change.kind}

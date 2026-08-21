@@ -9,7 +9,7 @@ export default function ServiceResult({ plan }: { plan: ServicePlan }) {
   return (
     <section>
       {plan.warnings.map((warning) => (
-        <p className="notice" key={warning}>
+        <p className="notice warn" key={warning}>
           <strong>{warning}</strong>
         </p>
       ))}

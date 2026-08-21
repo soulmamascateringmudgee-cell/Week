@@ -46,7 +46,7 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
   return (
     <section>
       {plan.warnings.map((warning) => (
-        <p className="notice" key={warning}>
+        <p className="notice warn" key={warning}>
           <strong>{warning}</strong>
         </p>
       ))}
@@ -149,7 +149,7 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
           </p>
 
           {costing.verdict === "over" && (
-            <p className="notice">
+            <p className="notice warn">
               <strong>
                 Over budget by $
                 {(costing.total - (costing.budget ?? 0)).toFixed(2)}.
@@ -169,7 +169,7 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
           )}
 
           {costing.verdict === "incomplete" && (
-            <p className="notice">
+            <p className="notice warn">
               <strong>This is a partial total.</strong>{" "}
               {costing.unpriced.length > 0 && (
                 <>

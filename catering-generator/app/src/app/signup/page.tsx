@@ -113,7 +113,7 @@ function SignupForm() {
         )}
 
         {error && (
-          <p className="notice" style={{ marginTop: 12 }}>
+          <p className="notice warn" style={{ marginTop: 12 }}>
             <strong>{error}</strong>
           </p>
         )}

@@ -4,8 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 
 import DictateRecipe from "@/components/DictateRecipe.tsx";
 import type { DictatedRecipe } from "@/components/DictateRecipe.tsx";
+import Section from "@/components/Section.tsx";
 import { COURSE_CHOICES } from "@/lib/options.ts";
 import { parseIngredients } from "@/lib/recipe-parse.ts";
+import { groupByCourse } from "@/lib/recipe-group.ts";
 import type { Category, RecipeIngredient } from "@/lib/types.ts";
 
 interface StoredRecipe {
@@ -38,6 +40,18 @@ export default function RecipesPage() {
   const [recipes, setRecipes] = useState<StoredRecipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  /** What's typed in the search box over the saved dishes. */
+  const [browse, setBrowse] = useState("");
+
+  /*
+   * The book split into course sections, filtered by that box.
+   *
+   * This is the same groupByCourse the job page's picker uses, deliberately.
+   * A dish has to file under the same course in both places — finding the
+   * pavlova under Dessert when you're building a menu and under Other when
+   * you're editing it would be the app disagreeing with itself.
+   */
+  const courses = groupByCourse(recipes, browse);
 
   // The form doubles as the editor. `editingId` null means "adding new".
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -410,7 +424,7 @@ export default function RecipesPage() {
               Read the ingredients
             </button>
           </div>
-          {note && <p className="notice">{note}</p>}
+          {note && <p className="notice check">{note}</p>}
 
           <h3>Ingredients</h3>
           {rows.map((row, index) => (
@@ -498,7 +512,7 @@ export default function RecipesPage() {
           />
 
           {error && (
-            <p className="notice">
+            <p className="notice warn">
               <strong>{error}</strong>
             </p>
           )}
@@ -527,35 +541,82 @@ export default function RecipesPage() {
         </div>
       )}
 
-      {recipes.map((recipe) => (
-        <div className="card" key={recipe.id}>
-          <h3 style={{ marginTop: 0, marginBottom: 4 }}>{recipe.name}</h3>
-          <p className="basis">
-            {recipe.course ?? "Dish"} · written for {recipe.serves} ·{" "}
-            {recipe.ingredients.length} ingredient
-            {recipe.ingredients.length === 1 ? "" : "s"}
-          </p>
-          <ul className="plain">
-            {recipe.ingredients.map((ing, i) => (
-              <li key={`${recipe.id}-${i}`}>
-                {ing.qty} {ing.unit} {ing.item}
-              </li>
+      {!loading && recipes.length > 0 && (
+        <>
+          <label htmlFor="browse">
+            Find a dish
+            <span className="hint">
+              Searches every course at once. Leave it empty to browse.
+            </span>
+          </label>
+          <input
+            id="browse"
+            type="search"
+            value={browse}
+            onChange={(e) => setBrowse(e.target.value)}
+            placeholder="brisket, slaw, pavlova…"
+          />
+
+          {/* A search that matches nothing has to say so. An empty page under
+              a search box reads as "you have no recipes", which after typing
+              a dish name is the wrong and rather alarming conclusion. */}
+          {courses.length === 0 && (
+            <p className="notice" style={{ marginTop: 14 }}>
+              No dish matches &ldquo;{browse}&rdquo;. Check the spelling, or
+              clear the box to see all {recipes.length}.
+            </p>
+          )}
+
+          <div style={{ marginTop: 14 }}>
+            {courses.map((group) => (
+              <Section
+                key={group.course}
+                title={group.course}
+                count={`${group.recipes.length} dish${
+                  group.recipes.length === 1 ? "" : "es"
+                }`}
+                // Searching opens everything: a hit inside a shut section is
+                // the same as no hit at all.
+                open={browse.trim() !== ""}
+              >
+                {group.recipes.map((recipe) => (
+                  <div className="dish" key={recipe.id}>
+                    <h3>{recipe.name}</h3>
+                    <p className="basis">
+                      Written for {recipe.serves} ·{" "}
+                      {recipe.ingredients.length} ingredient
+                      {recipe.ingredients.length === 1 ? "" : "s"}
+                    </p>
+                    <ul className="plain">
+                      {recipe.ingredients.map((ing, i) => (
+                        <li key={`${recipe.id}-${i}`}>
+                          {ing.qty} {ing.unit} {ing.item}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="actions">
+                      <button
+                        type="button"
+                        className="secondary"
+                        onClick={() => edit(recipe)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="secondary"
+                        onClick={() => void remove(recipe)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </Section>
             ))}
-          </ul>
-          <div className="actions">
-            <button type="button" className="secondary" onClick={() => edit(recipe)}>
-              Edit
-            </button>
-            <button
-              type="button"
-              className="secondary"
-              onClick={() => void remove(recipe)}
-            >
-              Delete
-            </button>
           </div>
-        </div>
-      ))}
+        </>
+      )}
     </>
   );
 }

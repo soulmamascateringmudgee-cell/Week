@@ -1,14 +1,70 @@
+/*
+ * Prep & Ordering — the look.
+ *
+ * The register is a good country kitchen, not a dashboard: warm paper, fired
+ * terracotta, eucalypt green, and a serif with some age on it. That's a
+ * deliberate choice about who this is for. A caterer in Mudgee reads a menu,
+ * an invoice and a prep list all day; making the tool look like accounting
+ * software would make it feel like more admin, which is the thing it exists
+ * to remove.
+ *
+ * Two rules constrain every decision below.
+ *
+ * It has to survive a printer. The order sheet and the prep list get printed
+ * and taken to the bench, and a page of coloured panels prints as grey mud.
+ * Everything decorative — shadows, fills, gradients, tints — is stripped in
+ * the print block at the bottom. Colour is never the only thing carrying a
+ * meaning; there is always a word or a border doing it too.
+ *
+ * It has to work on a phone held in one hand with the other hand full.
+ * Tap targets are generous, the nav scrolls rather than wrapping, and
+ * contrast is set for a bright kitchen rather than a dim office.
+ */
+
 :root {
-  --ink: #1c1b19;
-  --muted: #6b6862;
-  --line: #ddd8cf;
-  --paper: #faf8f4;
-  --card: #ffffff;
-  --accent: #8a3b12;
-  --accent-soft: #f4ebe4;
-  --warn: #8a2b2b;
+  /* Ink. Warm near-black, never pure #000 — it's harsh on cream. */
+  --ink: #221f1a;
+  --ink-soft: #46413a;
+  --muted: #6f6a61;
+
+  /* Paper and rules. */
+  --paper: #f8f5ef;
+  --paper-warm: #fdf8ee;
+  --card: #fffdfa;
+  --line: #e6dfd3;
+  --line-strong: #d5cbb9;
+
+  /* Terracotta. The doing colour: buttons, links, the active tab. The dark
+     one is for text and the bright one for fills, so text on paper always
+     clears contrast and a filled button still looks alive. */
+  --accent: #8f3a12;
+  --accent-bright: #b04a17;
+  --accent-soft: #f7ece3;
+
+  /* Eucalypt. The good-news colour: a price that fell, something saved. */
+  --sage: #4a5c40;
+  --sage-soft: #eef1e9;
+
+  /* Wattle. Notice-worthy but not wrong: assumptions, things to check. */
+  --gold: #7d6416;
+  --gold-soft: #f8f1dc;
+
+  /* The one that means look at this before you order. */
+  --warn: #99281f;
   --warn-soft: #fbeceb;
-  --radius: 10px;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+
+  --shadow-sm: 0 1px 2px rgba(60, 45, 30, 0.05), 0 1px 3px rgba(60, 45, 30, 0.04);
+  --shadow-md: 0 2px 4px rgba(60, 45, 30, 0.04), 0 8px 20px rgba(60, 45, 30, 0.07);
+  --shadow-lg: 0 4px 8px rgba(60, 45, 30, 0.05), 0 16px 40px rgba(60, 45, 30, 0.1);
+
+  --font-display-stack: var(--font-display), ui-serif, Georgia, "Iowan Old Style",
+    "Palatino Linotype", serif;
+  --font-text-stack: var(--font-text), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 * {
@@ -21,30 +77,64 @@ body {
   padding: 0;
 }
 
+/* Header, main, footer in a column so the footer sits at the bottom of a
+   short page instead of halfway up it with bare background underneath. */
 body {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: var(--paper);
   color: var(--ink);
-  font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
+  font-family: var(--font-text-stack);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+main.wrap {
+  flex: 1;
+  width: 100%;
+}
+
+/* A warm wash behind the top of the page. Fixed on its own layer rather than
+   background-attachment, which stutters badly while scrolling on iOS. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 500px at 15% -120px, #fdf3e2 0%, transparent 65%),
+    radial-gradient(900px 500px at 90% -160px, #f2f3ea 0%, transparent 60%);
 }
 
 .wrap {
-  max-width: 900px;
+  max-width: 940px;
   margin: 0 auto;
-  padding: 32px 20px 80px;
+  padding: 36px 20px 96px;
 }
 
+/* ---- Shell ------------------------------------------------------------- */
+
 header.site {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   border-bottom: 1px solid var(--line);
-  background: var(--card);
+  background: rgba(255, 253, 250, 0.88);
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
 }
 
 header.site .wrap {
-  padding: 18px 20px;
+  padding: 12px 20px;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 20px;
 }
 
 header.site a {
@@ -52,14 +142,66 @@ header.site a {
   text-decoration: none;
 }
 
+.brand {
+  font-family: var(--font-display-stack);
+  font-size: 1.16rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  font-variation-settings: "SOFT" 30;
+  white-space: nowrap;
+}
+
+.brand:hover {
+  color: var(--accent);
+}
+
+/* The nav scrolls sideways instead of wrapping. Seven links across a phone
+   would otherwise stack into a block that pushes the page content off the
+   first screen. */
+nav.modes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+  /* Without this the nav is a flex item at its full content width — eight
+     links wide — which pushes the whole document past the viewport and sets
+     every page scrolling sideways on a phone. It has to be allowed to shrink
+     before its own overflow-x can do anything. */
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  margin: -6px -20px -6px 0;
+  padding: 6px 20px 6px 0;
+}
+
+nav.modes::-webkit-scrollbar {
+  display: none;
+}
+
+nav.modes a,
+nav.modes button.linklike {
+  color: var(--muted);
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+nav.modes a:hover,
+nav.modes button.linklike:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
 footer.site {
   border-top: 1px solid var(--line);
-  border-bottom: none;
   background: var(--card);
 }
 
 footer.site .wrap {
-  padding: 18px 20px;
+  padding: 20px;
 }
 
 footer.site a {
@@ -69,7 +211,7 @@ footer.site a {
 }
 
 footer.site a:hover {
-  color: var(--ink);
+  color: var(--accent);
 }
 
 /* Long URLs — a signup link an admin needs to copy — must wrap on a phone
@@ -79,30 +221,231 @@ code {
   max-width: 100%;
   overflow-wrap: anywhere;
   font-size: 0.85rem;
-  background: var(--paper);
-  padding: 2px 5px;
-  border-radius: 4px;
+  background: var(--paper-warm);
+  border: 1px solid var(--line);
+  padding: 2px 6px;
+  border-radius: 5px;
 }
 
+/* ---- Type -------------------------------------------------------------- */
+
+h1,
+h2,
+h3,
+.section-title,
+.figure,
 .brand {
-  font-weight: 700;
+  font-family: var(--font-display-stack);
+  font-variation-settings: "SOFT" 25;
+}
+
+h1 {
+  font-size: clamp(2.05rem, 1.5rem + 2.2vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  margin: 0 0 10px;
+}
+
+h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  margin: 40px 0 12px;
+}
+
+h3 {
+  font-size: 1.08rem;
+  font-weight: 600;
   letter-spacing: -0.01em;
+  margin: 24px 0 8px;
 }
 
-nav.modes {
-  display: flex;
-  gap: 18px;
-  font-size: 0.92rem;
+p.lede {
+  color: var(--ink-soft);
+  font-size: 1.06rem;
+  margin: 0 0 30px;
+  max-width: 62ch;
 }
 
-nav.modes a {
+/* Small caps above a heading — says what kind of page this is without
+   spending a line of the heading on it. */
+.eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+}
+
+/* ---- Surfaces ---------------------------------------------------------- */
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.card > h2:first-child,
+.card > h3:first-child {
+  margin-top: 0;
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+/* ---- Forms ------------------------------------------------------------- */
+
+label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+label .hint {
+  display: block;
+  font-weight: 400;
   color: var(--muted);
-  border-bottom: 2px solid transparent;
-  padding-bottom: 2px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  margin-top: 3px;
 }
 
-nav.modes a:hover {
-  color: var(--ink);
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+select,
+textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+input:hover:not(:disabled),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Keyboard users still get a visible ring on everything else. */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.checks {
+  display: grid;
+  gap: 2px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+/* A whole row is the tap target, not just the 16px box. */
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.92rem;
+  font-weight: 400;
+  margin: 0;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.check:hover {
+  background: var(--accent-soft);
+}
+
+.check input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--accent);
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+
+/* ---- Buttons ----------------------------------------------------------- */
+
+button {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.12s ease, box-shadow 0.12s ease,
+    transform 0.06s ease;
+}
+
+button:hover:not(:disabled) {
+  background: var(--accent-bright);
+  border-color: var(--accent-bright);
+  box-shadow: var(--shadow-md);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: var(--shadow-sm);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: progress;
+  box-shadow: none;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--accent);
+  box-shadow: none;
+}
+
+button.secondary:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: none;
 }
 
 button.linklike {
@@ -114,141 +457,13 @@ button.linklike {
   font-weight: 400;
   color: var(--muted);
   cursor: pointer;
+  box-shadow: none;
 }
 
 button.linklike:hover {
-  color: var(--ink);
-}
-
-h1 {
-  font-size: 1.9rem;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  margin: 0 0 8px;
-}
-
-h2 {
-  font-size: 1.2rem;
-  margin: 34px 0 10px;
-  letter-spacing: -0.01em;
-}
-
-h3 {
-  font-size: 1rem;
-  margin: 22px 0 8px;
-}
-
-p.lede {
-  color: var(--muted);
-  margin: 0 0 28px;
-  max-width: 62ch;
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 18px;
-}
-
-.card > h2:first-child,
-.card > h3:first-child {
-  margin-top: 0;
-}
-
-.grid {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-}
-
-label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 5px;
-}
-
-label .hint {
-  display: block;
-  font-weight: 400;
-  color: var(--muted);
-  font-size: 0.8rem;
-  margin-top: 2px;
-}
-
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="search"],
-select,
-textarea {
-  width: 100%;
-  padding: 9px 10px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: #fff;
-  color: inherit;
-  font: inherit;
-  font-size: 0.94rem;
-}
-
-textarea {
-  min-height: 110px;
-  resize: vertical;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-.checks {
-  display: grid;
-  gap: 6px;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-}
-
-.check {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
-  font-weight: 400;
-  margin: 0;
-}
-
-.check input {
-  width: auto;
-  margin: 0;
-}
-
-button {
-  font: inherit;
-  font-weight: 600;
-  padding: 11px 20px;
-  border-radius: 7px;
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: #fff;
-  cursor: pointer;
-}
-
-button:hover:not(:disabled) {
-  filter: brightness(1.08);
-}
-
-button:disabled {
-  opacity: 0.55;
-  cursor: progress;
-}
-
-button.secondary {
-  background: transparent;
+  background: none;
   color: var(--accent);
+  box-shadow: none;
 }
 
 /*
@@ -261,23 +476,35 @@ a.btn {
   display: inline-block;
   font: inherit;
   font-weight: 600;
+  font-size: 0.95rem;
   padding: 11px 20px;
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--accent);
   background: var(--accent);
   color: #fff;
   text-decoration: none;
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
 }
 
 a.btn:hover {
-  filter: brightness(1.08);
+  background: var(--accent-bright);
+  border-color: var(--accent-bright);
   color: #fff;
+  box-shadow: var(--shadow-md);
 }
 
 a.btn.secondary {
   background: transparent;
   color: var(--accent);
+  box-shadow: none;
+}
+
+a.btn.secondary:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: none;
 }
 
 .actions {
@@ -285,30 +512,45 @@ a.btn.secondary {
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
-  margin-top: 18px;
+  margin-top: 20px;
 }
+
+/* ---- Tables ------------------------------------------------------------ */
 
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
 }
 
 th,
 td {
   text-align: left;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--line);
   vertical-align: top;
 }
 
 th {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.09em;
   color: var(--muted);
+  border-bottom: 1px solid var(--line-strong);
+  white-space: nowrap;
 }
 
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover td {
+  background: var(--paper-warm);
+}
+
+/* Quantities and money. Tabular figures so a column of weights lines up —
+   a column that doesn't is a column you read twice. */
 td.num {
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -318,31 +560,95 @@ td.num {
 
 .table-scroll {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
+
+/* ---- Small text and tags ----------------------------------------------- */
 
 .basis {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.81rem;
+  line-height: 1.5;
 }
 
 .tag {
   display: inline-block;
   font-size: 0.7rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 1px 6px;
-  border-radius: 4px;
+  letter-spacing: 0.07em;
+  padding: 3px 8px;
+  border-radius: 999px;
   background: var(--accent-soft);
   color: var(--accent);
+  border: 1px solid transparent;
   margin-left: 6px;
   vertical-align: 1px;
+  white-space: nowrap;
 }
 
-/* Recipe picker: courses that open one at a time, and the running list of
-   what's been chosen. The chosen list sits above the sections on purpose —
-   a folded section must never be the only place a ticked dish appears. */
+.tag.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.tag.good {
+  background: var(--sage-soft);
+  color: var(--sage);
+}
+
+.tag.check {
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+/* ---- Notices ------------------------------------------------------------
+ *
+ * Three tones, and the difference matters more than it looks. Everything
+ * used to be red, so "Reading the photo…" and "this job is over budget"
+ * arrived in the same alarm colour — which trains a cook to stop reading
+ * them, and the one that mattered got skipped with the rest.
+ *
+ * Neutral is the default because most of these are progress and information.
+ * A real warning has to be marked `warn` deliberately, and carries a word
+ * saying so as well as a colour.
+ */
+
+.notice {
+  border-left: 3px solid var(--line-strong);
+  background: var(--paper-warm);
+  color: var(--ink-soft);
+  padding: 12px 15px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-bottom: 12px;
+  font-size: 0.92rem;
+}
+
+.notice.warn {
+  border-left-color: var(--warn);
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.notice.check {
+  border-left-color: var(--gold);
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.notice.ok {
+  border-left-color: var(--sage);
+  background: var(--sage-soft);
+  color: var(--sage);
+}
+
+/* ---- Recipe picker ------------------------------------------------------
+   Courses that open one at a time, and the running list of what's been
+   chosen. The chosen list sits above the sections on purpose — a folded
+   section must never be the only place a ticked dish appears. */
+
 .courses {
-  margin-top: 12px;
+  margin-top: 14px;
   border-top: 1px solid var(--line);
 }
 
@@ -352,20 +658,51 @@ td.num {
 
 .courses summary {
   cursor: pointer;
-  padding: 11px 2px;
+  padding: 13px 4px;
   font-weight: 600;
   font-size: 0.95rem;
   display: flex;
   align-items: baseline;
   gap: 10px;
+  border-radius: var(--radius-sm);
+  transition: color 0.12s ease;
 }
 
-.courses summary::marker {
-  color: var(--muted);
+/* A hand-drawn chevron, because setting `display: flex` on a <summary>
+   suppresses the browser's own ::marker — which left every course heading
+   looking like plain text with nothing to say it opens. */
+.courses summary,
+.section > summary {
+  list-style: none;
+}
+
+.courses summary::-webkit-details-marker,
+.section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.courses summary::before {
+  content: "";
+  flex: none;
+  align-self: center;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.courses details[open] > summary::before {
+  transform: rotate(45deg);
 }
 
 .courses summary:hover {
   color: var(--accent);
+}
+
+.courses summary:hover::before {
+  border-color: var(--accent);
 }
 
 .courses details > .checks {
@@ -374,8 +711,9 @@ td.num {
 
 .chosen {
   background: var(--accent-soft);
-  border-radius: 7px;
-  padding: 11px 13px;
+  border: 1px solid #eddfd2;
+  border-radius: var(--radius-sm);
+  padding: 13px 15px;
   margin-bottom: 4px;
 }
 
@@ -386,61 +724,72 @@ td.num {
   justify-content: space-between;
   gap: 8px;
   font-size: 0.92rem;
+  font-weight: 600;
 }
 
 .chips {
   list-style: none;
   padding: 0;
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 7px;
 }
 
 /* Big enough to hit with a thumb in a kitchen, not a mouse in an office. */
 .chip {
   font-size: 0.85rem;
   font-weight: 500;
-  padding: 6px 11px;
+  padding: 7px 13px;
   border-radius: 999px;
   background: #fff;
   color: inherit;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
+  box-shadow: none;
 }
 
 .chip:hover:not(:disabled) {
+  background: #fff;
   border-color: var(--accent);
   color: var(--accent);
-  filter: none;
+  box-shadow: none;
 }
 
-.tag.warn {
-  background: var(--warn-soft);
-  color: var(--warn);
-}
-
-.notice {
-  border-left: 3px solid var(--warn);
-  background: var(--warn-soft);
-  padding: 11px 14px;
-  border-radius: 0 7px 7px 0;
-  margin-bottom: 12px;
-  font-size: 0.92rem;
-}
+/* ---- Countdown, prep and recipe sheets ---------------------------------- */
 
 .step {
-  border-left: 2px solid var(--line);
-  padding: 0 0 14px 16px;
+  border-left: 2px solid var(--line-strong);
+  padding: 0 0 16px 18px;
   margin-left: 6px;
+  position: relative;
+}
+
+/* The dot on the timeline. Without it a countdown is a list of paragraphs
+   with a stripe down the side. */
+.step::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 7px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--line-strong);
 }
 
 .step.overdue {
   border-left-color: var(--warn);
 }
 
+.step.overdue::before {
+  background: var(--warn);
+  border-color: var(--warn);
+}
+
 .step .when {
   font-weight: 700;
-  font-size: 0.92rem;
+  font-size: 0.94rem;
 }
 
 .step .date {
@@ -450,7 +799,7 @@ td.num {
 
 /* Sits under a card heading to say where the list came from. */
 .card > .note {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   color: var(--muted);
   font-size: 0.85rem;
 }
@@ -469,22 +818,26 @@ td.num {
 
 /* One dish written out at this job's size. */
 .sheet {
-  padding: 0 0 14px 16px;
+  padding: 0 0 16px 18px;
   margin-left: 6px;
-  border-left: 2px solid var(--line);
+  border-left: 2px solid var(--line-strong);
   break-inside: avoid;
 }
 
 .sheet .lines {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 0.92rem;
 }
 
 .sheet .lines td {
-  padding: 3px 0;
+  padding: 5px 0;
   border-bottom: 1px solid var(--line);
+}
+
+.sheet .lines tr:hover td {
+  background: transparent;
 }
 
 .sheet .lines tr:last-child td {
@@ -493,33 +846,34 @@ td.num {
 
 /* A recipe whose amounts can't be scaled — the numbers below are not real. */
 .sheet .broken {
-  margin: 6px 0 0;
-  padding: 8px 10px;
+  margin: 8px 0 0;
+  padding: 10px 12px;
   border-left: 3px solid var(--warn);
   background: var(--warn-soft);
   color: var(--warn);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   font-size: 0.85rem;
 }
 
 .sheet .method {
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   font-size: 0.88rem;
-  color: var(--muted);
+  color: var(--ink-soft);
   white-space: pre-line;
 }
 
 ul.plain {
-  margin: 6px 0 0;
-  padding-left: 18px;
+  margin: 8px 0 0;
+  padding-left: 20px;
 }
 
 ul.plain li {
-  margin-bottom: 3px;
-  font-size: 0.9rem;
+  margin-bottom: 5px;
+  font-size: 0.92rem;
 }
 
 .risk {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .risk .what {
@@ -532,50 +886,176 @@ ul.plain li {
 }
 
 .disclaimer {
-  margin-top: 36px;
-  padding-top: 14px;
+  margin-top: 40px;
+  padding-top: 16px;
   border-top: 1px solid var(--line);
   color: var(--muted);
   font-size: 0.85rem;
 }
 
+/* ---- Landing ------------------------------------------------------------ */
+
+.hero {
+  padding: 16px 0 0;
+}
+
+.hero .lede {
+  margin-bottom: 0;
+}
+
+.hero h1 {
+  max-width: 19ch;
+}
+
 .choice-list {
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  margin-top: 24px;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  margin-top: 28px;
 }
 
 .choice {
-  display: block;
+  display: flex;
+  flex-direction: column;
   text-decoration: none;
   color: inherit;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+  transition: transform 0.14s ease, box-shadow 0.14s ease,
+    border-color 0.14s ease;
 }
 
 .choice:hover {
+  transform: translateY(-3px);
   border-color: var(--accent);
+  box-shadow: var(--shadow-lg);
 }
 
 .choice strong {
-  display: block;
-  margin-bottom: 6px;
+  font-family: var(--font-display-stack);
+  font-variation-settings: "SOFT" 25;
+  font-size: 1.28rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin-bottom: 8px;
 }
 
 .choice span {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.91rem;
+  flex: 1;
 }
+
+/* The arrow only moves on hover, so the card reads as a thing you press
+   without needing a button inside a link. */
+.choice .go {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  /* Not flexible — the rule above matches this span too, and two growing
+     items split the slack between them, which left the two cards' arrows
+     sitting at different heights. Only the description stretches. */
+  flex: none;
+  margin-top: 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.choice .go::after {
+  content: "→";
+  transition: transform 0.14s ease;
+}
+
+.choice:hover .go::after {
+  transform: translateX(4px);
+}
+
+/* What the engine actually does, as a set of claims rather than bullets.
+   Each one is a reason to trust a number further down. */
+.features {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.features li {
+  padding: 15px 0 15px 20px;
+  border-top: 1px solid var(--line);
+  border-left: 3px solid transparent;
+  font-size: 0.94rem;
+  color: var(--ink-soft);
+  transition: border-color 0.12s ease, padding-left 0.12s ease;
+}
+
+.features li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+/* The disclaimer draws its own rule. Straight after the feature list that
+   made two lines with a blank band between them, which read as an empty
+   sixth row. */
+.features + .disclaimer {
+  border-top: none;
+  margin-top: 24px;
+  padding-top: 0;
+}
+
+.features li:hover {
+  border-left-color: var(--accent);
+}
+
+.features strong {
+  display: block;
+  font-family: var(--font-display-stack);
+  font-variation-settings: "SOFT" 25;
+  font-size: 1.04rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+
+/* ---- A saved dish in the recipe book ------------------------------------
+   These sit inside a course section, so they're separated by a rule rather
+   than boxed. A card inside a card reads as clutter and makes a book of
+   eighty dishes look like eighty problems. */
+
+.dish {
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+
+.dish:first-child {
+  padding-top: 4px;
+  border-top: none;
+}
+
+.dish:last-child {
+  padding-bottom: 0;
+}
+
+.dish h3 {
+  margin: 0 0 3px;
+}
+
+.dish .actions {
+  margin-top: 12px;
+}
+
+/* ---- Ingredient rows ---------------------------------------------------- */
 
 .row-item {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
   align-items: end;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 @media (max-width: 700px) {
@@ -584,9 +1064,11 @@ ul.plain li {
   }
 }
 
-/* Dictation. The transcript box is deliberately prominent — it is the step
-   where a mishearing gets caught, and a cook who skips it ends up with four
-   of something instead of flour and salt. */
+/* ---- Dictation ----------------------------------------------------------
+   The transcript box is deliberately prominent — it is the step where a
+   mishearing gets caught, and a cook who skips it ends up with four of
+   something instead of flour and salt. */
+
 .dictate textarea {
   min-height: 90px;
   font-size: 0.95rem;
@@ -615,119 +1097,249 @@ ul.plain li {
   .rec {
     animation: none;
   }
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 
-/* Foldable result sections. A finished job is a page and a half of scrolling
-   otherwise, and the countdown — the part you need on the Thursday — is at
-   the bottom of it. Each heading carries its own size so a shut section still
-   says how much is inside. */
+/* ---- Result sections ----------------------------------------------------
+   A finished job is a page and a half of scrolling otherwise, and the
+   countdown — the part you need on the Thursday — is at the bottom of it.
+   Each heading carries its own size so a shut section still says how much
+   is inside. */
+
 .section {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  margin-bottom: 10px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 12px;
+  overflow: hidden;
 }
 
 .section > summary {
   cursor: pointer;
-  padding: 16px 20px;
+  padding: 18px 22px;
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 10px;
+  transition: background-color 0.12s ease;
+}
+
+.section > summary:hover {
+  background: var(--paper-warm);
 }
 
 .section > summary:hover .section-title {
   color: var(--accent);
 }
 
+/* Sits at the right-hand end of the heading and turns over when the section
+   opens. Same reason as the course chevron: a flex <summary> has no marker
+   of its own, so a shut section had nothing saying there was more inside. */
+.section > summary::after {
+  content: "";
+  margin-left: auto;
+  align-self: center;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.15s ease;
+}
+
+.section[open] > summary::after {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+.section > summary:hover::after {
+  border-color: var(--accent);
+}
+
 .section-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-size: 1.18rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
 }
 
 /* A section that needs looking at before ordering — over budget, a passed
-   countdown step, dietaries to pack separately. Marked on the closed heading,
-   because that is where it has to be noticed. */
+   countdown step, dietaries to pack separately. Marked on the closed
+   heading, because that is where it has to be noticed. */
 .section.warn {
   border-left: 3px solid var(--warn);
 }
 
 .section-body {
-  padding: 0 20px 20px;
+  padding: 0 22px 22px;
 }
 
 .section-body > h3:first-child {
   margin-top: 0;
 }
 
-/* The whole job in one line, above everything that folds. */
+/* The whole job in one line, above everything that folds. This is the
+   payoff screen — the moment the guest count turns into an answer — so the
+   figures are set large in the display face rather than as bold body text. */
 .summary-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 26px;
-  background: var(--card);
+  gap: 14px 40px;
+  background: linear-gradient(180deg, var(--card) 0%, var(--paper-warm) 100%);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 16px 20px;
-  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+  padding: 20px 22px;
+  margin-bottom: 16px;
 }
 
 .summary-strip .figure {
   display: block;
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+  font-size: 1.85rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
 }
+
+.summary-strip .basis {
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+/* ---- Print --------------------------------------------------------------
+   Everything above is stripped back to ink on paper. The order sheet and
+   the prep list get printed and worked from, and a printer renders tinted
+   panels and drop shadows as grey smudge. */
 
 @media print {
   body {
     background: #fff;
+    font-size: 11pt;
   }
+
+  body::before {
+    display: none;
+  }
+
   header.site,
+  footer.site,
   form,
   .actions,
   button {
     display: none !important;
   }
-  .card {
-    border: none;
-    padding: 0;
-    margin-bottom: 8px;
-    break-inside: avoid;
-  }
+
   .wrap {
     max-width: none;
     padding: 0;
   }
+
+  /* No lift, no tint, no rounded corners — none of it survives a laser
+     printer, and the shadows come out as grey haze around every card. */
+  .card,
+  .section,
+  .summary-strip,
+  .choice,
+  .chosen {
+    border: none;
+    background: #fff;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    margin-bottom: 10px;
+    break-inside: avoid;
+  }
+
   h2 {
     break-after: avoid;
   }
+
+  /* A section that needs looking at, and a countdown step already gone past,
+     both keep a rule on paper — in black. `.section.warn` outranks the
+     `.section` reset above, so without naming it here its red bar survived
+     by accident, and red on a mono printer is just a grey smudge that means
+     nothing. Black is a decision that prints the same everywhere. */
+  .section.warn {
+    border-left: 2pt solid #000;
+    padding-left: 8pt;
+  }
+
+  .step.overdue {
+    border-left-color: #000;
+  }
+
+  .step.overdue::before {
+    background: #000;
+    border-color: #000;
+  }
+
   /* Sections are opened for printing by the beforeprint handler in
      Section.tsx, not here — a CSS override of a closed <details> is not
      reliable across browsers. These are only the paper cosmetics. */
-  .section {
-    border: none;
-    border-left: none;
-    margin-bottom: 8px;
-    break-inside: avoid;
-  }
   .section > summary {
     padding: 0;
     list-style: none;
+    background: none;
   }
+
   .section > summary::marker,
   .section > summary::-webkit-details-marker {
     display: none;
   }
+
+  /* The chevrons say "this opens", which means nothing once it's on paper. */
+  .section > summary::after,
+  .courses summary::before {
+    display: none;
+  }
+
   .section-body {
     padding: 0;
   }
+
   .summary-strip {
-    border: none;
-    padding: 0;
-    gap: 20px;
+    gap: 24px;
+  }
+
+  /* A warning still has to be obvious on paper, so it keeps its rule and
+     loses only the fill. Colour was never the only thing saying it.
+     The tone variants are listed by name: `.notice.warn` outranks `.notice`,
+     so a rule aimed at the base class alone leaves every tinted panel to
+     print as a grey block. */
+  .notice,
+  .notice.warn,
+  .notice.check,
+  .notice.ok,
+  .sheet .broken {
+    background: none;
+    color: #000;
+    border-left: 2pt solid #000;
+    border-radius: 0;
+    padding: 4pt 0 4pt 8pt;
+  }
+
+  .tag,
+  .tag.warn,
+  .tag.good,
+  .tag.check {
+    background: none;
+    color: #000;
+    border: 1px solid #000;
+  }
+
+  tbody tr:hover td {
+    background: none;
+  }
+
+  a {
+    text-decoration: none;
+    color: #000;
   }
 }

@@ -93,7 +93,7 @@ function LoginForm() {
   return (
     <>
       {problem && PROBLEMS[problem] && (
-        <p className="notice">{PROBLEMS[problem]}</p>
+        <p className="notice warn">{PROBLEMS[problem]}</p>
       )}
 
       <form onSubmit={signInWithPassword}>
@@ -126,7 +126,7 @@ function LoginForm() {
           />
 
           {error && (
-            <p className="notice" style={{ marginTop: 12 }}>
+            <p className="notice warn" style={{ marginTop: 12 }}>
               <strong>{error}</strong>
             </p>
           )}

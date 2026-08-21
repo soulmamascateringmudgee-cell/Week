@@ -236,12 +236,12 @@ function ServicePlanner() {
         <p className="notice">Opening your saved job…</p>
       )}
       {jobStatus.state === "failed" && (
-        <p className="notice">
+        <p className="notice warn">
           <strong>{jobStatus.message}</strong>
         </p>
       )}
       {jobStatus.state === "loaded" && (
-        <p className="notice">
+        <p className="notice ok">
           Opened <strong>{jobStatus.title}</strong>. Saving makes a new job
           rather than overwriting this one.
         </p>
@@ -406,7 +406,7 @@ function ServicePlanner() {
               </div>
             </>
           )}
-          {parseNote && <p className="notice">{parseNote}</p>}
+          {parseNote && <p className="notice check">{parseNote}</p>}
 
           <h3>Items</h3>
           {form.items.map((item, index) => (
@@ -526,7 +526,7 @@ function ServicePlanner() {
         </div>
 
         {error && (
-          <p className="notice">
+          <p className="notice warn">
             <strong>{error}</strong>
           </p>
         )}

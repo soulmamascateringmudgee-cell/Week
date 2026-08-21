@@ -147,7 +147,7 @@ export default function DictateRecipe({
       )}
 
       {error && (
-        <p className="notice" style={{ marginTop: 10 }}>
+        <p className="notice warn" style={{ marginTop: 10 }}>
           <strong>{error}</strong>
         </p>
       )}

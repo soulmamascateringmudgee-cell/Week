@@ -112,12 +112,12 @@ export default function AccountPage() {
           )}
 
           {error && (
-            <p className="notice" style={{ marginTop: 12 }}>
+            <p className="notice warn" style={{ marginTop: 12 }}>
               <strong>{error}</strong>
             </p>
           )}
           {done && (
-            <p className="notice" style={{ marginTop: 12 }}>
+            <p className="notice ok" style={{ marginTop: 12 }}>
               <strong>Password changed.</strong> Use the new one next time you
               sign in. You&rsquo;re still signed in here.
             </p>
