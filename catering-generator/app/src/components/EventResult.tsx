@@ -88,9 +88,21 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
           {plan.servedPerProtein} g each.
         </p>
 
+        {/*
+          Each supplier folds on its own. You shop this list one supplier at
+          a time — standing at the greengrocer, the four other categories are
+          just scrolling between you and the produce. They open by default,
+          because the order sheet is the thing you came for and nothing on it
+          should start hidden; folding is something you do as you go.
+        */}
         {grouped.map(([category, lines]) => (
-          <div key={category}>
-            <h3>{category}</h3>
+          <Section
+            key={category}
+            variant="plain"
+            title={category}
+            count={count(lines.length, "line")}
+            open
+          >
             <div className="table-scroll">
               <table>
                 <thead>
@@ -117,7 +129,7 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                 </tbody>
               </table>
             </div>
-          </div>
+          </Section>
         ))}
       </Section>
 
