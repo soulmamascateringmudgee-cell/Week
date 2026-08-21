@@ -16,9 +16,9 @@ export interface RecipeChoice {
   serves: number;
 }
 
-export interface CourseGroup {
+export interface CourseGroup<T extends RecipeChoice = RecipeChoice> {
   course: string;
-  recipes: RecipeChoice[];
+  recipes: T[];
 }
 
 /**
@@ -42,18 +42,23 @@ export function normalise(text: string): string {
  * Every recipe lands somewhere. `course` is free text in the database, so a
  * value that isn't one of the known courses — or no value at all — groups
  * under "Other" rather than vanishing. Empty sections are dropped.
+ *
+ * Generic over the recipe so both callers can use it: the picker passes the
+ * four fields it needs, the recipe book passes whole saved dishes with their
+ * ingredients and method attached, and gets them back intact. Two copies of
+ * this would mean two places for a dish to go missing.
  */
-export function groupByCourse(
-  library: RecipeChoice[],
+export function groupByCourse<T extends RecipeChoice>(
+  library: T[],
   query = "",
-): CourseGroup[] {
+): CourseGroup<T>[] {
   const needle = normalise(query);
   const matches = needle
     ? library.filter((recipe) => normalise(recipe.name).includes(needle))
     : library;
 
   const known = new Set<string>(COURSE_CHOICES);
-  const byCourse = new Map<string, RecipeChoice[]>();
+  const byCourse = new Map<string, T[]>();
 
   for (const recipe of matches) {
     const course =

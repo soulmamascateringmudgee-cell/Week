@@ -75,7 +75,7 @@ export default function JobsPage() {
 
       {loading && <div className="card">Loading…</div>}
       {error && (
-        <p className="notice">
+        <p className="notice warn">
           <strong>{error}</strong>
         </p>
       )}

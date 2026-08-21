@@ -3,12 +3,15 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-      <h1>What are you ordering for?</h1>
-      <p className="lede">
-        Put in the people, the menu and the dates. You get back the order list
-        split by supplier, in raw weights, with the packaging, the countdown and
-        the risks specific to that job.
-      </p>
+      <div className="hero">
+        <p className="eyebrow">For caterers</p>
+        <h1>What are you ordering for?</h1>
+        <p className="lede">
+          Put in the people, the menu and the dates. You get back the order list
+          split by supplier, in raw weights, with the packaging, the countdown
+          and the risks specific to that job.
+        </p>
+      </div>
 
       <div className="choice-list">
         <Link href="/event" className="choice">
@@ -17,6 +20,7 @@ export default function Home() {
             A date and a guest count. Weddings, functions, private chef work, a
             van on a booking. Anchored on T-7, seven days out.
           </span>
+          <span className="go">Start a job</span>
         </Link>
         <Link href="/service" className="choice">
           <strong>Ongoing weekly service</strong>
@@ -24,11 +28,12 @@ export default function Home() {
             Repeating covers. Restaurants, cafes, kiosks, canteens, a van on a
             regular pitch. Anchored on the delivery cycle.
           </span>
+          <span className="go">Set up a week</span>
         </Link>
       </div>
 
       <h2>What it works out</h2>
-      <ul className="plain">
+      <ul className="features">
         <li>
           <strong>Raw weight, not served weight.</strong> Brisket loses half its
           weight on the way to the plate. Ordering to the served figure
@@ -40,7 +45,8 @@ export default function Home() {
           jobs carry a bigger percentage.
         </li>
         <li>
-          <strong>Two crew meals, every time.</strong>
+          <strong>Two crew meals, every time.</strong> Nobody costs them in, and
+          nobody wants to be short at seven o&rsquo;clock.
         </li>
         <li>
           <strong>The things that aren&rsquo;t food.</strong> Chafing fuel, ice,

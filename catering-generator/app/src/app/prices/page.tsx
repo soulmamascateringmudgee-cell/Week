@@ -110,7 +110,7 @@ export default function PricesPage() {
       </p>
 
       {note && (
-        <p className="notice">
+        <p className="notice ok">
           <strong>{note}</strong>
         </p>
       )}
@@ -238,7 +238,7 @@ export default function PricesPage() {
           </div>
 
           {error && (
-            <p className="notice">
+            <p className="notice warn">
               <strong>{error}</strong>
             </p>
           )}

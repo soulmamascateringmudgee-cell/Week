@@ -253,12 +253,12 @@ function EventPlanner() {
         <p className="notice">Opening your saved job…</p>
       )}
       {jobStatus.state === "failed" && (
-        <p className="notice">
+        <p className="notice warn">
           <strong>{jobStatus.message}</strong>
         </p>
       )}
       {jobStatus.state === "loaded" && (
-        <p className="notice">
+        <p className="notice ok">
           Opened <strong>{jobStatus.title}</strong>. Change anything you like
           and build it again — saving makes a new job rather than overwriting
           this one.
@@ -627,7 +627,7 @@ function EventPlanner() {
         </div>
 
         {error && (
-          <p className="notice">
+          <p className="notice warn">
             <strong>{error}</strong>
           </p>
         )}

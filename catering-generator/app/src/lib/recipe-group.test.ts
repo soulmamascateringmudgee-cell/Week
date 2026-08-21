@@ -111,3 +111,24 @@ test("normalise collapses runs of whitespace", () => {
 test("Other is a real course on the recipe form, so it can be chosen", () => {
   assert.ok(COURSE_CHOICES.includes("Other"));
 });
+
+test("grouping carries the whole dish through, not just the fields it groups on", () => {
+  // The recipe book passes saved dishes with their ingredients attached and
+  // renders them straight out of the group. If grouping narrowed them to the
+  // four fields it sorts by, every dish would render with an empty ingredient
+  // list and nothing would report an error.
+  const saved = {
+    id: "r1",
+    name: "Smoked brisket",
+    course: "Main",
+    serves: 20,
+    ingredients: [{ item: "beef brisket", qty: 6, unit: "kg" }],
+    method: "Low and slow.",
+  };
+
+  const [group] = groupByCourse([saved], "");
+
+  assert.equal(group.course, "Main");
+  assert.deepEqual(group.recipes[0].ingredients, saved.ingredients);
+  assert.equal(group.recipes[0].method, "Low and slow.");
+});

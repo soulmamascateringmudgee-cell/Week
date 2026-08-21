@@ -137,14 +137,14 @@ export default function AdminPage() {
       </form>
 
       {emailed.state === "sent" && (
-        <p className="notice">
+        <p className="notice ok">
           <strong>{emailed.to} is on the list and has been emailed</strong> a
           link to set their own password. Nothing else for you to do.
         </p>
       )}
 
       {emailed.state === "failed" && (
-        <p className="notice">
+        <p className="notice check">
           <strong>
             {emailed.to} is on the list, but the email didn&rsquo;t send.
           </strong>{" "}
@@ -155,7 +155,7 @@ export default function AdminPage() {
       )}
 
       {error && (
-        <p className="notice">
+        <p className="notice warn">
           <strong>{error}</strong>
         </p>
       )}
