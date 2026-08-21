@@ -65,6 +65,7 @@ export default function Section({
   count,
   open = false,
   tone,
+  variant = "card",
   children,
 }: {
   title: string;
@@ -73,9 +74,27 @@ export default function Section({
   open?: boolean;
   /** "warn" marks a section that needs looking at before ordering. */
   tone?: "warn";
+  /**
+   * "plain" is the nested one — a supplier group inside the order sheet.
+   * Same folding, same print behaviour, but a rule and a smaller heading
+   * instead of its own card, because a card inside a card reads as clutter.
+   */
+  variant?: "card" | "plain";
   children: React.ReactNode;
 }) {
   const printing = usePrintOpen();
+
+  if (variant === "plain") {
+    return (
+      <details className="subsection" open={open || printing}>
+        <summary>
+          <span className="subsection-title">{title}</span>
+          {count && <span className="basis">{count}</span>}
+        </summary>
+        <div className="subsection-body">{children}</div>
+      </details>
+    );
+  }
 
   return (
     <details

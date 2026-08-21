@@ -1180,6 +1180,71 @@ ul.plain li {
   margin-top: 0;
 }
 
+/* ---- A supplier group inside the order sheet ----------------------------
+   The nested fold. Same behaviour as a section, but drawn as a rule and a
+   heading rather than another card — you shop this list one supplier at a
+   time, and at the greengrocer the other four categories are just scrolling
+   between you and the produce. */
+
+.subsection {
+  border-top: 1px solid var(--line);
+}
+
+.subsection:first-of-type {
+  border-top: none;
+}
+
+.subsection > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 14px 2px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  transition: color 0.12s ease;
+}
+
+.subsection > summary::-webkit-details-marker {
+  display: none;
+}
+
+.subsection > summary:hover .subsection-title {
+  color: var(--accent);
+}
+
+.subsection-title {
+  font-family: var(--font-display-stack);
+  font-variation-settings: "SOFT" 25;
+  font-size: 1.06rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Same chevron as the outer sections, one size down. */
+.subsection > summary::after {
+  content: "";
+  margin-left: auto;
+  align-self: center;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.15s ease;
+}
+
+.subsection[open] > summary::after {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+.subsection > summary:hover::after {
+  border-color: var(--accent);
+}
+
+.subsection-body {
+  padding-bottom: 16px;
+}
+
 /* The whole job in one line, above everything that folds. This is the
    payoff screen — the moment the guest count turns into an answer — so the
    figures are set large in the display face rather than as bold body text. */
@@ -1296,8 +1361,30 @@ ul.plain li {
 
   /* The chevrons say "this opens", which means nothing once it's on paper. */
   .section > summary::after,
+  .subsection > summary::after,
   .courses summary::before {
     display: none;
+  }
+
+  /* Supplier groups print as a heading and a table, the way the sheet read
+     before they could fold. They're opened by the same beforeprint handler
+     the outer sections use. */
+  .subsection {
+    border-top: none;
+    break-inside: avoid;
+  }
+
+  .subsection > summary {
+    padding: 0;
+    list-style: none;
+  }
+
+  .subsection > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .subsection-body {
+    padding-bottom: 8pt;
   }
 
   .section-body {
