@@ -17,13 +17,29 @@ import { createClient } from "@/lib/supabase/server.ts";
  * line lands in a review table for the cook to check first.
  */
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
-type AllowedType = (typeof ALLOWED_TYPES)[number];
+/**
+ * A receipt arrives as a photo or as the PDF the supplier emailed. Both are
+ * "upload a receipt" to the person holding it, so both are read here.
+ */
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
+type ImageType = (typeof IMAGE_TYPES)[number];
 
-function isAllowedType(value: string): value is AllowedType {
-  return (ALLOWED_TYPES as readonly string[]).includes(value);
+function isImageType(value: string): value is ImageType {
+  return (IMAGE_TYPES as readonly string[]).includes(value);
 }
-const MAX_BYTES = 8_000_000;
+
+function isAllowedType(value: string): boolean {
+  return isImageType(value) || value === "application/pdf";
+}
+
+/**
+ * Images are shrunk in the browser before they get here, so this is a backstop
+ * rather than the usual path. PDFs are allowed more room: the API takes 32 MB
+ * of document, and a scanned multi-page invoice is legitimately larger than a
+ * photo of one.
+ */
+const MAX_IMAGE_BYTES = 8_000_000;
+const MAX_PDF_BYTES = 30_000_000;
 
 const SCHEMA = {
   type: "object",
@@ -201,13 +217,22 @@ export async function POST(request: Request) {
 
   if (!isAllowedType(mediaType)) {
     return NextResponse.json(
-      { error: "That file isn't a photo the reader can open. Use a JPEG or PNG." },
+      {
+        error:
+          "That file isn't something the reader can open. Use a photo or a PDF.",
+      },
       { status: 400 },
     );
   }
-  if (!base64 || (base64.length * 3) / 4 > MAX_BYTES) {
+  const isPdf = mediaType === "application/pdf";
+  const limit = isPdf ? MAX_PDF_BYTES : MAX_IMAGE_BYTES;
+  if (!base64 || (base64.length * 3) / 4 > limit) {
     return NextResponse.json(
-      { error: "That photo is too big. Take it again at a smaller size." },
+      {
+        error: isPdf
+          ? "That PDF is too big to read. Send just the pages with the prices on them."
+          : "That photo is too big, even after shrinking. Try one page at a time.",
+      },
       { status: 400 },
     );
   }
@@ -230,12 +255,28 @@ export async function POST(request: Request) {
         {
           role: "user",
           content: [
+            // The document block goes before the text, which is what the API
+            // asks for and what makes the model read the page before the
+            // instruction rather than the other way round.
+            isPdf
+              ? {
+                  type: "document" as const,
+                  source: {
+                    type: "base64" as const,
+                    media_type: "application/pdf" as const,
+                    data: base64,
+                  },
+                }
+              : {
+                  type: "image" as const,
+                  source: {
+                    type: "base64" as const,
+                    media_type: mediaType as ImageType,
+                    data: base64,
+                  },
+                },
             {
-              type: "image",
-              source: { type: "base64", media_type: mediaType, data: base64 },
-            },
-            {
-              type: "text",
+              type: "text" as const,
               text: isReceipt ? "Read this receipt." : "Read this invoice.",
             },
           ],
