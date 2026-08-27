@@ -151,11 +151,25 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                         )}
                         {line.item}
                         {line.assumption && <span className="tag">assumed</span>}
+                        {/* Not "assumed" — an assumption is a figure we stand
+                            behind. This one is wrong until the recipe is
+                            fixed, and has to read that way. */}
+                        {line.unscalable && (
+                          <span className="tag warn">amount in the name</span>
+                        )}
                         <div className="basis">{line.basis}</div>
                       </td>
                       <td>{line.forDish}</td>
                       <td className="num">
-                        {line.qty} {line.unit}
+                        {line.unscalable ? (
+                          <span className="broken-qty" title="The recipe's amount is in the ingredient name">
+                            {line.qty} {line.unit}
+                          </span>
+                        ) : (
+                          <>
+                            {line.qty} {line.unit}
+                          </>
+                        )}
                         {/* The order stays at what the job needs. What the
                             pantry says goes underneath it, never instead. */}
                         {line.inStock && (

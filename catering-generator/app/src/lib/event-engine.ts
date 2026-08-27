@@ -35,7 +35,11 @@ import { combineOrders } from "./combine.ts";
 import { scaledToOrderUnits, toOrderUnits } from "./measure.ts";
 import { applyStock } from "./pantry.ts";
 import { toWholeProduce } from "./produce.ts";
-import { hasUnscalableAmounts, unscalableWarning } from "./recipe-health.ts";
+import {
+  hasUnscalableAmounts,
+  unscalableLines,
+  unscalableWarning,
+} from "./recipe-health.ts";
 import { costOrders } from "./costing.ts";
 import { addDays, daysBetween, formatDate, parseISODate } from "./dates.ts";
 import { round1, roundForUnit, roundKg, roundL, roundUnits } from "./round.ts";
@@ -125,10 +129,17 @@ export function planEvent(input: EventInput): EventPlan {
     }
     const factor = (scale / recipe.serves) * appetite;
 
-    // A recipe whose amounts live in its ingredient names multiplies "1 ea" and
-    // produces a confidently wrong sheet. Say so rather than order from it.
+    // Lines whose amount lives in the ingredient name multiply "1 ea" and
+    // produce a confidently wrong figure. Say so rather than order from them.
+    //
+    // One bad line is enough to warn about — a part-broken recipe is the
+    // normal shape of a bad import, and its good lines are exactly what makes
+    // the bad ones look trustworthy. `unscalable` stays a whole-dish verdict
+    // for the sheet, which prints dashes only when nothing on it can be relied
+    // on at all.
+    const broken = new Set(unscalableLines(recipe));
     const unscalable = hasUnscalableAmounts(recipe);
-    if (unscalable) warnings.push(unscalableWarning(recipe));
+    if (broken.size > 0) warnings.push(unscalableWarning(recipe));
 
     // The same scaled numbers the order lines are built from, kept per dish so
     // a cook can see how much of the shop belongs to which pot.
@@ -147,6 +158,7 @@ export function planEvent(input: EventInput): EventPlan {
             item: i.item,
             qty: roundForUnit(i.qty * factor, i.unit),
             unit: i.unit,
+            ...(broken.has(i.item) ? { unscalable: true } : {}),
           })),
       ),
       method: recipe.method ?? null,
@@ -163,6 +175,7 @@ export function planEvent(input: EventInput): EventPlan {
         unit: ingredient.unit,
         category: ingredient.category,
         forDish: recipe.name,
+        ...(broken.has(ingredient.item) ? { unscalable: true } : {}),
         basis:
           `${ingredient.qty} ${ingredient.unit} per ${recipe.serves} → ×${factor.toFixed(2)} for ${effectiveGuests} (incl. ${CREW_MEALS} crew) + ${Math.round(bufferPct * 100)}% buffer` +
           (biteSize === "standard" ? "" : `, ${biteSize} bites`),
