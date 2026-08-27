@@ -64,7 +64,9 @@ export async function POST(request: Request) {
 
     const { data: priceRows } = await supabase
       .from("ingredient_prices")
-      .select("item, unit, price");
+      // supplier included, or costing can't tell you which shop is cheapest —
+      // it would silently fall back to naming none of them.
+      .select("item, unit, price, supplier");
     // Postgres numeric arrives as a string; costing needs numbers.
     prices = (priceRows ?? []).map((row) => ({
       ...row,

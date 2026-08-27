@@ -76,23 +76,30 @@ export async function POST(request: Request) {
     );
   }
 
-  // Upsert: re-entering an ingredient updates its price rather than failing.
-  // Prices change, and being told off for saying so would be daft.
+  // '' means "no shop recorded" — the key ingredient_prices uses for it, so
+  // the same ingredient can hold a Woolworths price and an Aldi one without
+  // either overwriting the other. See migration 0007.
+  const supplier =
+    typeof body.supplier === "string" ? body.supplier.trim().slice(0, 100) : "";
+
+  // Upsert: re-entering an ingredient at the same shop updates its price
+  // rather than failing. Prices change, and being told off for saying so would
+  // be daft. A different shop is a different row, not an update.
   const { error } = await supabase.from("ingredient_prices").upsert(
-    {
-      user_id: user.id,
-      item,
-      unit,
-      price,
-      supplier:
-        typeof body.supplier === "string" ? body.supplier.trim() || null : null,
-    },
-    { onConflict: "user_id,item" },
+    { user_id: user.id, item, unit, price, supplier },
+    { onConflict: "user_id,item,supplier" },
   );
 
   if (error) {
     return NextResponse.json({ error: "Couldn't save that price." }, { status: 500 });
   }
+
+  // History is what answers "has this gone up". A price typed in by hand is as
+  // real as one read off a docket; only the source differs.
+  await supabase
+    .from("price_history")
+    .insert({ user_id: user.id, item, unit, price, supplier, source: "manual" });
+
   return NextResponse.json({ item }, { status: 201 });
 }
 

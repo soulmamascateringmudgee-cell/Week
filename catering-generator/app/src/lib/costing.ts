@@ -47,39 +47,67 @@ export function costOrders(
   guests: number,
   budget?: number,
 ): JobCosting {
-  const byItem = new Map<string, IngredientPrice>();
-  for (const price of prices) byItem.set(normalise(price.item), price);
+  // One item can carry a price from several shops. In a town with three
+  // supermarkets and no wholesaler for half the list, that's the normal case,
+  // not the exception.
+  const byItem = new Map<string, IngredientPrice[]>();
+  for (const price of prices) {
+    const key = normalise(price.item);
+    const existing = byItem.get(key);
+    if (existing) existing.push(price);
+    else byItem.set(key, [price]);
+  }
 
   let total = 0;
+  let dearestTotal = 0;
   const priced: JobCosting["priced"] = [];
   const unpriced: string[] = [];
   const mismatched: string[] = [];
 
   for (const line of orders) {
-    const price = byItem.get(normalise(line.item));
-    if (!price) {
+    const candidates = byItem.get(normalise(line.item)) ?? [];
+    if (candidates.length === 0) {
       unpriced.push(line.item);
       continue;
     }
 
-    const quantity = quantityInPricedUnit(
-      line.rawQty ?? line.qty,
-      line.unit,
-      price.unit,
-    );
-    if (quantity === null) {
+    // Cost the line at every shop that priced it in a unit this order can be
+    // converted to. A price per bunch against a line in kilos is dropped here
+    // rather than compared — it isn't dearer or cheaper, it's incomparable.
+    const costed = candidates.flatMap((price) => {
+      const quantity = quantityInPricedUnit(
+        line.rawQty ?? line.qty,
+        line.unit,
+        price.unit,
+      );
+      return quantity === null ? [] : [{ price, quantity, cost: quantity * price.price }];
+    });
+
+    if (costed.length === 0) {
       // Priced, but in a unit that doesn't line up. Say so rather than
       // multiplying two numbers that don't belong together.
-      mismatched.push(`${line.item} — priced per ${price.unit}, ordered in ${line.unit}`);
+      const units = [...new Set(candidates.map((p) => p.unit))].join(", ");
+      mismatched.push(`${line.item} — priced per ${units}, ordered in ${line.unit}`);
       continue;
     }
 
-    const cost = quantity * price.price;
-    total += cost;
+    // The cheapest shop wins, and the line says which one it was. A total that
+    // doesn't tell you where to go isn't a shopping plan.
+    const best = costed.reduce((a, b) => (b.cost < a.cost ? b : a));
+    const worst = costed.reduce((a, b) => (b.cost > a.cost ? b : a));
+
+    total += best.cost;
+    dearestTotal += worst.cost;
+
     priced.push({
       item: line.item,
-      cost: Math.round(cost * 100) / 100,
-      basis: `${Math.round(quantity * 100) / 100} ${price.unit} × $${price.price.toFixed(2)}`,
+      cost: Math.round(best.cost * 100) / 100,
+      basis:
+        `${Math.round(best.quantity * 100) / 100} ${best.price.unit} × $${best.price.price.toFixed(2)}` +
+        (best.price.supplier ? ` at ${best.price.supplier}` : ""),
+      supplier: best.price.supplier ?? null,
+      dearestCost:
+        costed.length > 1 ? Math.round(worst.cost * 100) / 100 : undefined,
     });
   }
 
@@ -90,6 +118,7 @@ export function costOrders(
     total: roundedTotal,
     perHead: guests > 0 ? Math.round((roundedTotal / guests) * 100) / 100 : 0,
     priced: priced.sort((a, b) => b.cost - a.cost),
+    savedByShopping: Math.round((dearestTotal - total) * 100) / 100,
     unpriced: [...new Set(unpriced)],
     mismatched: [...new Set(mismatched)],
     complete,

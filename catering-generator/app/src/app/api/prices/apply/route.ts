@@ -89,8 +89,10 @@ export async function POST(request: Request) {
   for (const line of cleaned) byItem.set(line.item, line);
   const lines = [...byItem.values()];
 
+  // '' means "no shop recorded", and is the key ingredient_prices uses for
+  // it. Null is no longer allowed there — see migration 0007.
   const supplier =
-    typeof body.supplier === "string" ? body.supplier.trim() || null : null;
+    typeof body.supplier === "string" ? body.supplier.trim().slice(0, 100) : "";
   // The invoice's own date, not today's. A docket entered a fortnight late
   // still belongs at its own date, or the history reads out of order.
   const pricedOn =
@@ -107,7 +109,7 @@ export async function POST(request: Request) {
       price: line.price,
       supplier,
     })),
-    { onConflict: "user_id,item" },
+    { onConflict: "user_id,item,supplier" },
   );
 
   if (priceError) {

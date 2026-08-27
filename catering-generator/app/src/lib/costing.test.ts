@@ -96,3 +96,79 @@ test("the dearest lines come first — that's where the money is", () => {
   );
   assert.equal(costing.priced[0].item, "Bacon");
 });
+
+// ---------------------------------------------------------------- shops
+//
+// One ingredient, several shops. Mudgee has no wholesaler for half a catering
+// list, so the same job gets shopped across Woolworths, Coles and Aldi.
+
+const SHOPS: IngredientPrice[] = [
+  { item: "bacon", unit: "kg", price: 22, supplier: "Woolworths" },
+  { item: "bacon", unit: "kg", price: 19.5, supplier: "Coles" },
+  { item: "bacon", unit: "kg", price: 16, supplier: "Aldi" },
+];
+
+test("the cheapest shop is the one costed", () => {
+  const costing = costOrders([line({ qty: 2 })], SHOPS, 10);
+  assert.equal(costing.total, 32);
+  assert.equal(costing.priced[0].supplier, "Aldi");
+});
+
+test("the line says which shop, because a total you can't act on is no plan", () => {
+  const costing = costOrders([line({ qty: 2 })], SHOPS, 10);
+  assert.match(costing.priced[0].basis, /at Aldi/);
+});
+
+test("what shopping around saves is reported", () => {
+  // 2 kg at Aldi's $16 against Woolworths' $22 — $12 on this line alone.
+  const costing = costOrders([line({ qty: 2 })], SHOPS, 10);
+  assert.equal(costing.savedByShopping, 12);
+  assert.equal(costing.priced[0].dearestCost, 44);
+});
+
+test("one shop is not a choice, so no saving is claimed", () => {
+  const costing = costOrders([line({ qty: 2 })], PRICES, 10);
+  assert.equal(costing.savedByShopping, 0);
+  assert.equal(costing.priced[0].dearestCost, undefined);
+});
+
+test("cheapest never means comparing units that don't line up", () => {
+  // $2 a bunch looks cheaper than $8 a kilo and is not a comparison anyone
+  // can make. The per-bunch price is dropped, not treated as the winner.
+  const costing = costOrders(
+    [line({ item: "Parsley", qty: 1, unit: "kg" })],
+    [
+      { item: "parsley", unit: "bunches", price: 2, supplier: "Coles" },
+      { item: "parsley", unit: "kg", price: 8, supplier: "Aldi" },
+    ],
+    10,
+  );
+  assert.equal(costing.total, 8);
+  assert.equal(costing.priced[0].supplier, "Aldi");
+  assert.equal(costing.savedByShopping, 0, "one comparable price is no choice");
+});
+
+test("an item priced only in an unusable unit is still a mismatch", () => {
+  const costing = costOrders(
+    [line({ item: "Parsley", qty: 1, unit: "kg" })],
+    [{ item: "parsley", unit: "bunches", price: 2, supplier: "Coles" }],
+    10,
+  );
+  assert.equal(costing.priced.length, 0);
+  assert.equal(costing.mismatched.length, 1);
+  assert.equal(costing.complete, false);
+});
+
+test("shop prices in different but convertible units still compare", () => {
+  // Aldi priced per 100 g, Coles per kg. $1.40/100 g is $14/kg — dearer.
+  const costing = costOrders(
+    [line({ item: "Chorizo", qty: 1, unit: "kg" })],
+    [
+      { item: "chorizo", unit: "kg", price: 12, supplier: "Coles" },
+      { item: "chorizo", unit: "g", price: 0.014, supplier: "Aldi" },
+    ],
+    10,
+  );
+  assert.equal(costing.total, 12);
+  assert.equal(costing.priced[0].supplier, "Coles");
+});

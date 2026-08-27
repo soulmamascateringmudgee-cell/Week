@@ -55,8 +55,11 @@ interface ReviewRow {
   keep: boolean;
 }
 
+/** The three Mudgee has, plus the one a lot of country towns have instead. */
+const SHOPS = ["Woolworths", "Coles", "Aldi", "IGA"];
+
 /**
- * Photograph a supplier invoice; check what it read; apply it to the prices.
+ * Photograph a docket or a receipt; check what it read; apply it to the prices.
  *
  * The review table is the whole point, not a formality. These numbers go
  * straight into what a job costs and therefore into what somebody quotes, so
@@ -64,13 +67,20 @@ interface ReviewRow {
  * unit, and how that compares to the price already on file — before anything
  * is saved. A line the reader was unsure about says so, and a line whose unit
  * changed is flagged rather than turned into a percentage.
+ *
+ * A supermarket receipt reads differently from a wholesale docket — the amount
+ * is inside the product name rather than in a quantity column — so the two are
+ * different modes, and the reader is told which one it's looking at rather
+ * than left to work it out. The shop matters as much as the price: a town
+ * without a wholesaler means the same brisket has three prices, and the whole
+ * point is knowing which of them is cheapest.
  */
 export default function InvoiceReader({
   current,
   onApplied,
 }: {
   /** Prices already on file, for the comparison column. */
-  current: { item: string; unit: string; price: number }[];
+  current: { item: string; unit: string; price: number; supplier?: string | null }[];
   onApplied: (message: string) => void;
 }) {
   const [reading, setReading] = useState(false);
@@ -78,11 +88,23 @@ export default function InvoiceReader({
   const [error, setError] = useState("");
   const [invoice, setInvoice] = useState<ReadInvoice | null>(null);
   const [rows, setRows] = useState<ReviewRow[]>([]);
+  const [kind, setKind] = useState<"invoice" | "receipt">("invoice");
+  /** Which shop the receipt is from, when the header didn't say. */
+  const [shop, setShop] = useState("");
 
-  function build(read: ReadInvoice): ReviewRow[] {
+  function build(read: ReadInvoice, forShop: string): ReviewRow[] {
+    // Keyed by item *and* shop. Comparing an Aldi receipt line against the
+    // Woolworths price on file would report a 30% fall that is really just two
+    // different shops — the sort of confident wrong number this whole app is
+    // built to avoid. No price for this shop yet means the line is new here,
+    // which is true and useful.
     const priced = new Map(
-      current.map((p) => [p.item.toLowerCase(), { price: p.price, unit: p.unit }]),
+      current.map((p) => [
+        `${p.item.toLowerCase()}|${(p.supplier ?? "").toLowerCase()}`,
+        { price: p.price, unit: p.unit },
+      ]),
     );
+    const key = (item: string) => `${item}|${forShop.toLowerCase()}`;
 
     const built: ReviewRow[] = [];
     for (const line of read.lines) {
@@ -94,7 +116,7 @@ export default function InvoiceReader({
         item: unit.item,
         price: unit.price,
         unit: unit.unit,
-        change: describeChange(priced.get(unit.item) ?? null, unit),
+        change: describeChange(priced.get(key(unit.item)) ?? null, unit),
         unclear: line.unclear ?? "",
         printed: `${line.qty} ${line.unit} for $${line.lineTotal.toFixed(2)}`,
         keep: true,
@@ -119,27 +141,32 @@ export default function InvoiceReader({
       const response = await fetch("/api/read-invoice", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ mediaType: file.type, data }),
+        body: JSON.stringify({ mediaType: file.type, data, kind }),
       });
       const body = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        setError(body.error ?? "Couldn't read that invoice.");
+        setError(body.error ?? `Couldn't read that ${kind}.`);
         return;
       }
 
       const readInvoice = body.invoice as ReadInvoice;
-      const built = build(readInvoice);
+      // What you picked wins over what the header read. You know which shop
+      // you were standing in; the top of a crumpled receipt might not say.
+      const forShop = shop.trim() || readInvoice.supplier || "";
+      const built = build({ ...readInvoice, supplier: forShop }, forShop);
       if (built.length === 0) {
         setError(
-          "Nothing on that docket had both an amount and a price. Check the quantities column is in frame.",
+          kind === "receipt"
+            ? "Nothing on that receipt had both an amount and a price. Check the item lines are in frame, not just the total."
+            : "Nothing on that docket had both an amount and a price. Check the quantities column is in frame.",
         );
         return;
       }
-      setInvoice(readInvoice);
+      setInvoice({ ...readInvoice, supplier: forShop });
       setRows(built);
     } catch {
-      setError("Couldn't read that invoice.");
+      setError(`Couldn't read that ${kind}.`);
     } finally {
       setReading(false);
     }
@@ -170,7 +197,9 @@ export default function InvoiceReader({
       setInvoice(null);
       setRows([]);
       onApplied(
-        `${body.saved} price${body.saved === 1 ? "" : "s"} updated from that docket.` +
+        `${body.saved} price${body.saved === 1 ? "" : "s"} updated from that ${kind}` +
+          (invoice?.supplier ? ` at ${invoice.supplier}` : "") +
+          "." +
           (body.warning ? ` ${body.warning}` : ""),
       );
     } catch {
@@ -184,12 +213,59 @@ export default function InvoiceReader({
 
   return (
     <div className="card">
-      <h2>Photograph an invoice</h2>
+      <h2>Photograph a docket</h2>
       <p className="basis">
-        The docket from your butcher, greengrocer or wholesaler. It reads the
-        lines into prices you can check, then updates your list — what you
-        actually paid, not a supermarket shelf price.
+        It reads the lines into prices you can check, then updates your list —
+        what you actually paid, not an advertised price.
       </p>
+
+      <fieldset className="choices">
+        <legend>What are you photographing?</legend>
+        <label>
+          <input
+            type="radio"
+            name="docket-kind"
+            checked={kind === "invoice"}
+            disabled={reading}
+            onChange={() => setKind("invoice")}
+          />
+          A supplier invoice — butcher, greengrocer, wholesaler
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="docket-kind"
+            checked={kind === "receipt"}
+            disabled={reading}
+            onChange={() => setKind("receipt")}
+          />
+          A supermarket receipt — Woolworths, Coles, Aldi
+        </label>
+      </fieldset>
+
+      {kind === "receipt" && (
+        <>
+          <label htmlFor="receipt-shop">Which shop?</label>
+          <select
+            id="receipt-shop"
+            value={shop}
+            disabled={reading}
+            onChange={(e) => setShop(e.target.value)}
+          >
+            <option value="">Read it off the receipt</option>
+            {SHOPS.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+          <p className="basis">
+            Every price is saved against its shop, so the same brisket can hold
+            a Woolies price and an Aldi one. Costing a job then takes whichever
+            is cheapest and tells you where to go.
+          </p>
+        </>
+      )}
 
       <input
         id="invoice-photo"
@@ -204,7 +280,11 @@ export default function InvoiceReader({
           if (file) void read(file);
         }}
       />
-      {reading && <p className="notice">Reading the invoice…</p>}
+      {reading && (
+        <p className="notice">
+          Reading the {kind === "receipt" ? "receipt" : "invoice"}…
+        </p>
+      )}
 
       {error && (
         <p className="notice warn" style={{ marginTop: 12 }}>
