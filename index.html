@@ -31,6 +31,7 @@
         <a href="#classes">Classes</a>
         <a href="#schedule">Schedule</a>
         <a href="#event">Fight Night</a>
+        <a href="#reels">Reels</a>
         <a href="#contact">Contact</a>
       </nav>
       <a href="https://bomberboxing.gymmasteronline.com/portal/signup" target="_blank" rel="noopener" class="btn btn-primary btn-sm nav-cta">Sign Up</a>
@@ -43,6 +44,7 @@
       <a href="#classes">Classes</a>
       <a href="#schedule">Schedule</a>
       <a href="#event">Fight Night</a>
+      <a href="#reels">Reels</a>
       <a href="#contact">Contact</a>
       <a href="https://bomberboxing.gymmasteronline.com/portal/signup" target="_blank" rel="noopener" class="btn btn-primary">Sign Up</a>
     </div>
@@ -321,6 +323,31 @@
     </div>
   </section>
 
+  <!-- ===== REELS / SOCIAL VIDEO ===== -->
+  <section class="section reels" id="reels">
+    <div class="container">
+      <div class="section-head reels-head">
+        <div>
+          <p class="section-eyebrow">Straight from the gym</p>
+          <h2 class="section-title">Bomber <span class="text-red">reels</span>.</h2>
+          <p class="lead reels-lead">
+            Rounds, results and ringwalks — short clips from training and fight night.
+            Tap a reel to watch, then follow us for the full story.
+          </p>
+        </div>
+        <a href="https://www.instagram.com/bomberboxing" target="_blank" rel="noopener" class="btn btn-ghost reels-follow">Follow @bomberboxing</a>
+      </div>
+
+      <!-- Cards are rendered from the REELS list in script.js -->
+      <div class="reels-grid" id="reelsGrid" role="list" aria-label="Bomber Boxing video reels"></div>
+
+      <p class="reels-note">
+        Got a clip worth sharing? Tag <strong>@bomberboxing</strong> or send it through the
+        <a href="#contact">enquiry form</a> and we'll get it up.
+      </p>
+    </div>
+  </section>
+
   <!-- ===== CTA / CONTACT ===== -->
   <section class="section contact" id="contact">
     <div class="container contact-grid">
@@ -408,6 +435,16 @@
       </div>
     </div>
   </footer>
+
+  <!-- ===== REEL LIGHTBOX ===== -->
+  <div class="reel-lightbox" id="reelLightbox" role="dialog" aria-modal="true" aria-label="Reel player" hidden>
+    <div class="reel-lightbox-backdrop" data-reel-close></div>
+    <div class="reel-lightbox-inner">
+      <button class="reel-close" id="reelClose" type="button" aria-label="Close reel" data-reel-close>&times;</button>
+      <div class="reel-stage" id="reelStage"><!-- active <video> injected here --></div>
+      <p class="reel-caption" id="reelCaption"></p>
+    </div>
+  </div>
 
   <script src="/script.js"></script>
 </body>
