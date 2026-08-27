@@ -2,6 +2,7 @@
 
 import PrintButton from "@/components/PrintButton.tsx";
 import Section from "@/components/Section.tsx";
+import { stockedCount } from "@/lib/pantry.ts";
 import { DISCLAIMER_TEXT } from "@/lib/options.ts";
 import type { Category, EventPlan, OrderLine } from "@/lib/types.ts";
 
@@ -43,6 +44,7 @@ const count = (n: number, one: string, many = `${one}s`) =>
 export default function EventResult({ plan }: { plan: EventPlan }) {
   const grouped = group(plan.orders);
   const costing = plan.costing;
+  const stocked = stockedCount(plan.orders);
 
   return (
     <section>
@@ -83,7 +85,11 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
 
       <Section
         title="The order"
-        count={count(plan.orders.length, "line")}
+        count={
+          stocked > 0
+            ? `${count(plan.orders.length, "line")} · ${stocked} in the pantry`
+            : count(plan.orders.length, "line")
+        }
         open
       >
         <p className="basis">
@@ -100,6 +106,18 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
           because the order sheet is the thing you came for and nothing on it
           should start hidden; folding is something you do as you go.
         */}
+        {stocked > 0 && (
+          <p className="notice good">
+            <strong>
+              ✻ marks {stocked} line{stocked === 1 ? "" : "s"} you already have
+              some of.
+            </strong>{" "}
+            The order still shows what the job needs; underneath it says what
+            your count says and what&rsquo;s left to buy. Nothing has been taken
+            off — check the shelf before you shop.
+          </p>
+        )}
+
         {grouped.map(([category, lines]) => (
           <Section
             key={category}
@@ -121,6 +139,16 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                   {lines.map((line) => (
                     <tr key={`${line.item}-${line.forDish}`}>
                       <td>
+                        {/* The mark you can see at a glance down the column,
+                            without reading a word of it. */}
+                        {line.inStock && (
+                          <span
+                            className="have"
+                            aria-label="some already in the pantry"
+                          >
+                            ✻
+                          </span>
+                        )}
                         {line.item}
                         {line.assumption && <span className="tag">assumed</span>}
                         <div className="basis">{line.basis}</div>
@@ -128,6 +156,35 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                       <td>{line.forDish}</td>
                       <td className="num">
                         {line.qty} {line.unit}
+                        {/* The order stays at what the job needs. What the
+                            pantry says goes underneath it, never instead. */}
+                        {line.inStock && (
+                          <div
+                            className={
+                              line.inStock.covered ? "stocked all" : "stocked"
+                            }
+                          >
+                            {line.inStock.covered ? (
+                              <>
+                                have {line.inStock.have} {line.inStock.haveUnit}{" "}
+                                — <strong>buy none</strong>
+                              </>
+                            ) : line.inStock.buy === null ? (
+                              <>
+                                have {line.inStock.have} {line.inStock.haveUnit}{" "}
+                                — check before you shop
+                              </>
+                            ) : (
+                              <>
+                                have {line.inStock.have} {line.inStock.haveUnit}{" "}
+                                —{" "}
+                                <strong>
+                                  buy {line.inStock.buy} {line.unit}
+                                </strong>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
