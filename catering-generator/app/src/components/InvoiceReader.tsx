@@ -7,6 +7,7 @@ import {
   toUnitPrice,
   type PriceChange,
 } from "@/lib/price-change.ts";
+import { UploadTooLargeError, prepareUpload } from "@/lib/upload-file.ts";
 
 interface ReadLine {
   item: string;
@@ -54,6 +55,9 @@ interface ReviewRow {
   printed: string;
   keep: boolean;
 }
+
+/** Matches the API's own ceiling for a PDF; images are shrunk under it. */
+const MAX_UPLOAD_BYTES = 30_000_000;
 
 /** The three Mudgee has, plus the one a lot of country towns have instead. */
 const SHOPS = ["Woolworths", "Coles", "Aldi", "IGA"];
@@ -131,17 +135,19 @@ export default function InvoiceReader({
     setInvoice(null);
     setRows([]);
     try {
-      const data = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onerror = () => reject(new Error("read failed"));
-        reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
-        reader.readAsDataURL(file);
-      });
+      // Shrunk and re-encoded here rather than shipped whole: an iPhone photo
+      // is HEIC, which the API doesn't take, and 12 MB of it over country
+      // internet to read forty words is a poor trade.
+      const upload = await prepareUpload(file, MAX_UPLOAD_BYTES);
 
       const response = await fetch("/api/read-invoice", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ mediaType: file.type, data, kind }),
+        body: JSON.stringify({
+          mediaType: upload.mediaType,
+          data: upload.data,
+          kind,
+        }),
       });
       const body = await response.json().catch(() => ({}));
 
@@ -165,8 +171,14 @@ export default function InvoiceReader({
       }
       setInvoice({ ...readInvoice, supplier: forShop });
       setRows(built);
-    } catch {
-      setError(`Couldn't read that ${kind}.`);
+    } catch (problem) {
+      // A PDF too big to send is a thing the cook can act on, so it says what
+      // to do. Anything else is ours, not theirs.
+      setError(
+        problem instanceof UploadTooLargeError
+          ? problem.message
+          : `Couldn't read that ${kind}.`,
+      );
     } finally {
       setReading(false);
     }
@@ -213,10 +225,11 @@ export default function InvoiceReader({
 
   return (
     <div className="card">
-      <h2>Photograph a docket</h2>
+      <h2>Add a docket</h2>
       <p className="basis">
-        It reads the lines into prices you can check, then updates your list —
-        what you actually paid, not an advertised price.
+        Photograph it, pick one out of your camera roll, or upload the PDF the
+        supplier emailed. It reads the lines into prices you can check, then
+        updates your list — what you actually paid, not an advertised price.
       </p>
 
       <fieldset className="choices">
@@ -264,14 +277,25 @@ export default function InvoiceReader({
             a Woolies price and an Aldi one. Costing a job then takes whichever
             is cheapest and tells you where to go.
           </p>
+          <p className="basis">
+            A photo of the paper receipt or a PDF both work. Photos are shrunk
+            on your phone before they upload, so a big picture over slow
+            internet isn&rsquo;t a problem.
+          </p>
         </>
       )}
 
+      {/*
+        No `capture` attribute. Setting it forces the camera and removes the
+        "Photo Library" and "Browse" options from the phone's own picker — so a
+        receipt already sitting in the camera roll, or the PDF the supplier
+        emailed, becomes impossible to choose. Without it the OS offers all
+        three, camera included.
+      */}
       <input
         id="invoice-photo"
         type="file"
-        accept="image/*"
-        capture="environment"
+        accept="image/*,application/pdf"
         disabled={reading}
         onChange={(e) => {
           const file = e.target.files?.[0];

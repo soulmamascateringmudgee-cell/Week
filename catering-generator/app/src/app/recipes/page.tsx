@@ -364,7 +364,6 @@ export default function RecipesPage() {
             id="recipe-photo"
             type="file"
             accept="image/*"
-            capture="environment"
             disabled={readingPhoto}
             onChange={(e) => {
               const file = e.target.files?.[0];
