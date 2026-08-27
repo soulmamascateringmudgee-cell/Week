@@ -49,6 +49,13 @@ export interface OrderLine {
     buy: number | null;
     covered: boolean;
   };
+  /**
+   * True when this line's amount was stuck in the ingredient name and the row
+   * said "1 ea", so the quantity here is a multiplication of the wrong thing.
+   * Not an assumption — an assumption is a figure we stand behind and label.
+   * This is a figure that is simply wrong until the recipe is fixed.
+   */
+  unscalable?: boolean;
 }
 
 /** Something already on the shelf, in the freezer, or in the packaging store. */
@@ -74,6 +81,8 @@ export interface ScaledIngredient {
   item: string;
   qty: number;
   unit: string;
+  /** The amount was in the name; this number is a multiplication of "1 ea". */
+  unscalable?: boolean;
 }
 
 /**

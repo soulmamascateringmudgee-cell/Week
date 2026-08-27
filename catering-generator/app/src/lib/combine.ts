@@ -75,6 +75,10 @@ export function combineOrders(orders: OrderLine[]): OrderLine[] {
         .map((line) => `${line.qty} ${line.unit} for ${line.forDish}`)
         .join("; ")}`,
       assumption: lines.some((line) => line.assumption),
+      // One bad line poisons the total it is added into, so the flag survives
+      // the merge. Dropping it here would launder a wrong number into a
+      // combined line that looks like every other one.
+      ...(lines.some((line) => line.unscalable) ? { unscalable: true } : {}),
     });
   }
 

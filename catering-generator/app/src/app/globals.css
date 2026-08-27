@@ -1593,3 +1593,17 @@ ul.plain li {
 .stocked.all {
   color: var(--good);
 }
+
+/*
+  A quantity that is wrong.
+
+  Struck through rather than tinted, because this has to survive a printer and
+  a glance. A colour alone would say "look at me"; a line through the number
+  says "do not use this one", which is the actual instruction.
+*/
+.broken-qty {
+  text-decoration: line-through;
+  text-decoration-color: var(--warn);
+  text-decoration-thickness: 1.5px;
+  color: var(--muted);
+}
