@@ -37,6 +37,28 @@ export interface OrderLine {
    * drifts upward, so anything that adds lines together uses this.
    */
   rawQty?: number;
+  /**
+   * What the pantry count says about this line. Present only when a stock
+   * entry matched. `qty` above is always the full amount the job needs — the
+   * order is never quietly reduced by a count that might be stale.
+   */
+  inStock?: {
+    have: number;
+    haveUnit: string;
+    /** What's left to buy, in this line's unit. Null when units don't reconcile. */
+    buy: number | null;
+    covered: boolean;
+  };
+}
+
+/** Something already on the shelf, in the freezer, or in the packaging store. */
+export interface StockItem {
+  id?: string;
+  item: string;
+  qty: number;
+  unit: string;
+  /** Where it is, when that matters: "chest freezer", "dry store". */
+  place?: string | null;
 }
 
 export interface CountdownStep {
@@ -138,6 +160,8 @@ export interface EventInput {
   biteSize?: BiteSize;
   /** The operator's price list, for costing the order. */
   prices?: IngredientPrice[];
+  /** What's already in the pantry, freezer and packaging store. */
+  stock?: StockItem[];
   /** Total food budget for this job, in dollars. */
   budget?: number;
   /** ISO yyyy-mm-dd */

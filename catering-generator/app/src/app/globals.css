@@ -1558,3 +1558,38 @@ ul.plain li {
 .prep-task:last-child {
   margin-bottom: 0;
 }
+
+/*
+  The pantry mark on an order line.
+
+  A star before the item name, readable straight down the column without
+  reading a word — you're scanning a list at the greengrocer, not studying it.
+  Terracotta rather than sage: it's a "look at this", not a "this is fine".
+*/
+.have {
+  color: var(--accent-ink);
+  font-size: 0.9em;
+  margin-right: 5px;
+  /* The glyph sits high in its box; this drops it onto the text baseline. */
+  vertical-align: -0.05em;
+}
+
+/*
+  What the count says, under the amount the job needs.
+
+  Deliberately below and smaller. The big number is what the job needs and must
+  stay the thing you read first — a pantry count is a memory of a Tuesday, and
+  the order sheet should not look like it has already been adjusted.
+*/
+.stocked {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--accent-ink);
+  line-height: 1.4;
+  margin-top: 3px;
+}
+
+/* Covered outright — good news rather than a job to do. */
+.stocked.all {
+  color: var(--good);
+}

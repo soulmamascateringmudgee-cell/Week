@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 
 import { planEvent } from "@/lib/event-engine.ts";
 import { createClient } from "@/lib/supabase/server.ts";
-import type { EventInput, IngredientPrice, Recipe } from "@/lib/types.ts";
+import type {
+  EventInput,
+  IngredientPrice,
+  Recipe,
+  StockItem,
+} from "@/lib/types.ts";
 
 export async function POST(request: Request) {
   let input: EventInput & { recipeIds?: unknown };
@@ -21,6 +26,7 @@ export async function POST(request: Request) {
 
   let recipes: Recipe[] = [];
   let prices: IngredientPrice[] = [];
+  let stock: StockItem[] = [];
 
   // Costing needs the price list whenever a budget was set, even on a job
   // with no recipes attached.
@@ -72,10 +78,18 @@ export async function POST(request: Request) {
       ...row,
       price: Number(row.price),
     })) as IngredientPrice[];
+
+    const { data: stockRows } = await supabase
+      .from("pantry_stock")
+      .select("item, qty, unit, place");
+    stock = (stockRows ?? []).map((row) => ({
+      ...row,
+      qty: Number(row.qty),
+    })) as StockItem[];
   }
 
   try {
-    return NextResponse.json(planEvent({ ...input, recipes, prices }));
+    return NextResponse.json(planEvent({ ...input, recipes, prices, stock }));
   } catch (error) {
     // The engine's own errors are written to be read by a chef, so they pass
     // straight through. Anything else is a bug and shouldn't leak internals.

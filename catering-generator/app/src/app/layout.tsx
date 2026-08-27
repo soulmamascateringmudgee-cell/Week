@@ -74,6 +74,7 @@ export default async function RootLayout({
                   <NavLink href="/service">Weekly service</NavLink>
                   <NavLink href="/recipes">Recipes</NavLink>
                   <NavLink href="/prices">Prices</NavLink>
+                  <NavLink href="/stock">Stock</NavLink>
                   <NavLink href="/jobs">Saved jobs</NavLink>
                   {owner && (
                     <NavLink href="/admin">Who&rsquo;s allowed in</NavLink>

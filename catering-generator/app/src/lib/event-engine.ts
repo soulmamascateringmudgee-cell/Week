@@ -33,6 +33,7 @@ import {
 } from "./tables.ts";
 import { combineOrders } from "./combine.ts";
 import { scaledToOrderUnits, toOrderUnits } from "./measure.ts";
+import { applyStock } from "./pantry.ts";
 import { toWholeProduce } from "./produce.ts";
 import { hasUnscalableAmounts, unscalableWarning } from "./recipe-health.ts";
 import { costOrders } from "./costing.ts";
@@ -564,7 +565,18 @@ export function planEvent(input: EventInput): EventPlan {
   // reasons. After combining, so a vegetable shared across three dishes rounds
   // up once instead of three times. After costing, because a price is quoted
   // per kilo and the costing has to see the kilos.
-  const shoppingOrders = toWholeProduce(combinedOrders);
+  // Last of all, what's already on the shelf. After the produce count, so a
+  // pantry holding 2 kg of cabbage is set against "3 cabbages" rather than
+  // against the grams that line used to be in — and, where those two units
+  // can't be reconciled, says so instead of guessing.
+  //
+  // This marks lines; it never reduces them. The order still says what the job
+  // needs, because a stock count is a memory of a Tuesday and by Friday
+  // somebody has used the tomatoes for staff lunch.
+  const shoppingOrders = applyStock(
+    toWholeProduce(combinedOrders),
+    input.stock ?? [],
+  );
 
   return {
     guests,
