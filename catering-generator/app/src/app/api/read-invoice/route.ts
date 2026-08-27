@@ -81,6 +81,63 @@ const SCHEMA = {
   additionalProperties: false,
 } as const;
 
+/**
+ * A supermarket receipt is not a wholesale docket, and reading it as one gets
+ * the quantities wrong.
+ *
+ * A docket has a quantity column. A Woolworths receipt mostly doesn't: the
+ * amount lives inside the product name ("MILK FC 2L  $3.10"), which is exactly
+ * the noise the wholesale prompt is told to strip out. Loose produce is the
+ * other way round, printing its own weight and per-kilo rate on a second line.
+ * Then there are discount lines, loyalty lines and a GST summary that means
+ * something different when most of a caterer's basket is GST-free fresh food.
+ *
+ * So it gets its own instructions rather than a shared prompt with caveats.
+ */
+const RECEIPT_SYSTEM = `You read Australian supermarket receipts — Woolworths, Coles, Aldi, IGA — and return the food lines as structured data.
+
+Give the ingredient a name a cook would search for, with the brand and the pack
+size taken out. "WW CARROTS 1KG" is "Carrots". "MILK FC 2L" is "Full cream
+milk". "COL RSP CHKN THIGH" is "Chicken thigh".
+
+qty is the total amount that line bought, in the unit you report, and on a
+receipt it comes from one of two places:
+
+  The pack size in the product name. "MILK FC 2L $3.10" is qty 2, unit L.
+  "CARROTS 1KG $2.50" is qty 1, unit kg. "EGGS FREE RANGE 12PK $6.50" is
+  qty 12, unit ea. If a line is a multiple — "2 @ $3.10" above or beside a
+  2 L milk — that is 4 L in total, not 2.
+
+  The weighed line. Loose produce prints its own weight and rate, like
+  "BROCCOLI 0.512kg NET @ $7.90/kg   $4.04". qty is 0.512, unit kg.
+
+If a line names no amount at all — "LETTUCE ICEBERG  $3.90" — report qty 1 and
+unit ea. Do not invent a weight for it. Say so in that line's "unclear".
+
+lineTotal is what was actually paid for that line. If a discount or special is
+printed against the line, use the price after it. If a discount appears as its
+own separate line, subtract it from the line it belongs to where the receipt
+makes that obvious, and note it; otherwise leave both and say so in notes.
+
+Skip anything that is not food or a food ingredient: bags, loyalty points,
+rounding, subtotals, the GST summary, the total, the payment lines. Also skip
+non-food grocery — cleaning products, pet food, toiletries.
+
+Australian supermarket prices are shown GST-inclusive, and most fresh food is
+GST-free. Report the printed price. Do not try to strip GST out.
+
+supplier is the shop: "Woolworths", "Coles", "Aldi", "IGA". Take it from the
+receipt header. If the header is cut off or unreadable, use an empty string
+rather than guessing from the layout.
+
+Put anything you are unsure about in that line's "unclear" — an abbreviation
+you had to expand, a pack size you inferred, a weight you couldn't read, a
+discount you weren't sure applied. A wrong price a caterer trusts goes straight
+into a quote, so an uncertain line that says so is worth far more than a
+confident guess.
+
+If the image is not a receipt, return an empty lines array.`;
+
 const SYSTEM = `You read supplier invoices and delivery dockets from food wholesalers, butchers, greengrocers and dry goods suppliers, and return the priced lines as structured data.
 
 Give the ingredient a name a cook would search for. Supplier codes, pack
@@ -126,13 +183,18 @@ export async function POST(request: Request) {
 
   let mediaType: string;
   let base64: string;
+  let isReceipt = false;
   try {
     const body = (await request.json()) as {
       mediaType?: unknown;
       data?: unknown;
+      kind?: unknown;
     };
     mediaType = typeof body.mediaType === "string" ? body.mediaType : "";
     base64 = typeof body.data === "string" ? body.data : "";
+    // Anything other than an explicit "receipt" reads as a wholesale docket,
+    // which is what every existing caller sends.
+    isReceipt = body.kind === "receipt";
   } catch {
     return NextResponse.json({ error: "Expected a JSON body." }, { status: 400 });
   }
@@ -150,13 +212,16 @@ export async function POST(request: Request) {
     );
   }
 
+  // Every message the cook sees should name the thing they photographed.
+  const noun = isReceipt ? "receipt" : "invoice";
+
   const client = new Anthropic();
 
   try {
     const response = await client.messages.create({
       model: "claude-opus-5",
       max_tokens: 8000,
-      system: SYSTEM,
+      system: isReceipt ? RECEIPT_SYSTEM : SYSTEM,
       output_config: {
         effort: "low",
         format: { type: "json_schema", schema: SCHEMA },
@@ -169,7 +234,10 @@ export async function POST(request: Request) {
               type: "image",
               source: { type: "base64", media_type: mediaType, data: base64 },
             },
-            { type: "text", text: "Read this invoice." },
+            {
+              type: "text",
+              text: isReceipt ? "Read this receipt." : "Read this invoice.",
+            },
           ],
         },
       ],
@@ -177,7 +245,7 @@ export async function POST(request: Request) {
 
     if (response.stop_reason === "refusal") {
       return NextResponse.json(
-        { error: "Couldn't read that invoice. Type the prices in instead." },
+        { error: `Couldn't read that ${noun}. Type the prices in instead.` },
         { status: 422 },
       );
     }
@@ -185,7 +253,7 @@ export async function POST(request: Request) {
     const text = response.content.find((block) => block.type === "text");
     if (!text) {
       return NextResponse.json(
-        { error: "Couldn't read that invoice. Type the prices in instead." },
+        { error: `Couldn't read that ${noun}. Type the prices in instead.` },
         { status: 422 },
       );
     }
@@ -201,7 +269,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "No priced lines found. Check the whole docket is in frame and the amounts are readable.",
+            `No priced lines found. Check the whole ${noun} is in frame and the amounts are readable.`,
         },
         { status: 422 },
       );

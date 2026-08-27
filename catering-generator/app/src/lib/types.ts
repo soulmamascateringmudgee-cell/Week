@@ -175,7 +175,24 @@ export interface JobCosting {
   /** Total of the lines that could be costed — not necessarily the whole job. */
   total: number;
   perHead: number;
-  priced: { item: string; cost: number; basis: string }[];
+  priced: {
+    item: string;
+    cost: number;
+    basis: string;
+    /** Which shop this price came from, when the price says. */
+    supplier?: string | null;
+    /**
+     * What the same line would have cost at the dearest shop holding a price
+     * for it. Absent when only one shop has a price — there's no choice to
+     * report.
+     */
+    dearestCost?: number;
+  }[];
+  /**
+   * What buying each line at its cheapest shop saves against buying every
+   * line at its dearest. Zero when no item has more than one price on file.
+   */
+  savedByShopping: number;
   /** Ingredients with no price on file. */
   unpriced: string[];
   /** Priced, but in a unit that can't be reconciled with the order line. */

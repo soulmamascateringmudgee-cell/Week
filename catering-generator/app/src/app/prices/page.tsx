@@ -99,6 +99,27 @@ export default function PricesPage() {
     await load();
   }
 
+  /*
+    Which row is the best buy for each ingredient.
+
+    Grouped by item *and* unit, never by item alone: $2 a bunch is not cheaper
+    than $8 a kilo, it's a different way of buying parsley, and a green tag
+    saying otherwise would send you to the wrong shop. A group with one row
+    gets no tag — there's nothing to be cheapest than.
+  */
+  const cheapest = new Set<string>();
+  const groups = new Map<string, typeof prices>();
+  for (const row of prices) {
+    const key = `${row.item}|${row.unit}`;
+    const group = groups.get(key);
+    if (group) group.push(row);
+    else groups.set(key, [row]);
+  }
+  for (const group of groups.values()) {
+    if (group.length < 2) continue;
+    cheapest.add(group.reduce((a, b) => (b.price < a.price ? b : a)).id);
+  }
+
   return (
     <>
       <h1>What things cost</h1>
@@ -116,7 +137,12 @@ export default function PricesPage() {
       )}
 
       <InvoiceReader
-        current={prices.map(({ item, unit, price }) => ({ item, unit, price }))}
+        current={prices.map(({ item, unit, price, supplier }) => ({
+          item,
+          unit,
+          price,
+          supplier,
+        }))}
         onApplied={(message) => {
           setNote(message);
           void load();
@@ -286,8 +312,13 @@ export default function PricesPage() {
               <tbody>
                 {prices.map((row) => (
                   <tr key={row.id}>
-                    <td>{row.item}</td>
-                    <td>{row.supplier ?? "—"}</td>
+                    <td>
+                      {row.item}
+                      {cheapest.has(row.id) && (
+                        <span className="tag good">cheapest</span>
+                      )}
+                    </td>
+                    <td>{row.supplier || "—"}</td>
                     <td className="num">
                       ${row.price.toFixed(2)} / {row.unit}
                     </td>

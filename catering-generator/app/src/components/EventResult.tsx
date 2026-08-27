@@ -200,6 +200,18 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
             </p>
           )}
 
+          {costing.savedByShopping > 0 && (
+            <p className="notice good">
+              <strong>
+                ${costing.savedByShopping.toFixed(2)} of that is shopping
+                around.
+              </strong>{" "}
+              Every line below is costed at the cheapest shop that has a price
+              for it, and says which one. Buying the lot at the dearest would
+              come to ${(costing.total + costing.savedByShopping).toFixed(2)}.
+            </p>
+          )}
+
           {costing.priced.length > 0 && (
             <div className="table-scroll">
               <table>
@@ -216,7 +228,14 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                         {line.item}
                         <div className="basis">{line.basis}</div>
                       </td>
-                      <td className="num">${line.cost.toFixed(2)}</td>
+                      <td className="num">
+                        ${line.cost.toFixed(2)}
+                        {line.dearestCost !== undefined && (
+                          <div className="basis">
+                            ${line.dearestCost.toFixed(2)} elsewhere
+                          </div>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
