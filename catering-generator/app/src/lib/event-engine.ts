@@ -33,6 +33,7 @@ import {
 } from "./tables.ts";
 import { combineOrders } from "./combine.ts";
 import { scaledToOrderUnits, toOrderUnits } from "./measure.ts";
+import { toWholeProduce } from "./produce.ts";
 import { hasUnscalableAmounts, unscalableWarning } from "./recipe-health.ts";
 import { costOrders } from "./costing.ts";
 import { addDays, daysBetween, formatDate, parseISODate } from "./dates.ts";
@@ -558,6 +559,13 @@ export function planEvent(input: EventInput): EventPlan {
       ? costOrders(combinedOrders, input.prices ?? [], guests, input.budget)
       : undefined;
 
+  // Fresh produce is bought by the piece, so the order sheet counts it that
+  // way — four carrots, not 380 g of carrot. This runs last of all, for two
+  // reasons. After combining, so a vegetable shared across three dishes rounds
+  // up once instead of three times. After costing, because a price is quoted
+  // per kilo and the costing has to see the kilos.
+  const shoppingOrders = toWholeProduce(combinedOrders);
+
   return {
     guests,
     crewMeals: CREW_MEALS,
@@ -567,7 +575,7 @@ export function planEvent(input: EventInput): EventPlan {
     servedPerProtein: round1(servedPerProtein),
     // One line per ingredient, not one per dish. Three bacon lines is three
     // chances to order the wrong amount.
-    orders: combinedOrders,
+    orders: shoppingOrders,
     costing,
     dietaryNotes,
     packaging,
