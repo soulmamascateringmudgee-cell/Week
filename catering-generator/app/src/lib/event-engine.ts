@@ -32,6 +32,7 @@ import {
   sideGramsPerPerson,
 } from "./tables.ts";
 import { combineOrders } from "./combine.ts";
+import { scaledToOrderUnits, toOrderUnits } from "./measure.ts";
 import { hasUnscalableAmounts, unscalableWarning } from "./recipe-health.ts";
 import { costOrders } from "./costing.ts";
 import { addDays, daysBetween, formatDate, parseISODate } from "./dates.ts";
@@ -134,13 +135,18 @@ export function planEvent(input: EventInput): EventPlan {
       course: recipe.course ?? null,
       unscalable,
       scaleNote: `written for ${recipe.serves} → ×${factor.toFixed(2)} for ${effectiveGuests} (incl. ${CREW_MEALS} crew) + ${Math.round(bufferPct * 100)}% buffer`,
-      ingredients: recipe.ingredients
-        .filter((i) => Number.isFinite(i.qty) && i.qty > 0)
-        .map((i) => ({
-          item: i.item,
-          qty: roundForUnit(i.qty * factor, i.unit),
-          unit: i.unit,
-        })),
+      // The cook's own sheet gets the same treatment as the order sheet. At
+      // this scale "41.8 cup" is no more useful standing at the bench than it
+      // is standing at the greengrocer.
+      ingredients: scaledToOrderUnits(
+        recipe.ingredients
+          .filter((i) => Number.isFinite(i.qty) && i.qty > 0)
+          .map((i) => ({
+            item: i.item,
+            qty: roundForUnit(i.qty * factor, i.unit),
+            unit: i.unit,
+          })),
+      ),
       method: recipe.method ?? null,
       notes: recipe.notes ?? null,
     });
@@ -542,7 +548,11 @@ export function planEvent(input: EventInput): EventPlan {
 
   // Costing runs on the combined lines, so bacon is priced once against its
   // total rather than three times against three part-quantities.
-  const combinedOrders = combineOrders(orders);
+  // Spoons and cups become millilitres and grams before anything is totalled.
+  // A recipe's "1½ cups" scaled to a real job is "41.8 cup", which nobody can
+  // order — and two dishes measuring the same vinegar in different spoons
+  // would otherwise print as two lines nobody adds up.
+  const combinedOrders = combineOrders(toOrderUnits(orders));
   const costing =
     (input.prices ?? []).length > 0 || input.budget !== undefined
       ? costOrders(combinedOrders, input.prices ?? [], guests, input.budget)

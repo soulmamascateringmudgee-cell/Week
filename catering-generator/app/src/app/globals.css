@@ -1502,3 +1502,13 @@ ul.plain li {
     color: #000;
   }
 }
+
+/* One job on the prep list, under the day it belongs to. */
+.prep-task {
+  margin: 8px 0 12px;
+  font-size: 0.94rem;
+}
+
+.prep-task:last-child {
+  margin-bottom: 0;
+}

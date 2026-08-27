@@ -1,5 +1,6 @@
 "use client";
 
+import PrintButton from "@/components/PrintButton.tsx";
 import Section from "@/components/Section.tsx";
 import { DISCLAIMER_TEXT } from "@/lib/options.ts";
 import type { Category, EventPlan, OrderLine } from "@/lib/types.ts";
@@ -74,6 +75,10 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
             </span>
           </div>
         )}
+      </div>
+
+      <div className="actions">
+        <PrintButton />
       </div>
 
       <Section
@@ -298,6 +303,97 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
           </div>
         ))}
       </Section>
+
+      {/*
+        The prep list and the recipe sheets. These are what you work from at
+        the bench, as opposed to the order sheet, which is what you shop from.
+        Both come off the same scaled numbers as the order lines, so the sheet
+        and the shop cannot disagree.
+      */}
+      {plan.prep.length > 0 && (
+        <Section
+          title="Prep list"
+          count={count(
+            plan.prep.reduce((n, day) => n + day.tasks.length, 0),
+            "job",
+          )}
+          tone={plan.prep.some((day) => day.overdue) ? "warn" : undefined}
+        >
+          <p className="basis">
+            Worked backwards from the event date. A dish sits on the day its
+            longest step demands, and each line says why.
+          </p>
+          {plan.prep.map((day) => (
+            <div
+              className={day.overdue ? "step overdue" : "step"}
+              key={`${day.daysOut}-${day.date}`}
+            >
+              <div className="when">
+                {day.label}
+                {day.overdue && <span className="tag warn">passed</span>}
+              </div>
+              <div className="date">{day.date}</div>
+              {day.tasks.map((task) => (
+                <div className="prep-task" key={`${task.dish}-${task.task}`}>
+                  <strong>{task.dish}</strong> — {task.task}
+                  <div className="because">{task.because}</div>
+                  {task.ingredients.length > 0 && (
+                    <div className="amounts">
+                      {task.ingredients
+                        .map((i) => `${i.qty} ${i.unit} ${i.item}`)
+                        .join(" · ")}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
+        </Section>
+      )}
+
+      {plan.dishSheets.length > 0 && (
+        <Section
+          title="Recipe sheets"
+          count={count(plan.dishSheets.length, "dish")}
+        >
+          <p className="basis">
+            Every dish written out at this job&rsquo;s size, with its method.
+          </p>
+          {plan.dishSheets.map((dish) => (
+            <div className="sheet" key={dish.name}>
+              <div className="when">{dish.name}</div>
+              <div className="date">{dish.scaleNote}</div>
+
+              {/* Amounts stuck in the ingredient names — the numbers below are
+                  multiplications of "1 ea" and are not real. */}
+              {dish.unscalable && (
+                <p className="broken">
+                  <strong>Don&rsquo;t cook from these numbers.</strong> This
+                  recipe&rsquo;s amounts are in the ingredient names instead of
+                  the amount column, so scaling has multiplied the wrong thing.
+                  Fix it on the Recipes page.
+                </p>
+              )}
+
+              <table className="lines">
+                <tbody>
+                  {dish.ingredients.map((line, i) => (
+                    <tr key={`${dish.name}-${line.item}-${i}`}>
+                      <td>{line.item}</td>
+                      <td className="num">
+                        {dish.unscalable ? "—" : `${line.qty} ${line.unit}`}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {dish.method && <p className="method">{dish.method}</p>}
+              {dish.notes && <p className="method">{dish.notes}</p>}
+            </div>
+          ))}
+        </Section>
+      )}
 
       <Section title="Three risks on this job" count={count(plan.risks.length, "risk")}>
         {plan.risks.map((risk) => (
