@@ -9,10 +9,11 @@ Marketing website for **Bomber Boxing**, Mudgee's community boxing gym.
 A fast, zero-dependency static site — no build step required.
 
 ```
-index.html      # Single-page site (hero, about, classes, schedule, fight night, gallery, contact)
+index.html      # Single-page site (hero, about, classes, schedule, fight night, gallery, reels, contact)
 styles.css      # Brand styling (black / red / white)
-script.js       # Mobile nav + contact form (opens a prefilled email)
+script.js       # Mobile nav, contact form (prefilled email) + reels player
 assets/         # Logo and photos
+assets/reels/   # Short-form videos for the Reels section (see its README)
 ```
 
 ## Sections
@@ -23,6 +24,7 @@ assets/         # Logo and photos
 - **Schedule** — full weekly timetable
 - **Fight Night** — Mudgee Madness event (Sat 12 Sep 2026, Parklands Mudgee)
 - **Gallery** — photos from inside the gym
+- **Reels** — short-form training and fight-night videos in a tap-to-play lightbox
 - **Contact** — location, phone, email and an enquiry form
 
 ## Deploying to Vercel
@@ -48,6 +50,7 @@ vercel --prod # production
 - **Contact details** — search `index.html` for the phone/email/address.
 - **Fight night** — update the `#event` section and swap the poster in `assets/`.
 - **Photos** — drop new images in `assets/` and update the `<img>` `src` paths.
+- **Reels** — drop `.mp4` clips in `assets/reels/` and add them to the `REELS` list in `script.js` (see `assets/reels/README.md`).
 
 ## Contact
 
