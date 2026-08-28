@@ -1,0 +1,1609 @@
+/*
+ * Prep & Ordering — the look.
+ *
+ * The register is a good country kitchen, not a dashboard: warm paper, fired
+ * terracotta, eucalypt green, and a serif with some age on it. That's a
+ * deliberate choice about who this is for. A caterer in Mudgee reads a menu,
+ * an invoice and a prep list all day; making the tool look like accounting
+ * software would make it feel like more admin, which is the thing it exists
+ * to remove.
+ *
+ * Two rules constrain every decision below.
+ *
+ * It has to survive a printer. The order sheet and the prep list get printed
+ * and taken to the bench, and a page of coloured panels prints as grey mud.
+ * Everything decorative — shadows, fills, gradients, tints — is stripped in
+ * the print block at the bottom. Colour is never the only thing carrying a
+ * meaning; there is always a word or a border doing it too.
+ *
+ * It has to work on a phone held in one hand with the other hand full.
+ * Tap targets are generous, the nav scrolls rather than wrapping, and
+ * contrast is set for a bright kitchen rather than a dim office.
+ */
+
+:root {
+  /* Charcoal, warm grey. Never pure #000 — it's harsh on cream. */
+  --ink: #292b29;
+  --ink-soft: #4a4d49;
+  --muted: #706d67;
+
+  /* Warm cream, soft ivory, soft sage-grey rules. */
+  --paper: #f7f3ec;
+  --paper-warm: #fdfbf5;
+  --card: #fffcf7;
+  --line: #d9ddd5;
+  --line-strong: #c2c8bd;
+
+  /* Deep sage — the doing colour. Buttons, links, focus, the active tab.
+     Clears 5.3:1 on cream as text and 5.8:1 white-on-sage as a button, so
+     it carries both jobs. Hover goes darker rather than lighter, because a
+     mid-tone green loses contrast as it brightens. */
+  --primary: #526b5a;
+  --primary-bright: #43594a;
+  --primary-soft: #eaefe7;
+
+  /* Muted terracotta — the accent. Labels, tags, a rule that draws the eye.
+     Two values on purpose: the brief's #c9785c is lovely on a fill but only
+     reaches 3.0:1 as text on cream, well under the 4.5:1 a small label
+     needs. So the soft one is used where terracotta is *seen* — fills,
+     borders, marks — and the deep one wherever it is *read*. Same colour,
+     legible in a kitchen at arm's length. */
+  --accent: #c9785c;
+  --accent-ink: #a85436;
+  --accent-deep: #8f4429;
+  --accent-soft: #f9ece5;
+
+  /* The good-news colour: a price that fell, something saved. Sits in the
+     sage family, which is what "this went your way" should look like here. */
+  --good: #46644a;
+  --good-soft: #e8efe6;
+
+  /* Wattle. Notice-worthy but not wrong: assumptions, things to check. */
+  --gold: #7d6416;
+  --gold-soft: #f6efd9;
+
+  /* The one that means look at this before you order. */
+  --warn: #99281f;
+  --warn-soft: #fbebe9;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+
+  --shadow-sm: 0 1px 2px rgba(45, 52, 44, 0.05), 0 1px 3px rgba(45, 52, 44, 0.04);
+  --shadow-md: 0 2px 4px rgba(45, 52, 44, 0.04), 0 8px 20px rgba(45, 52, 44, 0.07);
+  --shadow-lg: 0 4px 8px rgba(45, 52, 44, 0.05), 0 16px 40px rgba(45, 52, 44, 0.1);
+
+  --font-display-stack: var(--font-display), ui-serif, Georgia, "Iowan Old Style",
+    "Palatino Linotype", serif;
+  --font-text-stack: var(--font-text), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Header, main, footer in a column so the footer sits at the bottom of a
+   short page instead of halfway up it with bare background underneath. */
+body {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text-stack);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+main.wrap {
+  flex: 1;
+  width: 100%;
+}
+
+/* A warm wash behind the top of the page. Fixed on its own layer rather than
+   background-attachment, which stutters badly while scrolling on iOS. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 500px at 15% -120px, #fdf6e9 0%, transparent 65%),
+    radial-gradient(900px 500px at 90% -160px, #eef2ea 0%, transparent 60%);
+}
+
+.wrap {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 36px 20px 96px;
+}
+
+/* ---- Shell ------------------------------------------------------------- */
+
+header.site {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 252, 247, 0.88);
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+}
+
+header.site .wrap {
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+header.site a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Scoped to beat `header.site a { color: inherit }` above, which is a more
+   specific selector than a bare `.brand` and was quietly winning — the name
+   rendered charcoal while the stylesheet said sage. */
+header.site a.brand {
+  font-family: var(--font-display-stack);
+  font-size: 1.16rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  font-variation-settings: "SOFT" 30;
+  white-space: nowrap;
+  color: var(--primary);
+}
+
+header.site a.brand:hover {
+  color: var(--primary-bright);
+}
+
+/* The nav scrolls sideways instead of wrapping. Seven links across a phone
+   would otherwise stack into a block that pushes the page content off the
+   first screen. */
+nav.modes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+  /* Without this the nav is a flex item at its full content width — eight
+     links wide — which pushes the whole document past the viewport and sets
+     every page scrolling sideways on a phone. It has to be allowed to shrink
+     before its own overflow-x can do anything. */
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  margin: -6px -20px -6px 0;
+  padding: 6px 20px 6px 0;
+}
+
+nav.modes::-webkit-scrollbar {
+  display: none;
+}
+
+nav.modes a,
+nav.modes button.linklike {
+  color: var(--muted);
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+nav.modes a:hover,
+nav.modes button.linklike:hover {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+/* Where you are. Set from the URL in NavLink, so it survives a reload and a
+   link opened in a new tab — a highlight held in component state would not. */
+nav.modes a.active {
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-weight: 600;
+}
+
+footer.site {
+  border-top: 1px solid var(--line);
+  background: var(--card);
+}
+
+footer.site .wrap {
+  padding: 20px;
+}
+
+footer.site a {
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+footer.site a:hover {
+  color: var(--primary);
+}
+
+/* Long URLs — a signup link an admin needs to copy — must wrap on a phone
+   rather than pushing the whole page sideways. */
+code {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  background: var(--paper-warm);
+  border: 1px solid var(--line);
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+
+/* ---- Type -------------------------------------------------------------- */
+
+h1,
+h2,
+h3,
+.section-title,
+.figure,
+.brand {
+  font-family: var(--font-display-stack);
+  font-variation-settings: "SOFT" 25;
+}
+
+h1 {
+  font-size: clamp(2.05rem, 1.5rem + 2.2vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  margin: 0 0 10px;
+}
+
+h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  margin: 40px 0 12px;
+}
+
+h3 {
+  font-size: 1.08rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 24px 0 8px;
+}
+
+p.lede {
+  color: var(--ink-soft);
+  font-size: 1.06rem;
+  margin: 0 0 30px;
+  max-width: 62ch;
+}
+
+/* Small caps above a heading — says what kind of page this is without
+   spending a line of the heading on it. */
+.eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent-ink);
+}
+
+/* ---- Surfaces ---------------------------------------------------------- */
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.card > h2:first-child,
+.card > h3:first-child {
+  margin-top: 0;
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+/* ---- Forms ------------------------------------------------------------- */
+
+label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+label .hint {
+  display: block;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  margin-top: 3px;
+}
+
+/*
+  A group of radio choices.
+
+  `label` is a bold block by default, which is right for a field caption above
+  an input and wrong for the words beside a radio button — they'd stack as
+  headings. In here each label is a row instead, at normal weight, with the
+  whole row clickable so a thumb on a phone doesn't have to find the dot.
+*/
+.choices {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 0 0 16px;
+  background: var(--paper-warm);
+}
+
+.choices legend {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0 6px;
+  color: var(--ink);
+}
+
+.choices label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 400;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  margin: 0;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.choices label + label {
+  border-top: 1px solid var(--line);
+}
+
+.choices input[type="radio"] {
+  /* Nudged down so the dot sits on the first line of a wrapped label. */
+  margin-top: 3px;
+  flex: none;
+  accent-color: var(--primary);
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+select,
+textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+input:hover:not(:disabled),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+/* Keyboard users still get a visible ring on everything else. */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.checks {
+  display: grid;
+  gap: 2px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+/* A whole row is the tap target, not just the 16px box. */
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.92rem;
+  font-weight: 400;
+  margin: 0;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.check:hover {
+  background: var(--primary-soft);
+}
+
+.check input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--primary);
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+
+/* ---- Buttons ----------------------------------------------------------- */
+
+button {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.12s ease, box-shadow 0.12s ease,
+    transform 0.06s ease;
+}
+
+button:hover:not(:disabled) {
+  background: var(--primary-bright);
+  border-color: var(--primary-bright);
+  box-shadow: var(--shadow-md);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: var(--shadow-sm);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: progress;
+  box-shadow: none;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--primary);
+  box-shadow: none;
+}
+
+button.secondary:hover:not(:disabled) {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: none;
+}
+
+/* Warm grey clears AA on cream by a hair and loses it on any tinted panel —
+   "Clear all" sits on the pale sage chosen-dishes box and came out at 4.4:1.
+   These are controls, not captions, so they take the darker ink. */
+button.linklike {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 400;
+  color: var(--ink-soft);
+  cursor: pointer;
+  box-shadow: none;
+}
+
+button.linklike:hover {
+  background: none;
+  color: var(--primary);
+  box-shadow: none;
+}
+
+/*
+ * A link that looks like a button. A <button> nested inside an <a> is invalid
+ * HTML, and browsers disagree about which one gets the tap — on a phone the
+ * button often swallows it and the navigation never happens. Anything that
+ * navigates is a link; anything that acts is a button.
+ */
+a.btn {
+  display: inline-block;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+a.btn:hover {
+  background: var(--primary-bright);
+  border-color: var(--primary-bright);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+
+a.btn.secondary {
+  background: transparent;
+  color: var(--primary);
+  box-shadow: none;
+}
+
+a.btn.secondary:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+  box-shadow: none;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+/* ---- Tables ------------------------------------------------------------ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line-strong);
+  white-space: nowrap;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover td {
+  background: var(--paper-warm);
+}
+
+/* Quantities and money. Tabular figures so a column of weights lines up —
+   a column that doesn't is a column you read twice. */
+td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ---- Small text and tags ----------------------------------------------- */
+
+.basis {
+  color: var(--muted);
+  font-size: 0.81rem;
+  line-height: 1.5;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border: 1px solid transparent;
+  margin-left: 6px;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+
+.tag.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.tag.good {
+  background: var(--good-soft);
+  color: var(--good);
+}
+
+.tag.check {
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+/* ---- Notices ------------------------------------------------------------
+ *
+ * Three tones, and the difference matters more than it looks. Everything
+ * used to be red, so "Reading the photo…" and "this job is over budget"
+ * arrived in the same alarm colour — which trains a cook to stop reading
+ * them, and the one that mattered got skipped with the rest.
+ *
+ * Neutral is the default because most of these are progress and information.
+ * A real warning has to be marked `warn` deliberately, and carries a word
+ * saying so as well as a colour.
+ */
+
+.notice {
+  border-left: 3px solid var(--line-strong);
+  background: var(--paper-warm);
+  color: var(--ink-soft);
+  padding: 12px 15px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-bottom: 12px;
+  font-size: 0.92rem;
+}
+
+.notice.warn {
+  border-left-color: var(--warn);
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.notice.check {
+  border-left-color: var(--gold);
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.notice.ok {
+  border-left-color: var(--good);
+  background: var(--good-soft);
+  color: var(--good);
+}
+
+/* ---- Recipe picker ------------------------------------------------------
+   Courses that open one at a time, and the running list of what's been
+   chosen. The chosen list sits above the sections on purpose — a folded
+   section must never be the only place a ticked dish appears. */
+
+.courses {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.courses details {
+  border-bottom: 1px solid var(--line);
+}
+
+.courses summary {
+  cursor: pointer;
+  padding: 13px 4px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  border-radius: var(--radius-sm);
+  transition: color 0.12s ease;
+}
+
+/* A hand-drawn chevron, because setting `display: flex` on a <summary>
+   suppresses the browser's own ::marker — which left every course heading
+   looking like plain text with nothing to say it opens. */
+.courses summary,
+.section > summary {
+  list-style: none;
+}
+
+.courses summary::-webkit-details-marker,
+.section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.courses summary::before {
+  content: "";
+  flex: none;
+  align-self: center;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.courses details[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+.courses summary:hover {
+  color: var(--primary);
+}
+
+.courses summary:hover::before {
+  border-color: var(--primary);
+}
+
+.courses details > .checks {
+  padding: 2px 0 14px 18px;
+}
+
+.chosen {
+  background: var(--primary-soft);
+  border: 1px solid #eddfd2;
+  border-radius: var(--radius-sm);
+  padding: 13px 15px;
+  margin-bottom: 4px;
+}
+
+.chosen-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.chips {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+/* Big enough to hit with a thumb in a kitchen, not a mouse in an office. */
+.chip {
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: #fff;
+  color: inherit;
+  border: 1px solid var(--line-strong);
+  box-shadow: none;
+}
+
+.chip:hover:not(:disabled) {
+  background: #fff;
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: none;
+}
+
+/* ---- Countdown, prep and recipe sheets ---------------------------------- */
+
+.step {
+  border-left: 2px solid var(--line-strong);
+  padding: 0 0 16px 18px;
+  margin-left: 6px;
+  position: relative;
+}
+
+/* The dot on the timeline. Without it a countdown is a list of paragraphs
+   with a stripe down the side. */
+.step::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 7px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--line-strong);
+}
+
+.step.overdue {
+  border-left-color: var(--warn);
+}
+
+.step.overdue::before {
+  background: var(--warn);
+  border-color: var(--warn);
+}
+
+.step .when {
+  font-weight: 700;
+  font-size: 0.94rem;
+}
+
+.step .date {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Sits under a card heading to say where the list came from. */
+.card > .note {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Why a prep job sits on the day it does. */
+.because {
+  color: var(--muted);
+}
+
+/* What goes into one dish, printed under its prep job. */
+.amounts {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 2px 0 6px;
+}
+
+/* One dish written out at this job's size. */
+.sheet {
+  padding: 0 0 16px 18px;
+  margin-left: 6px;
+  border-left: 2px solid var(--line-strong);
+  break-inside: avoid;
+}
+
+.sheet .lines {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 0.92rem;
+}
+
+.sheet .lines td {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.sheet .lines tr:hover td {
+  background: transparent;
+}
+
+.sheet .lines tr:last-child td {
+  border-bottom: none;
+}
+
+/* A recipe whose amounts can't be scaled — the numbers below are not real. */
+.sheet .broken {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--warn);
+  background: var(--warn-soft);
+  color: var(--warn);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.85rem;
+}
+
+.sheet .method {
+  margin: 12px 0 0;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  white-space: pre-line;
+}
+
+ul.plain {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+ul.plain li {
+  margin-bottom: 5px;
+  font-size: 0.92rem;
+}
+
+.risk {
+  margin-bottom: 16px;
+}
+
+.risk .what {
+  font-weight: 600;
+}
+
+.risk .fix {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.disclaimer {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* ---- Landing ------------------------------------------------------------ */
+
+.hero {
+  padding: 16px 0 0;
+}
+
+.hero .lede {
+  margin-bottom: 0;
+}
+
+.hero h1 {
+  max-width: 19ch;
+}
+
+.choice-list {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  margin-top: 28px;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+  transition: transform 0.14s ease, box-shadow 0.14s ease,
+    border-color 0.14s ease;
+}
+
+.choice:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.choice strong {
+  font-family: var(--font-display-stack);
+  font-variation-settings: "SOFT" 25;
+  font-size: 1.28rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin-bottom: 8px;
+}
+
+.choice span {
+  color: var(--muted);
+  font-size: 0.91rem;
+  flex: 1;
+}
+
+/* The arrow only moves on hover, so the card reads as a thing you press
+   without needing a button inside a link. */
+/*
+ * The two calls to action, drawn as buttons rather than links with arrows.
+ *
+ * They're <span>s inside the card's <a>, not <button>s — a button nested in a
+ * link is invalid HTML and phones disagree about which one gets the tap. The
+ * whole card is the target; these just say so.
+ *
+ * One-off events take the sage, weekly service takes the terracotta. Two
+ * filled buttons in the two brand colours, side by side — which is the right
+ * call here after all: these genuinely are two doors into the same app rather
+ * than a primary action and a lesser one, and a caterer who runs a weekly
+ * pitch should not arrive to find their door drawn as the afterthought.
+ */
+.choice .go {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 8px;
+  /* Not flexible — the rule above matches this span too, and two growing
+     items split the slack between them, which left the two cards' buttons
+     sitting at different heights. Only the description stretches. */
+  flex: none;
+  margin-top: 20px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+
+.choice:hover .go {
+  background: var(--primary-bright);
+  border-color: var(--primary-bright);
+}
+
+/*
+ * The weekly-service button, in terracotta.
+ *
+ * It fills with the deep terracotta rather than the brief's #c9785c, for the
+ * same reason the labels do: white on #c9785c is 3.3:1 and charcoal on it is
+ * 4.3:1, so neither clears the 4.5:1 that button text at this size needs.
+ * Filled with #a85436 it reads at 5.3:1 and still plainly says terracotta.
+ */
+.choice .go.alt {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink);
+  color: #fff;
+}
+
+.choice:hover .go.alt {
+  background: var(--accent-deep);
+  border-color: var(--accent-deep);
+  color: #fff;
+}
+
+.choice .go::after {
+  content: "→";
+  transition: transform 0.14s ease;
+}
+
+.choice:hover .go::after {
+  transform: translateX(4px);
+}
+
+/* What the engine actually does, as a set of claims rather than bullets.
+   Each one is a reason to trust a number further down. */
+.features {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.features li {
+  padding: 15px 0 15px 20px;
+  border-top: 1px solid var(--line);
+  border-left: 3px solid transparent;
+  font-size: 0.94rem;
+  color: var(--ink-soft);
+  transition: border-color 0.12s ease, padding-left 0.12s ease;
+}
+
+.features li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+/* The disclaimer draws its own rule. Straight after the feature list that
+   made two lines with a blank band between them, which read as an empty
+   sixth row. */
+.features + .disclaimer {
+  border-top: none;
+  margin-top: 24px;
+  padding-top: 0;
+}
+
+.features li:hover {
+  border-left-color: var(--accent);
+}
+
+.features strong {
+  display: block;
+  font-family: var(--font-display-stack);
+  font-variation-settings: "SOFT" 25;
+  font-size: 1.04rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+
+/* ---- A saved dish in the recipe book ------------------------------------
+   These sit inside a course section, so they're separated by a rule rather
+   than boxed. A card inside a card reads as clutter and makes a book of
+   eighty dishes look like eighty problems. */
+
+.dish {
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+
+.dish:first-child {
+  padding-top: 4px;
+  border-top: none;
+}
+
+.dish:last-child {
+  padding-bottom: 0;
+}
+
+.dish h3 {
+  margin: 0 0 3px;
+}
+
+.dish .actions {
+  margin-top: 12px;
+}
+
+/* ---- Ingredient rows ---------------------------------------------------- */
+
+.row-item {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 700px) {
+  .row-item {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---- Dictation ----------------------------------------------------------
+   The transcript box is deliberately prominent — it is the step where a
+   mishearing gets caught, and a cook who skips it ends up with four of
+   something instead of flour and salt. */
+
+.dictate textarea {
+  min-height: 90px;
+  font-size: 0.95rem;
+}
+
+/* The recording dot. Movement is the clearest signal that it is listening;
+   anyone who has turned motion down gets a steady dot, which still reads. */
+.rec {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #fff;
+  margin-right: 7px;
+  vertical-align: 1px;
+  animation: rec-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes rec-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rec {
+    animation: none;
+  }
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ---- Result sections ----------------------------------------------------
+   A finished job is a page and a half of scrolling otherwise, and the
+   countdown — the part you need on the Thursday — is at the bottom of it.
+   Each heading carries its own size so a shut section still says how much
+   is inside. */
+
+.section {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.section > summary {
+  cursor: pointer;
+  padding: 18px 22px;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  transition: background-color 0.12s ease;
+}
+
+.section > summary:hover {
+  background: var(--paper-warm);
+}
+
+.section > summary:hover .section-title {
+  color: var(--primary);
+}
+
+/* Sits at the right-hand end of the heading and turns over when the section
+   opens. Same reason as the course chevron: a flex <summary> has no marker
+   of its own, so a shut section had nothing saying there was more inside. */
+.section > summary::after {
+  content: "";
+  margin-left: auto;
+  align-self: center;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.15s ease;
+}
+
+.section[open] > summary::after {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+.section > summary:hover::after {
+  border-color: var(--primary);
+}
+
+.section-title {
+  font-size: 1.18rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+/* A section that needs looking at before ordering — over budget, a passed
+   countdown step, dietaries to pack separately. Marked on the closed
+   heading, because that is where it has to be noticed. */
+.section.warn {
+  border-left: 3px solid var(--warn);
+}
+
+.section-body {
+  padding: 0 22px 22px;
+}
+
+.section-body > h3:first-child {
+  margin-top: 0;
+}
+
+/* ---- A supplier group inside the order sheet ----------------------------
+   The nested fold. Same behaviour as a section, but drawn as a rule and a
+   heading rather than another card — you shop this list one supplier at a
+   time, and at the greengrocer the other four categories are just scrolling
+   between you and the produce. */
+
+.subsection {
+  border-top: 1px solid var(--line);
+}
+
+.subsection:first-of-type {
+  border-top: none;
+}
+
+.subsection > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 14px 2px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  transition: color 0.12s ease;
+}
+
+.subsection > summary::-webkit-details-marker {
+  display: none;
+}
+
+.subsection > summary:hover .subsection-title {
+  color: var(--primary);
+}
+
+.subsection-title {
+  font-family: var(--font-display-stack);
+  font-variation-settings: "SOFT" 25;
+  font-size: 1.06rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Same chevron as the outer sections, one size down. */
+.subsection > summary::after {
+  content: "";
+  margin-left: auto;
+  align-self: center;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.15s ease;
+}
+
+.subsection[open] > summary::after {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+.subsection > summary:hover::after {
+  border-color: var(--primary);
+}
+
+.subsection-body {
+  padding-bottom: 16px;
+}
+
+/* The whole job in one line, above everything that folds. This is the
+   payoff screen — the moment the guest count turns into an answer — so the
+   figures are set large in the display face rather than as bold body text. */
+.summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 40px;
+  background: linear-gradient(180deg, var(--card) 0%, var(--paper-warm) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 20px 22px;
+  margin-bottom: 16px;
+}
+
+.summary-strip .figure {
+  display: block;
+  font-size: 1.85rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.summary-strip .basis {
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+/* ---- Print --------------------------------------------------------------
+   Everything above is stripped back to ink on paper. The order sheet and
+   the prep list get printed and worked from, and a printer renders tinted
+   panels and drop shadows as grey smudge. */
+
+@media print {
+  body {
+    background: #fff;
+    font-size: 11pt;
+  }
+
+  body::before {
+    display: none;
+  }
+
+  header.site,
+  footer.site,
+  form,
+  .actions,
+  button {
+    display: none !important;
+  }
+
+  .wrap {
+    max-width: none;
+    padding: 0;
+  }
+
+  /* No lift, no tint, no rounded corners — none of it survives a laser
+     printer, and the shadows come out as grey haze around every card. */
+  .card,
+  .section,
+  .summary-strip,
+  .choice,
+  .chosen {
+    border: none;
+    background: #fff;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    margin-bottom: 10px;
+    break-inside: avoid;
+  }
+
+  h2 {
+    break-after: avoid;
+  }
+
+  /* A section that needs looking at, and a countdown step already gone past,
+     both keep a rule on paper — in black. `.section.warn` outranks the
+     `.section` reset above, so without naming it here its red bar survived
+     by accident, and red on a mono printer is just a grey smudge that means
+     nothing. Black is a decision that prints the same everywhere. */
+  .section.warn {
+    border-left: 2pt solid #000;
+    padding-left: 8pt;
+  }
+
+  .step.overdue {
+    border-left-color: #000;
+  }
+
+  .step.overdue::before {
+    background: #000;
+    border-color: #000;
+  }
+
+  /* Sections are opened for printing by the beforeprint handler in
+     Section.tsx, not here — a CSS override of a closed <details> is not
+     reliable across browsers. These are only the paper cosmetics. */
+  .section > summary {
+    padding: 0;
+    list-style: none;
+    background: none;
+  }
+
+  .section > summary::marker,
+  .section > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* The chevrons say "this opens", which means nothing once it's on paper. */
+  .section > summary::after,
+  .subsection > summary::after,
+  .courses summary::before {
+    display: none;
+  }
+
+  /* Supplier groups print as a heading and a table, the way the sheet read
+     before they could fold. They're opened by the same beforeprint handler
+     the outer sections use. */
+  .subsection {
+    border-top: none;
+    break-inside: avoid;
+  }
+
+  .subsection > summary {
+    padding: 0;
+    list-style: none;
+  }
+
+  .subsection > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .subsection-body {
+    padding-bottom: 8pt;
+  }
+
+  .section-body {
+    padding: 0;
+  }
+
+  .summary-strip {
+    gap: 24px;
+  }
+
+  /* A warning still has to be obvious on paper, so it keeps its rule and
+     loses only the fill. Colour was never the only thing saying it.
+     The tone variants are listed by name: `.notice.warn` outranks `.notice`,
+     so a rule aimed at the base class alone leaves every tinted panel to
+     print as a grey block. */
+  .notice,
+  .notice.warn,
+  .notice.check,
+  .notice.ok,
+  .sheet .broken {
+    background: none;
+    color: #000;
+    border-left: 2pt solid #000;
+    border-radius: 0;
+    padding: 4pt 0 4pt 8pt;
+  }
+
+  .tag,
+  .tag.warn,
+  .tag.good,
+  .tag.check {
+    background: none;
+    color: #000;
+    border: 1px solid #000;
+  }
+
+  tbody tr:hover td {
+    background: none;
+  }
+
+  a {
+    text-decoration: none;
+    color: #000;
+  }
+}
+
+/* One job on the prep list, under the day it belongs to. */
+.prep-task {
+  margin: 8px 0 12px;
+  font-size: 0.94rem;
+}
+
+.prep-task:last-child {
+  margin-bottom: 0;
+}
+
+/*
+  The pantry mark on an order line.
+
+  A star before the item name, readable straight down the column without
+  reading a word — you're scanning a list at the greengrocer, not studying it.
+  Terracotta rather than sage: it's a "look at this", not a "this is fine".
+*/
+.have {
+  color: var(--accent-ink);
+  font-size: 0.9em;
+  margin-right: 5px;
+  /* The glyph sits high in its box; this drops it onto the text baseline. */
+  vertical-align: -0.05em;
+}
+
+/*
+  What the count says, under the amount the job needs.
+
+  Deliberately below and smaller. The big number is what the job needs and must
+  stay the thing you read first — a pantry count is a memory of a Tuesday, and
+  the order sheet should not look like it has already been adjusted.
+*/
+.stocked {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--accent-ink);
+  line-height: 1.4;
+  margin-top: 3px;
+}
+
+/* Covered outright — good news rather than a job to do. */
+.stocked.all {
+  color: var(--good);
+}
+
+/*
+  A quantity that is wrong.
+
+  Struck through rather than tinted, because this has to survive a printer and
+  a glance. A colour alone would say "look at me"; a line through the number
+  says "do not use this one", which is the actual instruction.
+*/
+.broken-qty {
+  text-decoration: line-through;
+  text-decoration-color: var(--warn);
+  text-decoration-thickness: 1.5px;
+  color: var(--muted);
+}

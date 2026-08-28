@@ -1,0 +1,589 @@
+/* ============================================================
+   Read Me Maybe, a blind date with a book
+   Palette lifted from the brand cards: cream stock, charcoal
+   ruling and type, hand-lettered wordmark (assets/wordmark.png).
+   ============================================================ */
+
+:root {
+  --cream:      #fdfaf0;
+  --cream-deep: #f8f2e2;
+  --paper:      #fffdf7;
+  --ink:        #2e2b28;
+  --ink-soft:   #6b6560;
+  --blue:       #2e2b28;   /* kept as a name so the two type tones stay separable */
+  --blue-deep:  #2e2b28;
+  --rule:       rgba(46, 43, 40, 0.42);
+  --rule-faint: rgba(46, 43, 40, 0.2);
+
+  --display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --body:    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+
+  --line: 2.75rem;            /* ruled-paper line height */
+  --shadow: 0 18px 44px -28px rgba(23, 19, 15, 0.45);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; display: block; }
+
+a { color: var(--blue-deep); }
+
+.wrap { width: min(1080px, calc(100% - 3rem)); margin-inline: auto; }
+.wrap-narrow { width: min(680px, calc(100% - 3rem)); }
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--ink); color: var(--cream);
+  padding: 0.75rem 1.25rem; z-index: 100;
+}
+.skip-link:focus { left: 0; }
+
+/* ---------- shared type ---------- */
+
+.section-title {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(2rem, 5vw, 3rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blue-deep);
+  text-align: center;
+  margin: 0 0 0.75rem;
+}
+.section-title.left { text-align: left; }
+
+.section-sub {
+  text-align: center;
+  max-width: 46ch;
+  margin: 0 auto 3rem;
+  color: var(--ink-soft);
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: inline-block;
+  font-family: var(--display);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--cream);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  padding: 0.9rem 2rem;
+  border-radius: 2px;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+.btn:hover { background: var(--blue-deep); border-color: var(--blue-deep); transform: translateY(-1px); }
+.btn:focus-visible { outline: 2px solid var(--blue-deep); outline-offset: 3px; }
+
+.btn-ghost { background: transparent; color: var(--ink); }
+.btn-ghost:hover { background: var(--ink); color: var(--cream); }
+
+.btn-small { padding: 0.55rem 1.1rem; font-size: 0.8125rem; white-space: nowrap; }
+
+.btn-block { display: block; text-align: center; width: 100%; }
+
+/* ---------- header ---------- */
+
+.site-header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(253, 250, 240, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule-faint);
+}
+
+.header-inner {
+  display: flex; align-items: center; gap: 1.5rem;
+  min-height: 4.25rem;
+}
+
+.brand {
+  font-family: var(--display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  line-height: 1;
+  padding-block: 0.4rem;
+  white-space: nowrap;
+}
+
+.site-nav { margin-left: auto; display: flex; gap: 1.75rem; }
+.site-nav a {
+  font-family: var(--display);
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue-deep);
+  text-decoration: none;
+}
+.site-nav a:hover { color: var(--ink); }
+
+/* ---------- card stock (the library card look) ---------- */
+
+.card-stock {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow);
+  position: relative;
+}
+
+/* horizontal ruling, with the two vertical column rules of a date-due card */
+.ruled {
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--line) - 1px),
+      var(--rule-faint) calc(var(--line) - 1px),
+      var(--rule-faint) var(--line)
+    );
+  background-position: 0 var(--rule-offset, 0);
+}
+
+.stamp {
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--blue);
+  font-size: clamp(0.875rem, 2vw, 1.25rem);
+  text-align: center;
+  margin: 0;
+  padding: 2rem 1rem 2.5rem;
+}
+.stamp span { display: block; }
+
+/* AUTHOR / TITLE rows */
+.catalogue { margin: 0; border-top: 1px solid var(--rule); }
+.catalogue > div {
+  display: grid;
+  grid-template-columns: minmax(6rem, 11rem) 1fr;
+  border-bottom: 1px solid var(--rule);
+}
+.catalogue dt,
+.catalogue dd {
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--blue);
+  margin: 0;
+  padding: 0.6rem 1rem;
+  font-size: clamp(0.8125rem, 1.7vw, 1.0625rem);
+}
+.catalogue dt { border-right: 1px solid var(--rule); }
+.catalogue.small dt,
+.catalogue.small dd { padding: 0.4rem 0.75rem; font-size: 0.8125rem; }
+
+/* ---------- hero ---------- */
+
+.hero { padding: 3rem 0 4.5rem; }
+
+.hero .card-stock { padding-bottom: 3rem; }
+
+.hero-mark {
+  position: relative;
+  padding: 2.5rem 1.5rem 1rem;
+  text-align: center;
+}
+
+/* The wordmark and both hearts are the real hand-lettered artwork, lifted
+   from the brand card. Hearts sit on a diagonal: one after "Read", one
+   tucked in beside "Maybe". */
+.lockup {
+  position: relative;
+  width: min(30rem, 76%);
+  margin-inline: auto;
+}
+.wordmark { width: 100%; height: auto; }
+
+.heart { position: absolute; height: auto; }
+.heart-big   { width: 19%; top: -1%; left: 78%; }
+.heart-small { width: 11%; bottom: 4%; left: -11%; }
+
+.hero-copy {
+  max-width: 44ch;
+  margin: 1.5rem auto 0;
+  padding-inline: 1.5rem;
+  text-align: center;
+  font-size: 1.125rem;
+  color: var(--ink-soft);
+}
+
+.hero-actions {
+  display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;
+  padding: 2rem 1.5rem 0;
+}
+
+.hero-note {
+  text-align: center;
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 0.875rem;
+  color: var(--blue);
+  margin: 1.75rem 0 0;
+}
+
+/* ---------- sections ---------- */
+
+.section { padding: 4.5rem 0; }
+.section-alt { background: var(--cream-deep); border-block: 1px solid var(--rule-faint); }
+
+/* ---------- steps ---------- */
+
+.steps {
+  list-style: none;
+  margin: 2.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.steps li {
+  border-top: 1px solid var(--rule);
+  padding-top: 1.25rem;
+}
+.step-no {
+  font-family: var(--display);
+  font-size: 2.5rem;
+  color: var(--blue);
+  line-height: 1;
+}
+.steps h3 {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin: 0.5rem 0 0.5rem;
+}
+.steps p { margin: 0; color: var(--ink-soft); }
+
+/* ---------- plans ---------- */
+
+.plans {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  align-items: start;
+}
+
+.plan {
+  padding: 2rem 1.5rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-feature { border-width: 2px; border-color: var(--blue); }
+
+.ribbon {
+  position: absolute; top: -0.9rem; left: 1.75rem;
+  background: var(--ink); color: var(--cream);
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.9rem;
+  margin: 0;
+}
+
+.plan-head { border-bottom: 1px solid var(--rule); padding-bottom: 1.25rem; }
+
+.plan-kicker {
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--blue);
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
+.plan-name {
+  font-family: var(--display);
+  font-size: clamp(1.625rem, 2.4vw, 2rem);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  margin: 0.25rem 0 0.75rem;
+  text-wrap: balance;
+}
+
+.plan-price { margin: 0; display: flex; align-items: baseline; gap: 0.5rem; }
+.plan-price .amount {
+  font-family: var(--display);
+  font-size: 3rem;
+  font-weight: 600;
+  line-height: 1;
+}
+.plan-price .per {
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--blue);
+  font-size: 0.9375rem;
+}
+
+.plan-includes {
+  list-style: none;
+  margin: 1.5rem 0;
+  padding: 0;
+}
+.plan-includes li {
+  padding: 0.45rem 0 0.45rem 1.6rem;
+  position: relative;
+  border-bottom: 1px dashed var(--rule-faint);
+  color: var(--ink-soft);
+}
+.plan-includes li::before {
+  content: "";
+  position: absolute; left: 0; top: 1.05rem;
+  width: 0.5rem; height: 0.5rem;
+  border: 1px solid var(--blue);
+  transform: rotate(45deg);
+}
+
+/* ---------- vibe chips ---------- */
+
+.vibes { border: 0; padding: 0; margin: 0.5rem 0 1.75rem; }
+
+.vibes legend {
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--blue);
+  font-size: 0.8125rem;
+  padding: 0;
+  margin-bottom: 0.75rem;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.chip { position: relative; }
+.chip input {
+  position: absolute; opacity: 0;
+  width: 100%; height: 100%; margin: 0; cursor: pointer;
+}
+.chip span {
+  display: block;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  background: var(--cream);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+}
+.chip input:checked + span {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--cream);
+}
+.chip input:focus-visible + span { outline: 2px solid var(--blue-deep); outline-offset: 2px; }
+.chip:hover span { border-color: var(--blue-deep); }
+
+.vibe-hint {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  margin: 0.75rem 0 0;
+}
+.vibe-hint.nudge { color: #b23b3b; font-weight: 600; }
+
+.vibes.nudge .chips { animation: shake 0.35s ease; }
+@keyframes shake {
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vibes.nudge .chips { animation: none; }
+  html { scroll-behavior: auto; }
+}
+
+.plan .btn-block {
+  margin-top: auto;
+  /* three cards across leaves a narrow button, so keep the label and the
+     price on one line */
+  font-size: 0.9375rem;
+  letter-spacing: 0.06em;
+  padding-inline: 1rem;
+}
+
+.plan-foot {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  text-align: center;
+  margin: 0.9rem 0 0;
+}
+
+.gift-note {
+  text-align: center;
+  margin: 2.5rem auto 0;
+  max-width: 52ch;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+/* ---------- what's inside ---------- */
+
+.inside-grid {
+  display: grid;
+  gap: 3rem;
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+@media (min-width: 860px) {
+  .inside-grid { grid-template-columns: 1fr 0.85fr; gap: 4rem; }
+}
+
+.inside-copy p { color: var(--ink-soft); max-width: 46ch; }
+
+.tick-list { list-style: none; margin: 1.5rem 0 0; padding: 0; }
+.tick-list li {
+  border-top: 1px solid var(--rule-faint);
+  padding: 0.85rem 0;
+  color: var(--ink-soft);
+}
+.tick-list strong { color: var(--ink); }
+
+.clue-card { padding-bottom: 2rem; }
+
+.clue-title {
+  font-family: var(--display);
+  font-size: clamp(2rem, 6vw, 3rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blue);
+  text-align: center;
+  margin: 0;
+  padding: 1.75rem 1rem 2rem;
+}
+
+.clue-lead {
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--blue);
+  text-align: center;
+  font-size: 1.25rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.clue-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 1rem;
+  text-align: center;
+}
+.clue-list li {
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--blue-deep);
+  font-size: clamp(1rem, 2.6vw, 1.25rem);
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--rule-faint);
+}
+.clue-list li:last-child { border-bottom: 0; }
+
+/* ---------- cta strip ---------- */
+
+.cta-strip {
+  background: var(--ink);
+  color: var(--cream);
+  text-align: center;
+  padding: 4rem 0;
+}
+/* same artwork, flipped to white for the dark strip */
+.cta-wordmark {
+  width: min(20rem, 62%);
+  height: auto;
+  margin-inline: auto;
+  filter: brightness(0) invert(1);
+}
+.cta-line {
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  margin: 1.25rem 0 2rem;
+  color: rgba(253, 250, 240, 0.72);
+}
+.cta-strip .btn { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+.cta-strip .btn:hover { background: var(--blue); border-color: var(--blue); color: var(--cream); }
+
+/* ---------- faq ---------- */
+
+details {
+  border-bottom: 1px solid var(--rule);
+  padding: 1.1rem 0;
+}
+details:first-of-type { border-top: 1px solid var(--rule); }
+
+summary {
+  font-family: var(--display);
+  font-size: 1.25rem;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+summary::-webkit-details-marker { display: none; }
+summary::after {
+  content: "+";
+  color: var(--blue);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+details[open] summary::after { content: "–"; }
+details p { margin: 0.75rem 0 0; color: var(--ink-soft); max-width: 60ch; }
+
+/* ---------- footer ---------- */
+
+.site-footer {
+  background: var(--cream-deep);
+  border-top: 1px solid var(--rule);
+  padding: 3rem 0;
+  text-align: center;
+}
+.footer-brand { width: 9rem; height: auto; margin-inline: auto; }
+.footer-links {
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.875rem;
+  margin: 1rem 0;
+}
+.footer-links a { color: var(--blue-deep); text-decoration: none; }
+.footer-links a:hover { text-decoration: underline; }
+.footer-fine { font-size: 0.8125rem; color: var(--ink-soft); margin: 0; }
+
+/* ---------- small screens ---------- */
+
+@media (max-width: 720px) {
+  .site-nav { display: none; }
+  .header-inner { gap: 0.75rem; }
+  .header-inner .btn-small { margin-left: auto; font-size: 0.75rem; padding: 0.5rem 0.85rem; }
+  .brand { font-size: 1rem; letter-spacing: 0.14em; }
+  .wrap { width: calc(100% - 2rem); }
+  :root { --line: 2.25rem; }
+  .hero { padding-top: 1.5rem; }
+  .heart-big { top: 4%; }
+}
