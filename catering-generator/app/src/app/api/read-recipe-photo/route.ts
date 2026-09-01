@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 
+import { MAX_PAGES, collectPages, faultInPages, pageLabel } from "@/lib/pages.ts";
 import { createClient } from "@/lib/supabase/server.ts";
 
 /**
@@ -15,9 +16,12 @@ import { createClient } from "@/lib/supabase/server.ts";
  */
 
 /**
- * What the vision API itself accepts. HEIC is deliberately absent: iOS
- * converts to JPEG on upload, so a phone photo arrives fine, and pretending to
- * accept HEIC would only fail further in.
+ * What the vision API itself accepts.
+ *
+ * HEIC is deliberately absent, and the browser is why it can be. An iPhone
+ * photo is HEIC, which would be rejected here for a reason nobody could act on
+ * — so the page redraws every picture as a JPEG before sending it. Accepting
+ * HEIC at this end would only move the failure somewhere less explicable.
  */
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
 type AllowedType = (typeof ALLOWED_TYPES)[number];
@@ -25,7 +29,9 @@ type AllowedType = (typeof ALLOWED_TYPES)[number];
 function isAllowedType(value: string): value is AllowedType {
   return (ALLOWED_TYPES as readonly string[]).includes(value);
 }
-const MAX_BYTES = 8_000_000;
+
+/** A ceiling on the whole upload. Photos are shrunk before they get here. */
+const MAX_BYTES = 24_000_000;
 
 const SCHEMA = {
   type: "object",
@@ -97,6 +103,19 @@ If the photo does not say how many it serves, return 0 rather than guessing.
 Put anything you could not read confidently into "unreadable" — a wrong number a
 cook trusts is worse than a gap they can see.
 
+You may be given several photos. They are pages or parts of ONE recipe, in
+order — a page and its overleaf, a card photographed in halves, a method that
+runs past where the ingredients stop. Treat them as a single recipe:
+
+  List each ingredient once. Photos of a long list usually overlap, and the
+  same ingredient appearing in two of them is one ingredient, not two.
+
+  An ingredient can be split across the break, with its amount at the bottom of
+  one photo and its name at the top of the next. Put it back together.
+
+  Take the dish name and the serves from wherever they appear, usually the
+  first photo. Join the method into one set of steps in the order given.
+
 If the image is not a recipe, return an empty ingredients array.`;
 
 export async function POST(request: Request) {
@@ -120,31 +139,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   }
 
-  let mediaType: string;
-  let base64: string;
+  let body: unknown;
   try {
-    const body = (await request.json()) as {
-      mediaType?: unknown;
-      data?: unknown;
-    };
-    mediaType = typeof body.mediaType === "string" ? body.mediaType : "";
-    base64 = typeof body.data === "string" ? body.data : "";
+    body = await request.json();
   } catch {
     return NextResponse.json({ error: "Expected a JSON body." }, { status: 400 });
   }
 
-  if (!isAllowedType(mediaType)) {
-    return NextResponse.json(
-      { error: "That file isn't a photo the reader can open. Use a JPEG or PNG." },
-      { status: 400 },
-    );
-  }
-  // base64 runs about 4 characters per 3 bytes.
-  if (!base64 || (base64.length * 3) / 4 > MAX_BYTES) {
-    return NextResponse.json(
-      { error: "That photo is too big. Take it again at a smaller size." },
-      { status: 400 },
-    );
+  const pages = collectPages(body);
+  const fault = faultInPages(pages, { isAllowedType, maxBytes: MAX_BYTES });
+
+  if (fault) {
+    const said = {
+      empty: "Nothing came through to read. Choose a photo of the recipe.",
+      "too-many": `That's ${fault.kind === "too-many" ? fault.count : 0} photos — more than the ${MAX_PAGES} this can read at once. Do the recipe in two goes.`,
+      type: "One of those files isn't a photo the reader can open. Use a JPEG or PNG.",
+      "too-big":
+        "Those photos are too big altogether. Send them in two goes, or take fewer.",
+    }[fault.kind];
+    return NextResponse.json({ error: said }, { status: 400 });
   }
 
   const client = new Anthropic();
@@ -162,11 +175,30 @@ export async function POST(request: Request) {
         {
           role: "user",
           content: [
+            // All the pages in one message, each announced before it appears.
+            // An ingredient whose amount is on one page and whose name is on
+            // the next can only be rejoined by a reader holding both.
+            ...pages.flatMap((page, index) => {
+              const label = pageLabel(index, pages.length);
+              const block = {
+                type: "image" as const,
+                source: {
+                  type: "base64" as const,
+                  media_type: page.mediaType as AllowedType,
+                  data: page.data,
+                },
+              };
+              return label
+                ? [{ type: "text" as const, text: label }, block]
+                : [block];
+            }),
             {
-              type: "image",
-              source: { type: "base64", media_type: mediaType, data: base64 },
+              type: "text" as const,
+              text:
+                pages.length === 1
+                  ? "Read this recipe."
+                  : `Those ${pages.length} photos are one recipe. Read it.`,
             },
-            { type: "text", text: "Read this recipe." },
           ],
         },
       ],

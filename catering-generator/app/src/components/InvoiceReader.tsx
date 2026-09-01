@@ -59,6 +59,16 @@ interface ReviewRow {
 /** Matches the API's own ceiling for a PDF; images are shrunk under it. */
 const MAX_UPLOAD_BYTES = 30_000_000;
 
+/** Matches the reader's own limit. Kept in step with MAX_PAGES in lib/pages.ts. */
+const MAX_PAGES = 8;
+
+/** A photo or PDF waiting to be read, with the name to show the cook. */
+interface StagedPage {
+  name: string;
+  mediaType: string;
+  data: string;
+}
+
 /** The three Mudgee has, plus the one a lot of country towns have instead. */
 const SHOPS = ["Woolworths", "Coles", "Aldi", "IGA"];
 
@@ -88,8 +98,19 @@ export default function InvoiceReader({
   onApplied: (message: string) => void;
 }) {
   const [reading, setReading] = useState(false);
+  const [adding, setAdding] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  /**
+   * Photos chosen but not yet read.
+   *
+   * A supermarket receipt for a job is longer than one photograph can hold and
+   * still be legible, and a phone camera takes one shot at a time — so the
+   * photos collect here and go to the reader together. Reading them one at a
+   * time would produce a separate half-receipt for each, and lose any line
+   * that straddles the join.
+   */
+  const [pages, setPages] = useState<StagedPage[]>([]);
   const [invoice, setInvoice] = useState<ReadInvoice | null>(null);
   const [rows, setRows] = useState<ReviewRow[]>([]);
   const [kind, setKind] = useState<"invoice" | "receipt">("invoice");
@@ -129,23 +150,61 @@ export default function InvoiceReader({
     return built;
   }
 
-  async function read(file: File) {
+  /** Take the chosen files, shrink them, and add them to what's waiting. */
+  async function stage(chosen: File[]) {
+    setAdding(true);
+    setError("");
+    try {
+      const room = MAX_PAGES - pages.length;
+      if (room <= 0) {
+        setError(
+          `That's already ${MAX_PAGES} photos, as many as the reader takes at once. Read these first, then do the rest as a second lot.`,
+        );
+        return;
+      }
+
+      const taking = chosen.slice(0, room);
+      const added: StagedPage[] = [];
+      for (const file of taking) {
+        // Shrunk and re-encoded here rather than shipped whole: an iPhone
+        // photo is HEIC, which the API doesn't take, and 12 MB of it over
+        // country internet to read forty words is a poor trade.
+        const upload = await prepareUpload(file, MAX_UPLOAD_BYTES);
+        added.push({
+          name: file.name || `Photo ${pages.length + added.length + 1}`,
+          mediaType: upload.mediaType,
+          data: upload.data,
+        });
+      }
+      setPages((waiting) => [...waiting, ...added]);
+
+      if (chosen.length > room) {
+        setError(
+          `Added ${room} of those ${chosen.length}. The reader takes ${MAX_PAGES} at a time; do the rest as a second lot.`,
+        );
+      }
+    } catch (problem) {
+      setError(
+        problem instanceof UploadTooLargeError
+          ? problem.message
+          : "Couldn't open that file. Try another photo.",
+      );
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  async function read() {
     setReading(true);
     setError("");
     setInvoice(null);
     setRows([]);
     try {
-      // Shrunk and re-encoded here rather than shipped whole: an iPhone photo
-      // is HEIC, which the API doesn't take, and 12 MB of it over country
-      // internet to read forty words is a poor trade.
-      const upload = await prepareUpload(file, MAX_UPLOAD_BYTES);
-
       const response = await fetch("/api/read-invoice", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          mediaType: upload.mediaType,
-          data: upload.data,
+          pages: pages.map(({ mediaType, data }) => ({ mediaType, data })),
           kind,
         }),
       });
@@ -171,14 +230,12 @@ export default function InvoiceReader({
       }
       setInvoice({ ...readInvoice, supplier: forShop });
       setRows(built);
-    } catch (problem) {
-      // A PDF too big to send is a thing the cook can act on, so it says what
-      // to do. Anything else is ours, not theirs.
-      setError(
-        problem instanceof UploadTooLargeError
-          ? problem.message
-          : `Couldn't read that ${kind}.`,
-      );
+      // Cleared only once it has been read into something reviewable. On any
+      // failure the photos stay, so a slow connection doesn't cost you a walk
+      // back out to the car for the receipt.
+      setPages([]);
+    } catch {
+      setError(`Couldn't read that ${kind}.`);
     } finally {
       setReading(false);
     }
@@ -228,8 +285,9 @@ export default function InvoiceReader({
       <h2>Add a docket</h2>
       <p className="basis">
         Photograph it, pick one out of your camera roll, or upload the PDF the
-        supplier emailed. It reads the lines into prices you can check, then
-        updates your list — what you actually paid, not an advertised price.
+        supplier emailed. A long receipt can go in as several photos and be
+        read as one. It turns the lines into prices you can check, then updates
+        your list — what you actually paid, not an advertised price.
       </p>
 
       <fieldset className="choices">
@@ -278,9 +336,10 @@ export default function InvoiceReader({
             is cheapest and tells you where to go.
           </p>
           <p className="basis">
-            A photo of the paper receipt or a PDF both work. Photos are shrunk
-            on your phone before they upload, so a big picture over slow
-            internet isn&rsquo;t a problem.
+            A photo of the paper receipt or a PDF both work, and a receipt too
+            long for one photo can go in as several. Photos are shrunk on your
+            phone before they upload, so a big picture over slow internet
+            isn&rsquo;t a problem.
           </p>
         </>
       )}
@@ -291,23 +350,80 @@ export default function InvoiceReader({
         receipt already sitting in the camera roll, or the PDF the supplier
         emailed, becomes impossible to choose. Without it the OS offers all
         three, camera included.
+
+        `multiple` lets several be picked from the library at once. It doesn't
+        help the camera, which takes one shot at a time — which is why the
+        photos stage up below rather than being read the moment one arrives.
       */}
       <input
         id="invoice-photo"
         type="file"
         accept="image/*,application/pdf"
-        disabled={reading}
+        multiple
+        disabled={reading || adding}
         onChange={(e) => {
-          const file = e.target.files?.[0];
+          const chosen = Array.from(e.target.files ?? []);
           // Cleared so choosing the same photo twice still fires.
           e.target.value = "";
-          if (file) void read(file);
+          if (chosen.length > 0) void stage(chosen);
         }}
       />
-      {reading && (
-        <p className="notice">
-          Reading the {kind === "receipt" ? "receipt" : "invoice"}…
-        </p>
+      {adding && <p className="notice">Getting {pages.length > 0 ? "those" : "that"} ready…</p>}
+
+      {pages.length > 0 && (
+        <>
+          <p className="basis" style={{ marginTop: 12 }}>
+            {pages.length === 1
+              ? "One photo ready."
+              : `${pages.length} photos ready, and they'll be read as one ${kind}.`}{" "}
+            Add another if the {kind} runs past the bottom of the frame — a long
+            receipt is easier to read in sections than squeezed into one shot.
+          </p>
+          <ul className="pages">
+            {pages.map((page, index) => (
+              <li key={`${page.name}-${index}`}>
+                <span>
+                  {pages.length > 1 && <strong>{index + 1}. </strong>}
+                  {page.name}
+                </span>
+                <button
+                  type="button"
+                  className="linklike"
+                  disabled={reading || adding}
+                  onClick={() =>
+                    setPages((waiting) => waiting.filter((_, i) => i !== index))
+                  }
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="actions">
+            <button
+              type="button"
+              onClick={() => void read()}
+              disabled={reading || adding}
+            >
+              {reading
+                ? "Reading…"
+                : pages.length === 1
+                  ? `Read this ${kind}`
+                  : `Read these ${pages.length} photos`}
+            </button>
+            <button
+              type="button"
+              className="linklike"
+              disabled={reading || adding}
+              onClick={() => {
+                setPages([]);
+                setError("");
+              }}
+            >
+              Start again
+            </button>
+          </div>
+        </>
       )}
 
       {error && (

@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 
+import { MAX_PAGES, collectPages, faultInPages, pageLabel } from "@/lib/pages.ts";
 import { createClient } from "@/lib/supabase/server.ts";
 
 /**
@@ -33,12 +34,17 @@ function isAllowedType(value: string): boolean {
 }
 
 /**
- * Images are shrunk in the browser before they get here, so this is a backstop
- * rather than the usual path. PDFs are allowed more room: the API takes 32 MB
- * of document, and a scanned multi-page invoice is legitimately larger than a
- * photo of one.
+ * Ceilings on a whole upload, not on one photo.
+ *
+ * Images are shrunk in the browser before they get here, so these are
+ * backstops rather than the usual path. A set of photos gets more room than a
+ * single one did, because a long receipt genuinely is several — but not eight
+ * times as much, since each is a page rather than a poster.
+ *
+ * PDFs keep the larger allowance: the API takes 32 MB of document, and a
+ * scanned multi-page invoice is legitimately bigger than a photo of one.
  */
-const MAX_IMAGE_BYTES = 8_000_000;
+const MAX_IMAGE_BYTES = 24_000_000;
 const MAX_PDF_BYTES = 30_000_000;
 
 const SCHEMA = {
@@ -146,6 +152,26 @@ supplier is the shop: "Woolworths", "Coles", "Aldi", "IGA". Take it from the
 receipt header. If the header is cut off or unreadable, use an empty string
 rather than guessing from the layout.
 
+You may be given several photos. They are sections of ONE receipt, in order,
+because a supermarket receipt for a catering shop is longer than one photograph
+can hold and still be readable. Treat them as a single receipt:
+
+  Report each purchase ONCE. Consecutive photos of a long receipt usually
+  overlap — the last few lines of one are the first few of the next — and the
+  same line appearing twice is the same purchase, not two of them. Getting this
+  wrong doubles what a job appears to have cost.
+
+  A line can be split across the break, with the item name at the bottom of one
+  photo and its price at the top of the next. Put it back together rather than
+  reporting two half-lines.
+
+  Where you genuinely cannot tell whether two similar lines are one purchase
+  photographed twice or two separate purchases of the same thing, report one
+  and say so in its "unclear".
+
+  The header is usually only on the first photo and the total only on the last.
+  That is normal and not something to note.
+
 Put anything you are unsure about in that line's "unclear" — an abbreviation
 you had to expand, a pack size you inferred, a weight you couldn't read, a
 discount you weren't sure applied. A wrong price a caterer trusts goes straight
@@ -170,6 +196,12 @@ amounts, use the ex-GST one and say so in notes. If it only shows one, use it.
 
 Only return lines that are food or ingredients with a price. Skip delivery
 fees, pallet charges, credits, subtotals and the invoice total.
+
+You may be given several photos or pages. They are ONE invoice, in order. Treat
+them as a single document: report each billed line once even where consecutive
+photos overlap, and rejoin a line split across the break rather than reporting
+two half-lines. The header is usually only on the first page and the total only
+on the last.
 
 Put anything you are unsure about in that line's "unclear" — a smudged number,
 a unit you had to infer, a pack size you read as a multiplication. A wrong price
@@ -197,48 +229,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   }
 
-  let mediaType: string;
-  let base64: string;
-  let isReceipt = false;
+  let body: unknown;
   try {
-    const body = (await request.json()) as {
-      mediaType?: unknown;
-      data?: unknown;
-      kind?: unknown;
-    };
-    mediaType = typeof body.mediaType === "string" ? body.mediaType : "";
-    base64 = typeof body.data === "string" ? body.data : "";
-    // Anything other than an explicit "receipt" reads as a wholesale docket,
-    // which is what every existing caller sends.
-    isReceipt = body.kind === "receipt";
+    body = await request.json();
   } catch {
     return NextResponse.json({ error: "Expected a JSON body." }, { status: 400 });
   }
 
-  if (!isAllowedType(mediaType)) {
-    return NextResponse.json(
-      {
-        error:
-          "That file isn't something the reader can open. Use a photo or a PDF.",
-      },
-      { status: 400 },
-    );
-  }
-  const isPdf = mediaType === "application/pdf";
-  const limit = isPdf ? MAX_PDF_BYTES : MAX_IMAGE_BYTES;
-  if (!base64 || (base64.length * 3) / 4 > limit) {
-    return NextResponse.json(
-      {
-        error: isPdf
-          ? "That PDF is too big to read. Send just the pages with the prices on them."
-          : "That photo is too big, even after shrinking. Try one page at a time.",
-      },
-      { status: 400 },
-    );
-  }
+  // Anything other than an explicit "receipt" reads as a wholesale docket,
+  // which is what every existing caller sends.
+  const isReceipt =
+    typeof body === "object" &&
+    body !== null &&
+    (body as { kind?: unknown }).kind === "receipt";
 
   // Every message the cook sees should name the thing they photographed.
   const noun = isReceipt ? "receipt" : "invoice";
+
+  const pages = collectPages(body);
+  const hasPdf = pages.some((page) => page.mediaType === "application/pdf");
+  const fault = faultInPages(pages, {
+    isAllowedType,
+    maxBytes: hasPdf ? MAX_PDF_BYTES : MAX_IMAGE_BYTES,
+  });
+
+  if (fault) {
+    // Each of these is something the cook can act on, so each says what to do
+    // rather than reporting that a check failed.
+    const said = {
+      empty: `Nothing came through to read. Choose a photo or PDF of the ${noun}.`,
+      "too-many": `That's ${fault.kind === "too-many" ? fault.count : 0} photos — more than the ${MAX_PAGES} this can read at once. Send the longest receipt in two goes, or use the supplier's PDF.`,
+      type: "One of those files isn't something the reader can open. Use photos or a PDF.",
+      "too-big": hasPdf
+        ? "That PDF is too big to read. Send just the pages with the prices on them."
+        : "Those photos are too big altogether, even after shrinking. Send them in two goes.",
+    }[fault.kind];
+    return NextResponse.json({ error: said }, { status: 400 });
+  }
 
   const client = new Anthropic();
 
@@ -255,29 +282,41 @@ export async function POST(request: Request) {
         {
           role: "user",
           content: [
-            // The document block goes before the text, which is what the API
-            // asks for and what makes the model read the page before the
-            // instruction rather than the other way round.
-            isPdf
-              ? {
-                  type: "document" as const,
-                  source: {
-                    type: "base64" as const,
-                    media_type: "application/pdf" as const,
-                    data: base64,
-                  },
-                }
-              : {
-                  type: "image" as const,
-                  source: {
-                    type: "base64" as const,
-                    media_type: mediaType as ImageType,
-                    data: base64,
-                  },
-                },
+            // Each page is announced by name before it appears, so the reader
+            // knows which photo it's looking at and in what order. Every page
+            // goes into one message rather than one request each: a line split
+            // across a photo boundary can only be rejoined by something
+            // holding both halves at once.
+            ...pages.flatMap((page, index) => {
+              const label = pageLabel(index, pages.length);
+              const block =
+                page.mediaType === "application/pdf"
+                  ? {
+                      type: "document" as const,
+                      source: {
+                        type: "base64" as const,
+                        media_type: "application/pdf" as const,
+                        data: page.data,
+                      },
+                    }
+                  : {
+                      type: "image" as const,
+                      source: {
+                        type: "base64" as const,
+                        media_type: page.mediaType as ImageType,
+                        data: page.data,
+                      },
+                    };
+              return label
+                ? [{ type: "text" as const, text: label }, block]
+                : [block];
+            }),
             {
               type: "text" as const,
-              text: isReceipt ? "Read this receipt." : "Read this invoice.",
+              text:
+                pages.length === 1
+                  ? `Read this ${noun}.`
+                  : `Those ${pages.length} photos are one ${noun}. Read it.`,
             },
           ],
         },
