@@ -349,6 +349,46 @@ p.lede {
   padding-bottom: 6px;
 }
 
+/*
+  Photos waiting to be read, as one document.
+
+  Numbered and named, because the order is the order they'll be read in, and
+  because the fix for a blurry third shot is to see which one is third. Each
+  row is its own line with the remove button pushed right, so a thumb reaching
+  for it doesn't land on the name.
+*/
+.pages {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper-warm);
+}
+
+.pages li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  font-size: 0.9rem;
+}
+
+.pages li + li {
+  border-top: 1px solid var(--line);
+}
+
+/* A long filename wraps rather than shoving the button off the edge. */
+.pages li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pages li > button {
+  flex: none;
+}
+
 /* ---- Forms ------------------------------------------------------------- */
 
 label {

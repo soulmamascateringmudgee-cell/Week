@@ -9,6 +9,7 @@ import { COURSE_CHOICES } from "@/lib/options.ts";
 import { parseIngredients } from "@/lib/recipe-parse.ts";
 import { groupByCourse } from "@/lib/recipe-group.ts";
 import type { Category, RecipeIngredient } from "@/lib/types.ts";
+import { prepareUpload } from "@/lib/upload-file.ts";
 
 interface StoredRecipe {
   id: string;
@@ -35,6 +36,19 @@ const BLANK_ROW: RecipeIngredient = {
   unit: "kg",
   category: "Produce",
 };
+
+/** Matches the reader's own limit. Kept in step with MAX_PAGES in lib/pages.ts. */
+const MAX_RECIPE_PAGES = 8;
+
+/** Matches the reader's ceiling on a whole upload. */
+const MAX_RECIPE_UPLOAD_BYTES = 24_000_000;
+
+/** A photo waiting to be read, with the name to show the cook. */
+interface StagedPhoto {
+  name: string;
+  mediaType: string;
+  data: string;
+}
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState<StoredRecipe[]>([]);
@@ -64,6 +78,8 @@ export default function RecipesPage() {
   const [link, setLink] = useState("");
   const [importing, setImporting] = useState(false);
   const [readingPhoto, setReadingPhoto] = useState(false);
+  const [addingPhotos, setAddingPhotos] = useState(false);
+  const [photos, setPhotos] = useState<StagedPhoto[]>([]);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
 
@@ -100,27 +116,66 @@ export default function RecipesPage() {
   }
 
   /**
-   * A photo of a recipe card, a cookbook page, or someone's handwriting. The
-   * fields it fills are the same editable fields as everything else — nothing
-   * is saved until the cook has looked at the numbers.
+   * Add chosen photos to the ones waiting.
+   *
+   * They stage rather than reading immediately because a recipe often runs
+   * over a page — a card photographed in halves, a method that continues on
+   * the back — and a phone camera takes one shot at a time. Reading them
+   * separately would give two half-recipes and lose any ingredient split
+   * across the break.
    */
-  async function readPhoto(file: File) {
+  async function stagePhotos(chosen: File[]) {
+    setAddingPhotos(true);
+    setNote("");
+    try {
+      const room = MAX_RECIPE_PAGES - photos.length;
+      if (room <= 0) {
+        setNote(
+          `That's already ${MAX_RECIPE_PAGES} photos, as many as the reader takes at once.`,
+        );
+        return;
+      }
+      const added: StagedPhoto[] = [];
+      for (const file of chosen.slice(0, room)) {
+        // Redrawn as a JPEG rather than sent as-is: an iPhone photo is HEIC,
+        // which the reader won't open, and the failure would be baffling
+        // because the picture looks perfectly normal in the camera roll.
+        const upload = await prepareUpload(file, MAX_RECIPE_UPLOAD_BYTES);
+        added.push({
+          name: file.name || `Photo ${photos.length + added.length + 1}`,
+          mediaType: upload.mediaType,
+          data: upload.data,
+        });
+      }
+      setPhotos((waiting) => [...waiting, ...added]);
+      if (chosen.length > room) {
+        setNote(
+          `Added ${room} of those ${chosen.length}. The reader takes ${MAX_RECIPE_PAGES} at a time.`,
+        );
+      }
+    } catch {
+      setNote("Couldn't open that photo. Try another.");
+    } finally {
+      setAddingPhotos(false);
+    }
+  }
+
+  /**
+   * The staged photos of a recipe card, a cookbook page, or someone's
+   * handwriting, read as one recipe. The fields it fills are the same editable
+   * fields as everything else — nothing is saved until the cook has looked at
+   * the numbers.
+   */
+  async function readPhoto() {
     setReadingPhoto(true);
     setNote("");
     try {
-      const data = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onerror = () => reject(new Error("read failed"));
-        // The result is a data: URL; the API wants the base64 payload alone.
-        reader.onload = () =>
-          resolve(String(reader.result).split(",")[1] ?? "");
-        reader.readAsDataURL(file);
-      });
-
       const response = await fetch("/api/read-recipe-photo", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ mediaType: file.type, data }),
+        body: JSON.stringify({
+          pages: photos.map(({ mediaType, data }) => ({ mediaType, data })),
+        }),
       });
       const body = await response.json();
 
@@ -143,7 +198,7 @@ export default function RecipesPage() {
       if (read.method) setMethod(read.method);
 
       const checks = [
-        `Read ${read.ingredients.length} ingredients from that photo`,
+        `Read ${read.ingredients.length} ingredients from ${photos.length === 1 ? "that photo" : `those ${photos.length} photos`}`,
         read.serves >= 1
           ? `written for ${read.serves}`
           : "it didn't say how many it serves, so set that yourself",
@@ -152,6 +207,9 @@ export default function RecipesPage() {
           : "",
       ].filter(Boolean);
       setNote(`${checks.join(" · ")}. Check every amount before you save.`);
+      // Cleared only on success. A failure leaves them staged, so a dropout
+      // doesn't mean finding the cookbook page again.
+      setPhotos([]);
     } catch {
       setNote("Couldn't read that photo.");
     } finally {
@@ -356,23 +414,73 @@ export default function RecipesPage() {
             Photograph a recipe
             <span className="hint">
               A recipe card, a page of a cookbook, your own handwriting. It
-              reads the amounts into the fields below for you to check. On a
-              phone this opens the camera.
+              reads the amounts into the fields below for you to check. A
+              recipe that runs over the page can go in as several photos and be
+              read as one.
             </span>
           </label>
           <input
             id="recipe-photo"
             type="file"
             accept="image/*"
-            disabled={readingPhoto}
+            multiple
+            disabled={readingPhoto || addingPhotos}
             onChange={(e) => {
-              const file = e.target.files?.[0];
+              const chosen = Array.from(e.target.files ?? []);
               // Cleared so choosing the same photo twice still fires.
               e.target.value = "";
-              if (file) void readPhoto(file);
+              if (chosen.length > 0) void stagePhotos(chosen);
             }}
           />
-          {readingPhoto && <p className="notice">Reading the photo…</p>}
+          {addingPhotos && <p className="notice">Getting that ready…</p>}
+
+          {photos.length > 0 && (
+            <>
+              <ul className="pages" style={{ marginTop: 12 }}>
+                {photos.map((photo, index) => (
+                  <li key={`${photo.name}-${index}`}>
+                    <span>
+                      {photos.length > 1 && <strong>{index + 1}. </strong>}
+                      {photo.name}
+                    </span>
+                    <button
+                      type="button"
+                      className="linklike"
+                      disabled={readingPhoto || addingPhotos}
+                      onClick={() =>
+                        setPhotos((waiting) =>
+                          waiting.filter((_, i) => i !== index),
+                        )
+                      }
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <div className="actions">
+                <button
+                  type="button"
+                  onClick={() => void readPhoto()}
+                  disabled={readingPhoto || addingPhotos}
+                >
+                  {readingPhoto
+                    ? "Reading…"
+                    : photos.length === 1
+                      ? "Read this photo"
+                      : `Read these ${photos.length} photos`}
+                </button>
+                <button
+                  type="button"
+                  className="linklike"
+                  disabled={readingPhoto || addingPhotos}
+                  onClick={() => setPhotos([])}
+                >
+                  Start again
+                </button>
+              </div>
+            </>
+          )}
 
           <label htmlFor="recipe-link" style={{ marginTop: 18 }}>
             Paste a recipe link
