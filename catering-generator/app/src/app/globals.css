@@ -327,6 +327,28 @@ p.lede {
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 }
 
+/*
+  Line the boxes up, whatever the labels above them say.
+
+  Field captions are not the same height. "Price" is one word; "Ingredient" is
+  a word plus a two-line hint. Left alone, each input starts directly under its
+  own caption, so a row of four fields has four different baselines and the
+  form looks like it was assembled by someone not paying attention.
+
+  Grid rows are equal height already, so making each cell a column and pushing
+  its control to the bottom puts every box on the same line. It costs nothing
+  when the captions do happen to match.
+*/
+.grid > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid > div > label {
+  margin-bottom: auto;
+  padding-bottom: 6px;
+}
+
 /* ---- Forms ------------------------------------------------------------- */
 
 label {
@@ -407,6 +429,20 @@ textarea {
   color: inherit;
   font: inherit;
   font-size: 0.95rem;
+  /*
+    Every control the same height, stated rather than inherited.
+
+    Left alone a <select> and an <input> work out their inner height by
+    different rules and land a couple of pixels apart, so a dropdown standing
+    beside a text box in the same row is visibly the odd one out. Setting the
+    line height isn't enough on its own — Chromium ignores it on a <select> and
+    reports "normal" whatever you ask for — so the height is stated as a
+    minimum too, which selects do honour. The sum is the text line plus the
+    padding and borders above and below it, so it tracks the font size instead
+    of being a magic number.
+  */
+  line-height: 1.4;
+  min-height: calc(1.4em + 24px);
   transition: border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
@@ -500,9 +536,18 @@ button:active:not(:disabled) {
   box-shadow: var(--shadow-sm);
 }
 
+/*
+  A button you can't press yet, not a button that's broken.
+
+  `progress` was the wrong cursor: it says "working, wait", when almost always
+  the truth is "fill the form in first". And at half opacity the white text on
+  sage went soft enough to read as a fault in the page rather than a deliberate
+  state, which is the exact worry a new customer doesn't need on their first
+  evening.
+*/
 button:disabled {
-  opacity: 0.5;
-  cursor: progress;
+  opacity: 0.62;
+  cursor: not-allowed;
   box-shadow: none;
 }
 
