@@ -1,4 +1,4 @@
-import { parseIngredientLine } from "./recipe-parse.ts";
+import { parseIngredientList } from "./recipe-parse.ts";
 import type { RecipeIngredient } from "./types.ts";
 
 /**
@@ -89,9 +89,12 @@ export function extractRecipe(html: string): ImportedRecipe | null {
     const rawIngredients = recipe.recipeIngredient ?? recipe.ingredients;
     if (!Array.isArray(rawIngredients) || rawIngredients.length === 0) continue;
 
-    const ingredients = rawIngredients
-      .map((line) => parseIngredientLine(stripTags(String(line))))
-      .filter((row): row is RecipeIngredient => row !== null);
+    // Read as a list rather than line by line: recipe sites put "For the
+    // dressing" in the ingredient array as though it were an ingredient, and
+    // it is a heading for everything after it.
+    const ingredients: RecipeIngredient[] = parseIngredientList(
+      rawIngredients.map((line) => stripTags(String(line))),
+    );
 
     if (ingredients.length === 0) continue;
 

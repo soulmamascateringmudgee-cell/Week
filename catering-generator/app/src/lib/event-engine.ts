@@ -158,6 +158,11 @@ export function planEvent(input: EventInput): EventPlan {
             item: i.item,
             qty: roundForUnit(i.qty * factor, i.unit),
             unit: i.unit,
+            // The parts the dish is written in travel with it. They change no
+            // number here — the order sheet below groups by supplier, because
+            // that is how it is shopped — but the sheet a cook works off has
+            // to read the way the recipe was written.
+            ...(i.section ? { section: i.section } : {}),
             ...(broken.has(i.item) ? { unscalable: true } : {}),
           })),
       ),

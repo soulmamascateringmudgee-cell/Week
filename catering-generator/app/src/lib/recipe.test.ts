@@ -127,6 +127,36 @@ test("applies no yield multiplier — a recipe is already an ordering weight", (
   assert.equal(line?.qty, 6.5);
 });
 
+test("the parts a dish is written in reach the bench sheet, unchanged", () => {
+  const plan = planEvent({
+    ...BASE,
+    guests: 10,
+    recipes: [
+      {
+        name: "Buttermilk chicken",
+        serves: 10,
+        ingredients: [
+          { item: "Plain flour", qty: 500, unit: "g", category: "Dry goods", section: "Dry" },
+          { item: "Buttermilk", qty: 2, unit: "L", category: "Dairy", section: "Wet" },
+        ],
+      },
+    ],
+  });
+
+  const sheet = plan.dishSheets.find((d) => d.name === "Buttermilk chicken");
+  assert.deepEqual(
+    sheet?.ingredients.map((i) => i.section),
+    ["Dry", "Wet"],
+  );
+
+  // The order sheet is shopped by supplier, not by part, so nothing there
+  // changes — the same two lines, in the same categories.
+  assert.equal(
+    plan.orders.find((o) => o.item === "Plain flour")?.category,
+    "Dry goods",
+  );
+});
+
 test("warns when recipes and generic sides are both on the same job", () => {
   const plan = planEvent({ ...BASE, sidesCount: 3, recipes: [SLAW] });
   assert.ok(plan.warnings.some((w) => w.includes("ordering the same food twice")));

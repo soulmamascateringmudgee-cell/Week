@@ -1,3 +1,4 @@
+import { sectionHeading } from "./recipe-sections.ts";
 import type { Category } from "./types.ts";
 
 /**
@@ -24,6 +25,8 @@ export interface ParsedIngredient {
   qty: number;
   unit: string;
   category: Category;
+  /** Set only when a heading above the line said which part it belongs to. */
+  section?: string;
 }
 
 /**
@@ -310,9 +313,36 @@ export function parseIngredientLine(rawLine: string): ParsedIngredient | null {
   return { item: line, qty: 1, unit: "ea", category: categoryFor(line) };
 }
 
+/**
+ * Read a list of ingredient lines, keeping the headings between them.
+ *
+ * "For the marinade" is not an ingredient, and until this existed it became
+ * one: the last resort in `parseIngredientLine` keeps any line it can't make
+ * sense of, so a heading arrived on the order sheet as "1 ea For the
+ * marinade". Now it does the job it was written for — everything under it
+ * belongs to that part of the dish, until the next heading.
+ *
+ * A heading with nothing under it is dropped by simply never being stored;
+ * the section only reaches a row when a row follows it.
+ */
+export function parseIngredientList(lines: string[]): ParsedIngredient[] {
+  const rows: ParsedIngredient[] = [];
+  let section: string | null = null;
+
+  for (const line of lines) {
+    const heading = sectionHeading(line);
+    if (heading !== null) {
+      section = heading;
+      continue;
+    }
+    const row = parseIngredientLine(line);
+    if (row === null) continue;
+    rows.push(section === null ? row : { ...row, section });
+  }
+
+  return rows;
+}
+
 export function parseIngredients(text: string): ParsedIngredient[] {
-  return text
-    .split(/\r?\n/)
-    .map(parseIngredientLine)
-    .filter((row): row is ParsedIngredient => row !== null);
+  return parseIngredientList(text.split(/\r?\n/));
 }

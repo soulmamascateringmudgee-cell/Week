@@ -58,8 +58,13 @@ const SCHEMA = {
               "Drinks",
             ],
           },
+          section: {
+            type: "string",
+            description:
+              "The part of the dish they said this belongs to — 'Dry', 'Wet', 'Marinade'. Empty string when they didn't split the dish up.",
+          },
         },
-        required: ["item", "qty", "unit", "category"],
+        required: ["item", "qty", "unit", "category", "section"],
         additionalProperties: false,
       },
     },
@@ -103,6 +108,11 @@ Never silently invent a number.
 Speech recognition mishears. Say so when a line reads like a mishearing, in the
 cook's own terms: "Heard 'four salt' — did you mean flour and salt?" beats a note
 about transcription confidence.
+
+Cooks talk a recipe through in parts: "so the dry stuff is…", "then for the
+marinade…". Put that part in "section" on every ingredient they name under it,
+in their own words, and never as an ingredient of its own. Leave it empty when
+they simply listed a dish straight through — do not split a dish up for them.
 
 If they never said how many it serves, return 0 rather than guessing.
 
