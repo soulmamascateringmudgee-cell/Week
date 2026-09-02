@@ -1,0 +1,21 @@
+-- Recipes are written in parts, and now the stored shape says so.
+--
+-- A crumbed chicken has a dry bowl, a wet bowl and a sauce. Held as one flat
+-- list of eleven ingredients, the parts have to be worked out again at the
+-- bench, and the app was asking a cook to do that at six in the morning with
+-- wet hands. Each line can now carry the heading it sits under.
+--
+-- No column is added: `ingredients` is jsonb, so this is a new optional key on
+-- each entry, and every recipe already saved stays valid and unchanged. The
+-- shape is now:
+--
+--   [{ item, qty, unit, category, section? }]
+--
+-- `section` is free text the cook writes for themselves — "Dry", "Wet",
+-- "For the marinade" — trimmed and de-duplicated by the API, absent when they
+-- didn't file the line anywhere. It changes no arithmetic anywhere in the app:
+-- a dish scales the same, and the order sheet still groups by supplier,
+-- because that is how the shopping is done. It changes only how the dish reads
+-- on the sheet the cook works from. See lib/recipe-sections.ts.
+comment on column public.recipes.ingredients is
+  'Ingredient lines: [{ item, qty, unit, category, section? }]. section is the optional part of the dish the line belongs to — "Dry", "Wet", "For the marinade" — and affects display only, never scaling or ordering.';

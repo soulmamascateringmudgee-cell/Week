@@ -1,9 +1,12 @@
 "use client";
 
+import { Fragment } from "react";
+
 import PrintButton from "@/components/PrintButton.tsx";
 import Section from "@/components/Section.tsx";
 import { stockedCount } from "@/lib/pantry.ts";
 import { DISCLAIMER_TEXT } from "@/lib/options.ts";
+import { groupBySection, hasSections } from "@/lib/recipe-sections.ts";
 import type { Category, EventPlan, OrderLine } from "@/lib/types.ts";
 
 const CATEGORY_ORDER: Category[] = [
@@ -465,15 +468,31 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                 </p>
               )}
 
+              {/* The parts the dish was written in — dry, wet, the sauce that
+                  goes over it — kept as headings. A cook reading one flat list
+                  has to work the parts out again at the bench. Only shown when
+                  there is more than one, so a dish that is a single list isn't
+                  given a heading saying so. */}
               <table className="lines">
                 <tbody>
-                  {dish.ingredients.map((line, i) => (
-                    <tr key={`${dish.name}-${line.item}-${i}`}>
-                      <td>{line.item}</td>
-                      <td className="num">
-                        {dish.unscalable ? "—" : `${line.qty} ${line.unit}`}
-                      </td>
-                    </tr>
+                  {groupBySection(dish.ingredients).map((part, p) => (
+                    <Fragment key={`${dish.name}-part-${p}`}>
+                      {hasSections(dish.ingredients) && (
+                        <tr className="part">
+                          <th colSpan={2} scope="colgroup">
+                            {part.heading}
+                          </th>
+                        </tr>
+                      )}
+                      {part.ingredients.map((line, i) => (
+                        <tr key={`${dish.name}-${p}-${line.item}-${i}`}>
+                          <td>{line.item}</td>
+                          <td className="num">
+                            {dish.unscalable ? "—" : `${line.qty} ${line.unit}`}
+                          </td>
+                        </tr>
+                      ))}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>

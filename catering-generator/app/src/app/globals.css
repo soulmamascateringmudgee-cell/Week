@@ -999,6 +999,25 @@ td.num {
   background: transparent;
 }
 
+/* The part of the dish a block of lines belongs to: dry, wet, the marinade.
+   Set apart by weight and letter-spacing rather than a rule — the rows
+   already carry rules, and a second one under a heading reads as a table
+   inside a table. */
+.sheet .lines tr.part th {
+  padding: 14px 0 4px;
+  text-align: left;
+  font-family: var(--font-display-stack);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.sheet .lines tr.part:first-child th {
+  padding-top: 4px;
+}
+
 .sheet .lines tr:last-child td {
   border-bottom: none;
 }
@@ -1019,6 +1038,17 @@ td.num {
   font-size: 0.88rem;
   color: var(--ink-soft);
   white-space: pre-line;
+}
+
+/* The same heading over a saved dish in the recipe book. */
+p.part {
+  margin: 12px 0 0;
+  font-family: var(--font-display-stack);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
 }
 
 ul.plain {

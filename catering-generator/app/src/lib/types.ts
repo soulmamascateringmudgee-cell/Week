@@ -81,6 +81,12 @@ export interface ScaledIngredient {
   item: string;
   qty: number;
   unit: string;
+  /**
+   * Which part of the dish this line belongs to — "Dry", "Wet", "Marinade".
+   * Carried through from the recipe so the bench sheet reads in the order the
+   * cook works, not as one undifferentiated list.
+   */
+  section?: string | null;
   /** The amount was in the name; this number is a multiplication of "1 ea". */
   unscalable?: boolean;
 }
@@ -142,6 +148,15 @@ export interface RecipeIngredient {
   qty: number;
   unit: string;
   category: Category;
+  /**
+   * Which part of the dish this line belongs to: "Dry", "Wet", "Marinade",
+   * "For the topping". Free text, optional, and it changes no arithmetic — a
+   * dish is scaled and ordered the same whether or not its lines are grouped.
+   * It exists because a recipe that mixes dry into wet is written in parts,
+   * and a cook reading one flat list has to work out the parts again at the
+   * bench.
+   */
+  section?: string | null;
 }
 
 /**

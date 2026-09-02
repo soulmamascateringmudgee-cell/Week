@@ -8,6 +8,7 @@ import Section from "@/components/Section.tsx";
 import { COURSE_CHOICES } from "@/lib/options.ts";
 import { parseIngredients } from "@/lib/recipe-parse.ts";
 import { groupByCourse } from "@/lib/recipe-group.ts";
+import { groupBySection, hasSections, sectionChoices } from "@/lib/recipe-sections.ts";
 import type { Category, RecipeIngredient } from "@/lib/types.ts";
 import { prepareUpload } from "@/lib/upload-file.ts";
 
@@ -35,6 +36,7 @@ const BLANK_ROW: RecipeIngredient = {
   qty: 1,
   unit: "kg",
   category: "Produce",
+  section: "",
 };
 
 /** Matches the reader's own limit. Kept in step with MAX_PAGES in lib/pages.ts. */
@@ -289,8 +291,15 @@ export default function RecipesPage() {
     // Replace rather than append: pasting twice shouldn't double the order.
     setRows(parsed);
     setPaste("");
+    const parts = groupBySection(parsed).filter((p) => p.section !== null);
     setNote(
-      `Read ${parsed.length} ingredient${parsed.length === 1 ? "" : "s"}. Check the quantities and units before you save — everything scales off them.`,
+      `Read ${parsed.length} ingredient${parsed.length === 1 ? "" : "s"}` +
+        (parts.length > 0
+          ? `, in ${parts.length} part${parts.length === 1 ? "" : "s"} — ${parts
+              .map((p) => p.heading)
+              .join(", ")}`
+          : "") +
+        `. Check the quantities and units before you save — everything scales off them.`,
     );
   }
 
@@ -512,14 +521,17 @@ export default function RecipesPage() {
             <span className="hint">
               One per line, straight off your recipe card — &ldquo;5 kg beef
               brisket&rdquo;, &ldquo;500g butter&rdquo;, &ldquo;2 bunches
-              broccolini&rdquo;. Bullets and numbering are fine.
+              broccolini&rdquo;. Bullets and numbering are fine. Leave the
+              headings in — &ldquo;Dry ingredients:&rdquo;, &ldquo;For the
+              marinade&rdquo; — and everything under one is filed to that part
+              of the dish.
             </span>
           </label>
           <textarea
             id="recipe-paste"
             value={paste}
             onChange={(e) => setPaste(e.target.value)}
-            placeholder={"5 kg beef brisket\n2 tbsp smoked paprika\n3 x 400g tinned tomatoes\n2 bunches broccolini"}
+            placeholder={"Dry:\n500 g plain flour\n2 tsp smoked paprika\n\nWet:\n600 ml buttermilk\n3 eggs"}
           />
           <div className="actions">
             <button
@@ -534,6 +546,17 @@ export default function RecipesPage() {
           {note && <p className="notice check">{note}</p>}
 
           <h3>Ingredients</h3>
+          <p className="basis">
+            Leave the part blank for a dish that&rsquo;s just one list. Fill it
+            in — Dry, Wet, Marinade, For the topping — and the dish prints
+            under those headings on the bench sheet, in the order you wrote
+            them. It changes no amount; it only changes how the dish reads.
+          </p>
+          <datalist id="section-choices">
+            {sectionChoices(rows).map((choice) => (
+              <option key={choice} value={choice} />
+            ))}
+          </datalist>
           {rows.map((row, index) => (
             <div className="row-item" key={index}>
               <div>
@@ -564,6 +587,17 @@ export default function RecipesPage() {
                   type="text"
                   value={row.unit}
                   onChange={(e) => updateRow(index, { unit: e.target.value })}
+                />
+              </div>
+              <div>
+                <label htmlFor={`ing-section-${index}`}>Part</label>
+                <input
+                  id={`ing-section-${index}`}
+                  type="text"
+                  list="section-choices"
+                  value={row.section ?? ""}
+                  placeholder="Dry, Wet…"
+                  onChange={(e) => updateRow(index, { section: e.target.value })}
                 />
               </div>
               <div>
@@ -599,7 +633,16 @@ export default function RecipesPage() {
             <button
               type="button"
               className="secondary"
-              onClick={() => setRows([...rows, { ...BLANK_ROW }])}
+              // The new row inherits the last row's part. Ingredients are
+              // entered a block at a time — six dry things, then four wet —
+              // and retyping "Dry" six times is how a section ends up spelt
+              // two ways and split into two headings.
+              onClick={() =>
+                setRows([
+                  ...rows,
+                  { ...BLANK_ROW, section: rows.at(-1)?.section ?? "" },
+                ])
+              }
             >
               Add an ingredient
             </button>
@@ -693,14 +736,26 @@ export default function RecipesPage() {
                       Written for {recipe.serves} ·{" "}
                       {recipe.ingredients.length} ingredient
                       {recipe.ingredients.length === 1 ? "" : "s"}
+                      {hasSections(recipe.ingredients) &&
+                        ` · ${groupBySection(recipe.ingredients).length} parts`}
                     </p>
-                    <ul className="plain">
-                      {recipe.ingredients.map((ing, i) => (
-                        <li key={`${recipe.id}-${i}`}>
-                          {ing.qty} {ing.unit} {ing.item}
-                        </li>
-                      ))}
-                    </ul>
+                    {/* Grouped only when there is more than one part. A lone
+                        "Ingredients" heading over a list of ingredients is
+                        noise on every dish in the book. */}
+                    {groupBySection(recipe.ingredients).map((part, p) => (
+                      <div key={`${recipe.id}-part-${p}`}>
+                        {hasSections(recipe.ingredients) && (
+                          <p className="part">{part.heading}</p>
+                        )}
+                        <ul className="plain">
+                          {part.ingredients.map((ing, i) => (
+                            <li key={`${recipe.id}-${p}-${i}`}>
+                              {ing.qty} {ing.unit} {ing.item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
                     <div className="actions">
                       <button
                         type="button"

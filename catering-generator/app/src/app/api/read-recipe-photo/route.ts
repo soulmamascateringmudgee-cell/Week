@@ -67,8 +67,13 @@ const SCHEMA = {
               "Drinks",
             ],
           },
+          section: {
+            type: "string",
+            description:
+              "The heading this ingredient sits under on the page — 'Dry', 'Wet', 'For the marinade'. Empty string when the page has no headings.",
+          },
         },
-        required: ["item", "qty", "unit", "category"],
+        required: ["item", "qty", "unit", "category", "section"],
         additionalProperties: false,
       },
     },
@@ -98,6 +103,12 @@ Leave spoon measures for spices out of the ingredient list — they belong in th
 method as pantry items, because nobody orders 3 tsp of paprika.
 
 Use "ea" for things counted rather than weighed: eggs, onions, lemons, pastry sheets.
+
+Recipes are often written in parts, with headings over blocks of ingredients:
+"Dry", "Wet", "For the marinade", "Topping". Put that heading in "section" on
+every ingredient under it, word for word as the page has it, and never as an
+ingredient of its own. A page with no headings gets an empty section on every
+line — do not invent parts the cook did not write.
 
 If the photo does not say how many it serves, return 0 rather than guessing.
 Put anything you could not read confidently into "unreadable" — a wrong number a

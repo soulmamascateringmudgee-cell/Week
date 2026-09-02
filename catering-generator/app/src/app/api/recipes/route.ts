@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { tidySection } from "@/lib/recipe-sections.ts";
 import { createClient } from "@/lib/supabase/server.ts";
 import type { RecipeIngredient } from "@/lib/types.ts";
 
@@ -44,7 +45,12 @@ export function cleanIngredients(raw: unknown): RecipeIngredient[] | string {
         ? (row.category as RecipeIngredient["category"])
         : "Dry goods";
 
-    rows.push({ item, qty, unit, category });
+    // Free text, and deliberately not validated against a list: a section is
+    // a heading the cook writes for themselves. Tidied so "Dry:" and "dry"
+    // don't become two headings, and only stored when it says something.
+    const section = tidySection(row.section);
+
+    rows.push({ item, qty, unit, category, ...(section ? { section } : {}) });
   }
 
   if (rows.length === 0) return "A recipe needs at least one ingredient.";
