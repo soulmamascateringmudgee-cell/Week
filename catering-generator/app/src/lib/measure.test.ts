@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { scaledToOrderUnits, toOrderMeasure, toOrderUnits } from "./measure.ts";
+import { toWholeProduce } from "./produce.ts";
 import type { OrderLine } from "./types.ts";
 
 test("a buying unit is left exactly as it is", () => {
@@ -135,6 +136,42 @@ test("a dish's own sheet is converted the same way", () => {
     ]).map((i) => i.unit),
     ["g", "kg"],
   );
+});
+
+test("fresh produce given in cups is weighed, not left in millilitres", () => {
+  // "960 ml of coriander" is not a line anybody can shop from, and it was
+  // worse than unreadable: produce is only counted into bunches and onions
+  // once it is a weight, so a line left in millilitres was skipped entirely.
+  assert.equal(toOrderMeasure(1, "cup", "coriander leaves, chopped").unit, "g");
+  assert.equal(toOrderMeasure(1, "cup", "finely chopped white onion").unit, "g");
+  assert.equal(toOrderMeasure(2, "tbsp", "finely chopped jalapeño").unit, "g");
+
+  // A density is an estimate and says so, so the basis line can be argued with.
+  assert.equal(toOrderMeasure(1, "cup", "coriander leaves").assumed, true);
+});
+
+test("a longer name still beats the general one it contains", () => {
+  // Adding "coriander" and "onion" must not capture the dried and powdered
+  // forms, which are several times denser and are not sold in bunches.
+  assert.equal(toOrderMeasure(1, "cup", "ground coriander").qty, 100); // 250 × 0.4
+  assert.equal(toOrderMeasure(1, "cup", "onion powder").qty, 120); // 250 × 0.48
+  assert.equal(toOrderMeasure(1, "cup", "tomato paste").qty, 280); // 250 × 1.1, to the nearest 10 g
+});
+
+test("a cup of chopped onion reaches the shopping list as onions", () => {
+  // The whole chain, because each half is useless without the other: cups to
+  // grams here, grams to things you pick up in produce.ts.
+  const [onions] = toWholeProduce([
+    order({ item: "Finely chopped white onion", ...pick(toOrderMeasure(3, "cup", "finely chopped white onion")) }),
+  ]);
+  assert.equal(onions.unit, "onions");
+  assert.equal(onions.qty, 4); // 750 ml × 0.64 = 480 g, at 130 g an onion
+
+  const [herbs] = toWholeProduce([
+    order({ item: "Coriander leaves, chopped", ...pick(toOrderMeasure(1, "cup", "coriander leaves, chopped")) }),
+  ]);
+  assert.equal(herbs.unit, "bunches");
+  assert.equal(herbs.qty, 2); // 250 ml × 0.16 = 40 g, at 30 g a bunch
 });
 
 function pick(measure: { qty: number; unit: string }) {

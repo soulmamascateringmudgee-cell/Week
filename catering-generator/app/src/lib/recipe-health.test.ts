@@ -4,6 +4,8 @@ import test from "node:test";
 import {
   hasUnscalableAmounts,
   unscalableLines,
+  suspectYield,
+  suspectYieldWarning,
   unscalableWarning,
 } from "./recipe-health.ts";
 import type { Category, Recipe } from "./types.ts";
@@ -182,3 +184,26 @@ function recipe(name: string, rows: [string, number, string][]): Recipe {
     })),
   };
 }
+
+// ------------------------------------------------- a yield that can't be true
+
+test("a dish that claims to serve two is flagged, not quietly multiplied", () => {
+  // The pico de gallo. Published as "2 cups", stored as serving 2, scaled to
+  // a 19-guest job as though two cups fed two people: 35 tomatoes.
+  const pico: Recipe = {
+    ...recipe("Pico de Gallo (Authentic)", [["large tomatoes", 3, "ea"]]),
+    serves: 2,
+  };
+  assert.equal(suspectYield(pico), true);
+  assert.match(suspectYieldWarning(pico), /Pico de Gallo/);
+  assert.match(suspectYieldWarning(pico), /serves 2/);
+});
+
+test("an ordinary yield says nothing at all", () => {
+  // The check has to stay quiet on the normal case or it gets ignored.
+  for (const serves of [4, 6, 8, 10, 20]) {
+    const dish: Recipe = { ...recipe("Slaw", [["cabbage", 1, "ea"]]), serves };
+    assert.equal(suspectYield(dish), false, `serves ${serves}`);
+    assert.equal(suspectYieldWarning(dish), "");
+  }
+});

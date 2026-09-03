@@ -75,10 +75,44 @@ const GRAMS_PER_ML: Record<string, number> = {
   "grated cheese": 0.4,
   "cheddar": 0.4,
 
-  // Produce, prepared
+  // Produce, prepared.
+  //
+  // These earn their place twice over. A cup of chopped onion is unreadable on
+  // an order sheet as "720 ml", and — because produce is only counted into
+  // whole onions and bunches once it is a weight — a line left in millilitres
+  // never gets counted at all. Giving the fresh things a density is what puts
+  // them back on the sheet as four onions and a bunch of coriander.
   "shredded cabbage": 0.3,
   cabbage: 0.3,
   "grated carrot": 0.4,
+  onion: 0.64,
+  "spring onion": 0.4,
+  celery: 0.4,
+  tomato: 0.72,
+  capsicum: 0.6,
+  // Chopped chilli, which recipes give in spoons and shops sell by weight.
+  jalapeno: 0.6,
+  jalapeño: 0.6,
+  serrano: 0.6,
+  chilli: 0.6,
+  // Soft herbs, picked and loosely chopped. A cup of them is mostly air, so
+  // the density is low and the resulting weight is small — which is right: a
+  // third of a cup of coriander is a fraction of one bunch, not a litre of it.
+  coriander: 0.16,
+  cilantro: 0.16,
+  parsley: 0.16,
+  mint: 0.16,
+  basil: 0.16,
+  dill: 0.16,
+  // Seeds are not leaves. Longer key, so it wins over "coriander" above.
+  "coriander seeds": 0.5,
+  // Processed tomato is nearly twice the density of the chopped fruit, and is
+  // what a Mexican menu actually reaches for. Longer keys, so they win.
+  "tomato paste": 1.1,
+  "tomato sauce": 1.1,
+  "tomato passata": 1.05,
+  "crushed tomato": 1.0,
+  "diced tomato": 1.0,
 
   // Spices and dried herbs. Roughly 3 g a teaspoon for a powder, 1 g for a
   // dried leaf herb, which is where these numbers come from.

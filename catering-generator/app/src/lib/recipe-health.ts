@@ -82,6 +82,43 @@ export function hasUnscalableAmounts(recipe: Recipe): boolean {
   return unscalableLines(recipe).length / lines.length >= 0.5;
 }
 
+/**
+ * A yield too small to have come from a person counting people.
+ *
+ * Published recipes are written for four, six, eight. Almost none are written
+ * for one or two, and a saved recipe that says so is nearly always an import
+ * that read a volume yield — "2 cups" of salsa — as a headcount. That mistake
+ * is invisible on the sheet, because a wrong `serves` produces numbers that
+ * are internally consistent and merely enormous: every line is multiplied by
+ * the same wrong factor, so nothing looks out of place next to anything else.
+ *
+ * Fixing the importer stops new ones arriving. It does nothing for the
+ * recipes already saved, which is why this check is on the job and not only
+ * on the import.
+ *
+ * Deliberately not a check on the scale factor. Cooking a dish for six at a
+ * hundred guests is ×18 and perfectly ordinary, so a threshold there would
+ * cry wolf on the normal case and get ignored by the time it mattered.
+ */
+const IMPLAUSIBLE_SERVES = 3;
+
+export function suspectYield(recipe: Recipe): boolean {
+  const serves = recipe.serves;
+  return Number.isFinite(serves) && serves >= 1 && serves <= IMPLAUSIBLE_SERVES;
+}
+
+/** The warning an operator sees when a dish's yield can't be believed. */
+export function suspectYieldWarning(recipe: Recipe): string {
+  if (!suspectYield(recipe)) return "";
+
+  return (
+    `"${recipe.name}" says it serves ${recipe.serves}, which is small enough to be wrong. ` +
+    `Salsas, dips and dressings are published as "2 cups" or "500 ml", and an import used to read that number as a headcount — ` +
+    `so a dish that actually feeds a table gets multiplied as though it fed two, and the order comes back many times too big. ` +
+    `Open the dish, check what it really serves, and save it before ordering from this sheet.`
+  );
+}
+
 /** The warning an operator sees, naming the dish and the lines to fix. */
 export function unscalableWarning(recipe: Recipe): string {
   const broken = unscalableLines(recipe);
