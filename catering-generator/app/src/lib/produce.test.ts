@@ -111,6 +111,75 @@ test("a line already counted in bunches is left as it is", () => {
   assert.equal(line.basis, "original basis");
 });
 
+test("a count of sprigs becomes a count of bunches", () => {
+  // Straight off a real job sheet: 146 rosemary sprigs and 113 garlic cloves,
+  // neither of which is a thing anyone sells.
+  assert.deepEqual(
+    toWholeProduce([
+      order({ item: "Rosemary sprigs", qty: 146, unit: "ea" }),
+      order({ item: "Garlic cloves", qty: 113, unit: "ea" }),
+      order({ item: "Spring onions", qty: 12, unit: "ea" }),
+    ]).map((l) => `${l.qty} ${l.unit}`),
+    ["8 bunches", "12 bulbs", "2 bunches"],
+  );
+});
+
+test("the sprig count and what's in a bunch are written into the basis", () => {
+  const [line] = toWholeProduce([
+    order({ item: "Rosemary sprigs", qty: 146, unit: "ea" }),
+  ]);
+  assert.match(line.basis, /146 sprigs/);
+  assert.match(line.basis, /20 sprigs a bunch/);
+  // What's in a bunch is an estimate, in exactly the way an average carrot is.
+  assert.equal(line.assumption, true);
+});
+
+test("one bunch is a bunch, not 1 bunches", () => {
+  const [line] = toWholeProduce([
+    order({ item: "Thyme sprigs", qty: 6, unit: "ea" }),
+  ]);
+  assert.equal(line.qty, 1);
+  assert.equal(line.unit, "bunch");
+});
+
+test("a herb counted in ea was counting bunches", () => {
+  // "Parsley — 7 ea" is the recipe's own unit coming through. Seven sprigs or
+  // seven bunches is a real question at the shop, and one parsley is one bunch.
+  const [line] = toWholeProduce([order({ item: "Parsley", qty: 7, unit: "ea" })]);
+  assert.equal(line.qty, 7, "the number is the recipe's, and it stands");
+  assert.equal(line.unit, "bunches");
+  assert.equal(line.assumption, true);
+  assert.match(line.basis, /only sold in bunches/);
+});
+
+test("a jar is never turned into a bunch", () => {
+  // "Dried oregano" and "garlic powder" both name a herb and neither grows in
+  // a bunch. Same rule as the weights, applied to the counts.
+  for (const item of ["Dried oregano", "Garlic powder", "Mint sauce"]) {
+    const [line] = toWholeProduce([order({ item, qty: 4, unit: "ea" })]);
+    assert.equal(line.unit, "ea", `${item} should be left alone`);
+  }
+});
+
+test("things you genuinely buy one of stay in ea", () => {
+  for (const item of ["Lemon", "Brown onion", "Long red chilli"]) {
+    const [line] = toWholeProduce([order({ item, qty: 34, unit: "ea" })]);
+    assert.equal(line.unit, "ea", `${item} should be left alone`);
+  }
+});
+
+test("counting sprigs after combining buys one bunch, not two", () => {
+  // The same rule the carrots follow, and the reason this runs after the
+  // combine: 12 sprigs across two dishes is one bunch of thyme, not two.
+  const perDish = [
+    order({ item: "Thyme sprigs", qty: 6, unit: "ea", forDish: "Lamb" }),
+    order({ item: "Thyme sprigs", qty: 6, unit: "ea", forDish: "Potatoes" }),
+  ];
+  const [line] = toWholeProduce(combineOrders(perDish));
+  assert.equal(line.qty, 1);
+  assert.equal(line.unit, "bunch");
+});
+
 test("counting after combining buys three carrots, not four", () => {
   // This is the whole reason it runs last. Two dishes wanting 1.2 carrots each
   // is 2.4 carrots — three. Rounding each dish up on its own buys four, and

@@ -30,6 +30,14 @@
  * Only things genuinely sold by the piece are in here. Potatoes, tomatoes and
  * pumpkin go by the kilo at every supplier worth using, and "150 potatoes" is
  * a worse line than "16 kg". When in doubt it is left as a weight.
+ *
+ * The same complaint applies to things already counted, which is the harder
+ * half. A recipe says "3 sprigs of rosemary" and "2 cloves of garlic" because
+ * that is how you cook. Scaled to ninety guests those become "146 ea" and
+ * "113 ea" — numbers with no shop behind them. Nobody sells a sprig, and
+ * standing at the greengrocer holding a bunch you still have to work out how
+ * many bunches 146 sprigs is. So a count of parts is turned into a count of
+ * the whole thing the part came off, by the same three rules.
  */
 
 import { roundUnits } from "./round.ts";
@@ -152,6 +160,78 @@ const PIECES: Record<string, Piece> = {
   dill: bunch(25, "25 g of picked fronds a bunch"),
 };
 
+/**
+ * A thing recipes count that shops don't sell.
+ *
+ * The figures are what a bunch off a Mudgee greengrocer's shelf actually
+ * holds, picked deliberately on the low side. Under-counting what is in a
+ * bunch buys a spare bunch; over-counting sends you back out mid-prep, and the
+ * herbs are the cheapest thing on the whole order to be generous with.
+ */
+interface Part {
+  /** What the recipe counts, plural: "sprigs", "cloves", "leaves". */
+  parts: string;
+  /** How many of those come in one of the thing the shop sells. */
+  per: number;
+  /** What you buy: "bunch", "bulb". */
+  one: string;
+  many: string;
+}
+
+const bunched = (parts: string, per: number): Part => ({
+  parts,
+  per,
+  one: "bunch",
+  many: "bunches",
+});
+
+const PARTS: Record<string, Part> = {
+  "garlic clove": { parts: "cloves", per: 10, one: "bulb", many: "bulbs" },
+
+  // Woody herbs, where a sprig is what a recipe asks for
+  "rosemary sprig": bunched("sprigs", 20),
+  "thyme sprig": bunched("sprigs", 40),
+  "oregano sprig": bunched("sprigs", 30),
+  "sage leaf": bunched("leaves", 60),
+  // Bay is deliberately absent: it comes dried in a packet far more often than
+  // fresh in a bunch, and "1 bunch of bay leaves" would send you looking for
+  // something the shop hasn't got.
+
+  // Soft herbs
+  "parsley sprig": bunched("sprigs", 30),
+  "coriander sprig": bunched("sprigs", 30),
+  "mint sprig": bunched("sprigs", 25),
+  "basil leaf": bunched("leaves", 100),
+  "basil sprig": bunched("sprigs", 20),
+  "dill sprig": bunched("sprigs", 25),
+
+  // Sold in a rubber band, never singly
+  "spring onion": bunched("onions", 7),
+};
+
+/**
+ * Herbs there is no other way to buy.
+ *
+ * A line that says "Parsley — 7 ea" is the recipe's own unit coming through
+ * untouched, and it leaves a real question at the shop: seven bunches, or
+ * seven sprigs? One parsley *is* one bunch — that is the only parsley you can
+ * pick up — so the number stands and the unit is named. Marked as an
+ * assumption, because the recipe never actually said.
+ */
+const BUNCH_ONLY = [
+  "parsley",
+  "coriander",
+  "mint",
+  "basil",
+  "dill",
+  "chives",
+  "rosemary",
+  "thyme",
+  "oregano",
+  "sage",
+  "tarragon",
+];
+
 function cabbage(grams: number): Piece {
   return { one: "cabbage", many: "cabbages", grams, each: `${grams} g a cabbage` };
 }
@@ -195,8 +275,9 @@ const NOT_FRESH = [
 
 /** Longest first, so a specific name beats the general one it contains. */
 const PIECE_KEYS = Object.keys(PIECES).sort((a, b) => b.length - a.length);
+const PART_KEYS = Object.keys(PARTS).sort((a, b) => b.length - a.length);
 
-/** Only weights convert. A line already counted in bunches is already right. */
+/** A line already counted in bunches is already right; only weights convert. */
 const GRAMS_PER: Record<string, number> = { g: 1, kg: 1000 };
 
 function pieceFor(item: string): { key: string; piece: Piece } | null {
@@ -208,8 +289,60 @@ function pieceFor(item: string): { key: string; piece: Piece } | null {
   return null;
 }
 
+function partFor(item: string): Part | null {
+  const name = item.toLowerCase();
+  if (NOT_FRESH.some((word) => name.includes(word))) return null;
+  for (const key of PART_KEYS) {
+    if (name.includes(key)) return PARTS[key];
+  }
+  return null;
+}
+
 /**
- * Turn combined produce weights into counts of whole items.
+ * Turn a count of parts into a count of what the shop sells.
+ *
+ * Everything here is already counted, so there is no weight to work from and
+ * nothing to reconcile with a price per kilo — a bunch is what you ask for and
+ * a bunch is what you're charged for.
+ */
+function toWholeCount(line: OrderLine): OrderLine {
+  const quantity = line.rawQty ?? line.qty;
+  if (!Number.isFinite(quantity) || quantity <= 0) return line;
+
+  const name = line.item.toLowerCase();
+  if (NOT_FRESH.some((word) => name.includes(word))) return line;
+
+  const part = partFor(line.item);
+  if (part) {
+    const count = roundUnits(quantity / part.per);
+    const { one, many } = part;
+    return {
+      ...line,
+      qty: count,
+      // The unrounded figure counts sprigs. Left on a line counted in bunches
+      // it would have anything that totals lines adding sprigs to bunches.
+      rawQty: undefined,
+      unit: count === 1 ? one : many,
+      basis: `${line.basis} · ${round(quantity)} ${part.parts} at ${part.per} ${part.parts} a ${one}, rounded up to whole ${many}`,
+      assumption: true,
+    };
+  }
+
+  const herb = BUNCH_ONLY.find((leaf) => name.includes(leaf));
+  if (!herb) return line;
+
+  // The number is left exactly as the recipe had it. Only the unit is named,
+  // because "ea" of a thing sold in bunches can only have meant bunches.
+  return {
+    ...line,
+    unit: line.qty === 1 ? "bunch" : "bunches",
+    basis: `${line.basis} · written as "ea", and ${herb} is only sold in bunches`,
+    assumption: true,
+  };
+}
+
+/**
+ * Turn combined produce weights — and counts of parts — into whole items.
  *
  * Call this on the finished order sheet, after combining and after costing.
  * Costing works in the unit a price is quoted in — per kilo — so it has to see
@@ -218,6 +351,8 @@ function pieceFor(item: string): { key: string; piece: Piece } | null {
 export function toWholeProduce(lines: OrderLine[]): OrderLine[] {
   return lines.map((line) => {
     if (line.category !== "Produce") return line;
+
+    if (line.unit === "ea") return toWholeCount(line);
 
     const perGram = GRAMS_PER[line.unit];
     if (!perGram) return line;
