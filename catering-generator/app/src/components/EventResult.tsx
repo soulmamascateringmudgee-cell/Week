@@ -469,6 +469,14 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                 </p>
               )}
 
+              {/* The method makes a sauce of its own and the list isn't in
+                  parts, so the amounts below are dish totals spanning two
+                  pots. Said next to the numbers, because that is where the
+                  whole 1390 g of brown sugar goes into the batter. */}
+              {dish.splitNote && !dish.unscalable && (
+                <p className="split">{dish.splitNote}</p>
+              )}
+
               {/* The parts the dish was written in — dry, wet, the sauce that
                   goes over it — kept as headings. A cook reading one flat list
                   has to work the parts out again at the bench. Only shown when

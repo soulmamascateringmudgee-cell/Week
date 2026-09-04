@@ -36,6 +36,7 @@ import { scaledToOrderUnits, toOrderUnits } from "./measure.ts";
 import { applyStock } from "./pantry.ts";
 import { toWholeProduce } from "./produce.ts";
 import { missingIngredientWarning } from "./recipe-gaps.ts";
+import { splitAmountNote, splitAmountWarning } from "./split-amounts.ts";
 import { scaledToSpoonMeasures, toSpoonMeasures } from "./spoons.ts";
 import {
   hasUnscalableAmounts,
@@ -157,12 +158,20 @@ export function planEvent(input: EventInput): EventPlan {
     const gap = missingIngredientWarning(recipe);
     if (gap) warnings.push(gap);
 
+    // A dish with a sauce in its method and one undivided ingredient list.
+    // Every amount below is then a total across two pots — right for the shop,
+    // wrong at the bench, and indistinguishable from a single-pot amount on
+    // the page. Said here and again on the sheet itself.
+    const split = splitAmountWarning(recipe);
+    if (split) warnings.push(split);
+
     // The same scaled numbers the order lines are built from, kept per dish so
     // a cook can see how much of the shop belongs to which pot.
     dishSheets.push({
       name: recipe.name,
       course: recipe.course ?? null,
       unscalable,
+      splitNote: splitAmountNote(recipe),
       scaleNote: `written for ${recipe.serves} → ×${factor.toFixed(2)} for ${effectiveGuests} (incl. ${CREW_MEALS} crew) + ${Math.round(bufferPct * 100)}% buffer`,
       // The cook's own sheet gets the same treatment as the order sheet. At
       // this scale "41.8 cup" is no more useful standing at the bench than it
