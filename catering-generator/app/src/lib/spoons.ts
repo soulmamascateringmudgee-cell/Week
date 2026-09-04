@@ -208,6 +208,22 @@ export function asSpoons(ml: number): Spoonful | null {
   return { qty: quarters / 4, unit };
 }
 
+/**
+ * Millilitres as a spoon measure in a spoon size somebody else chose.
+ *
+ * `asSpoons` picks the size that reads best for one amount on its own. The
+ * parts of a split don't get that freedom: they are printed in brackets after
+ * a total and have to be in the total's unit, or the bracket says "4½ tbsp
+ * (chicken 3½ tbsp, sliders 3 tsp)" and the cook is left checking whether
+ * those add up. Same quarters, same arithmetic, unit fixed from outside.
+ */
+export function asSpoonsIn(ml: number, unit: "tsp" | "tbsp"): Spoonful | null {
+  if (!Number.isFinite(ml) || ml <= 0 || ml > MAX_SPOON_ML) return null;
+  const per = unit === "tsp" ? TSP_ML : TBSP_ML;
+  const quarters = Math.max(1, Math.round((ml / per) * 4));
+  return { qty: quarters / 4, unit };
+}
+
 /** Millilitres behind a line, using its density where it's been weighed. */
 function millilitresOf(
   qty: number,
@@ -279,11 +295,28 @@ export function toSpoonMeasures(lines: OrderLine[]): OrderLine[] {
   return lines.map((line) => {
     const spooned = toSpoonLine(line.rawQty ?? line.qty, line.unit, line.item);
     if (!spooned) return line;
+
+    // The per-dish amounts come along, through the same conversion. A row
+    // reading "1½ tbsp (chicken 30 g, slaw 17 g)" mixes two units on one line
+    // and makes the cook do the sum the sheet was supposed to do. Any part
+    // that won't convert — too small to be a quarter spoon, too big to count
+    // — takes the whole split with it rather than leaving a bracket whose
+    // pieces don't add up to the number in front of them.
+    const split = line.split?.map((part) => {
+      const volume = millilitresOf(part.qty, part.unit, line.item);
+      if (!volume) return null;
+      const each = asSpoonsIn(volume.ml, spooned.unit as "tsp" | "tbsp");
+      return each ? { dish: part.dish, qty: each.qty, unit: each.unit } : null;
+    });
+
     return {
       ...line,
       qty: spooned.qty,
       rawQty: undefined,
       unit: spooned.unit,
+      ...(split
+        ? { split: split.every((part) => part !== null) ? split : undefined }
+        : {}),
       basis: `${line.basis} · ${spooned.note}`,
       assumption: line.assumption || spooned.assumed,
     };

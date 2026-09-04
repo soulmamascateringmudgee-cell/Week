@@ -30,6 +30,16 @@ export interface OrderLine {
   category: Category;
   forDish: string;
   basis: string;
+  /**
+   * Where this line's total goes, when it came from more than one dish.
+   *
+   * One line of paprika for three dishes is one jar to buy and three amounts
+   * to weigh out, and the sheet has to carry both. Structured rather than
+   * written into `basis`, because the shopping list prints it beside the total
+   * and the basis is the long maths behind it — kept, but not read at the
+   * greengrocer.
+   */
+  split?: { dish: string; qty: number; unit: string }[];
   /** True when a figure came from a default rather than something the user told us. */
   assumption?: boolean;
   /**

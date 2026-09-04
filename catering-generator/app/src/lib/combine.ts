@@ -23,6 +23,32 @@ function key(item: string): string {
   return item.trim().toLowerCase().replace(/\s+/g, " ").replace(/[.,;]+$/, "");
 }
 
+/**
+ * One entry per dish, not one per line.
+ *
+ * A recipe can name the same ingredient twice — cayenne in the marinade and
+ * cayenne in the dredge — and each is its own line coming in here. Printed
+ * straight, the bracket says the dish's name twice with a number after each,
+ * which reads like two dishes and invites the cook to weigh out both. They are
+ * one pot's worth; they add.
+ *
+ * Only amounts in the same unit are added, for the same reason the totals
+ * above are: a bunch and a kilo don't sum, and a wrong total in a bracket is
+ * as bad as a wrong total anywhere else.
+ */
+function perDish(lines: OrderLine[]): { dish: string; qty: number; unit: string }[] {
+  const parts: { dish: string; qty: number; unit: string }[] = [];
+
+  for (const line of lines) {
+    const already = parts.find(
+      (part) => part.dish === line.forDish && part.unit === line.unit,
+    );
+    if (already) already.qty = roundForUnit(already.qty + line.qty, line.unit);
+    else parts.push({ dish: line.forDish, qty: line.qty, unit: line.unit });
+  }
+  return parts;
+}
+
 export function combineOrders(orders: OrderLine[]): OrderLine[] {
   const groups = new Map<string, OrderLine[]>();
 
@@ -71,6 +97,10 @@ export function combineOrders(orders: OrderLine[]): OrderLine[] {
       unit,
       category: lines[0].category,
       forDish: dishes.join(", "),
+      // What to weigh out for each pot, beside the one amount to buy. The
+      // rounded per-dish figures are the ones a cook works to, so those are
+      // what travel — not the raw values the total was added from.
+      split: perDish(lines),
       basis: `${lines.length} dishes added together — ${lines
         .map((line) => `${line.qty} ${line.unit} for ${line.forDish}`)
         .join("; ")}`,
@@ -83,4 +113,39 @@ export function combineOrders(orders: OrderLine[]): OrderLine[] {
   }
 
   return combined;
+}
+
+/**
+ * Drop any per-dish split that no longer matches the total it sits beside.
+ *
+ * A split is only ever printed in brackets after the total, so the two have to
+ * be readable as one statement: 47 g, of which 30 g here and 17 g there. Once
+ * a later step has changed the line's unit — produce counted into whole
+ * onions, a spice put back into spoons that its parts were too small to reach
+ * — the bracket would be in different units from the number in front of it,
+ * or its pieces would no longer add up to it. Either way the cook is left
+ * doing the arithmetic the sheet exists to have done.
+ *
+ * So the parts have to be in the line's own unit and add up to it, near enough
+ * that rounding explains the rest. Anything else loses its bracket and keeps
+ * its total, which is the half that has to be right.
+ */
+export function checkedSplits(lines: OrderLine[]): OrderLine[] {
+  return lines.map((line) => {
+    if (!line.split || line.split.length < 2) {
+      return line.split ? { ...line, split: undefined } : line;
+    }
+
+    const sameUnit = line.split.every((part) => part.unit === line.unit);
+    const total = line.split.reduce((sum, part) => sum + part.qty, 0);
+    // Each part was rounded on its own, so the sum can sit a little either
+    // side of the total. A tenth of the total, or one whole unit, covers that
+    // without letting a genuinely wrong bracket through.
+    const slack = Math.max(line.qty * 0.1, 1);
+
+    if (!sameUnit || Math.abs(total - line.qty) > slack) {
+      return { ...line, split: undefined };
+    }
+    return line;
+  });
 }

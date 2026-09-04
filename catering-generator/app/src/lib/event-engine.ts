@@ -31,7 +31,7 @@ import {
   protein,
   sideGramsPerPerson,
 } from "./tables.ts";
-import { combineOrders } from "./combine.ts";
+import { checkedSplits, combineOrders } from "./combine.ts";
 import { scaledToOrderUnits, toOrderUnits } from "./measure.ts";
 import { applyStock } from "./pantry.ts";
 import { toWholeProduce } from "./produce.ts";
@@ -627,9 +627,15 @@ export function planEvent(input: EventInput): EventPlan {
   // be added while they're in different sizes. After costing, because a price
   // is quoted per kilo. And after the produce count, which is looking for
   // weights and would find nothing on a row already turned into teaspoons.
-  const shoppingOrders = applyStock(
-    toSpoonMeasures(toWholeProduce(combinedOrders)),
-    input.stock ?? [],
+  // Last of all, the per-dish brackets are checked against the totals they sit
+  // beside. Everything above is free to change a line's unit; this is the one
+  // place that notices when doing so left the bracket saying something the
+  // number in front of it doesn't.
+  const shoppingOrders = checkedSplits(
+    applyStock(
+      toSpoonMeasures(toWholeProduce(combinedOrders)),
+      input.stock ?? [],
+    ),
   );
 
   return {

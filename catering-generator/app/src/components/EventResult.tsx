@@ -1,12 +1,13 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 
 import PrintButton from "@/components/PrintButton.tsx";
 import Section from "@/components/Section.tsx";
 import { stockedCount } from "@/lib/pantry.ts";
 import { formatAmount } from "@/lib/round.ts";
 import { DISCLAIMER_TEXT } from "@/lib/options.ts";
+import { methodSteps } from "@/lib/method-steps.ts";
 import { groupBySection, hasSections } from "@/lib/recipe-sections.ts";
 import type { Category, EventPlan, OrderLine } from "@/lib/types.ts";
 
@@ -50,6 +51,13 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
   const costing = plan.costing;
   const stocked = stockedCount(plan.orders);
 
+  // The maths behind every line, off by default. It was under all of them at
+  // once, which made a fifteen-item shop three pages: three lines of print per
+  // thing to buy, two of which are only wanted when a number looks wrong. The
+  // working is still one tap away and still prints when it is open — it is not
+  // gone, it is just no longer in front of the list it explains.
+  const [showWorking, setShowWorking] = useState(false);
+
   return (
     <section>
       {plan.warnings.map((warning) => (
@@ -85,6 +93,14 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
 
       <div className="actions">
         <PrintButton />
+        <button
+          type="button"
+          className="secondary"
+          aria-pressed={showWorking}
+          onClick={() => setShowWorking(!showWorking)}
+        >
+          {showWorking ? "Hide the working" : "Show the working"}
+        </button>
       </div>
 
       <Section
@@ -135,7 +151,6 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                 <thead>
                   <tr>
                     <th>Item</th>
-                    <th>For</th>
                     <th style={{ textAlign: "right" }}>Qty</th>
                   </tr>
                 </thead>
@@ -161,9 +176,29 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                         {line.unscalable && (
                           <span className="tag warn">amount in the name</span>
                         )}
-                        <div className="basis">{line.basis}</div>
+
+                        {/* Where the one amount goes, in brackets on the same
+                            line. One jar of paprika to buy, three amounts to
+                            weigh out — the shopping list has to carry both,
+                            and it does it in the space of a sentence. Without
+                            a split it's just the dish, which is the same
+                            sentence with one name in it. */}
+                        <div className="goes">
+                          {line.split
+                            ? line.split
+                                .map(
+                                  (part) =>
+                                    `${part.dish} ${formatAmount(part.qty, part.unit)} ${part.unit}`,
+                                )
+                                .join(" · ")
+                            : line.forDish}
+                        </div>
+
+                        {/* The maths, for the row that looks wrong. Folded
+                            away because it is read once in an argument with a
+                            number, not once per line at the greengrocer. */}
+                        {showWorking && <div className="basis">{line.basis}</div>}
                       </td>
-                      <td>{line.forDish}</td>
                       <td className="num">
                         {line.unscalable ? (
                           <span className="broken-qty" title="The recipe's amount is in the ingredient name">
@@ -506,7 +541,21 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                 </tbody>
               </table>
 
-              {dish.method && <p className="method">{dish.method}</p>}
+              {/* The method a step at a time, with the cook's own label for
+                  each stage in front of it. As one paragraph it is a block the
+                  size of a hand, and coming back to it with wet hands means
+                  re-reading from the top to find your place. Nothing is
+                  reworded — only broken where the recipe already broke. */}
+              {methodSteps(dish.method).length > 0 && (
+                <ol className="method-steps">
+                  {methodSteps(dish.method).map((step, n) => (
+                    <li key={`${dish.name}-step-${n}`}>
+                      {step.label && <b>{step.label}</b>}
+                      {step.text}
+                    </li>
+                  ))}
+                </ol>
+              )}
               {dish.notes && <p className="method">{dish.notes}</p>}
             </div>
           ))}
