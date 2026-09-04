@@ -35,6 +35,7 @@ import { combineOrders } from "./combine.ts";
 import { scaledToOrderUnits, toOrderUnits } from "./measure.ts";
 import { applyStock } from "./pantry.ts";
 import { toWholeProduce } from "./produce.ts";
+import { missingIngredientWarning } from "./recipe-gaps.ts";
 import { scaledToSpoonMeasures, toSpoonMeasures } from "./spoons.ts";
 import {
   hasUnscalableAmounts,
@@ -148,6 +149,13 @@ export function planEvent(input: EventInput): EventPlan {
     // because the recipe was saved long before this sheet was printed.
     const suspect = suspectYieldWarning(recipe);
     if (suspect) warnings.push(suspect);
+
+    // Food the method calls for that the ingredient list never mentions, and
+    // which therefore reached no order sheet. The quietest failure there is:
+    // a wrong number is at least on the page to be argued with, a missing one
+    // leaves nothing to notice until the oven is on.
+    const gap = missingIngredientWarning(recipe);
+    if (gap) warnings.push(gap);
 
     // The same scaled numbers the order lines are built from, kept per dish so
     // a cook can see how much of the shop belongs to which pot.
