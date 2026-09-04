@@ -21,6 +21,31 @@ export function round1(value: number): number {
   return Math.round(value * 10) / 10;
 }
 
+/** The fractions a spoon set is graduated in, and a recipe is written in. */
+const QUARTERS: Record<string, string> = {
+  "0.25": "¼",
+  "0.5": "½",
+  "0.75": "¾",
+};
+
+/**
+ * An amount as a cook would write it.
+ *
+ * "1¼ tsp", not "1.25 tsp". The decimal is the same number and nobody measures
+ * by it — a spoon set has a quarter and a half on it, so that is what the
+ * sheet should say. Only spoons and cups get this: 1.25 kg is a weight off a
+ * scale and reads perfectly well as a decimal.
+ */
+export function formatAmount(qty: number, unit: string): string {
+  if (unit !== "tsp" && unit !== "tbsp" && unit !== "cup") return `${qty}`;
+  if (!Number.isFinite(qty) || qty <= 0) return `${qty}`;
+
+  const whole = Math.floor(qty);
+  const fraction = QUARTERS[String(Math.round((qty - whole) * 100) / 100)];
+  if (!fraction) return `${qty}`;
+  return whole === 0 ? fraction : `${whole}${fraction}`;
+}
+
 /**
  * Round a scaled recipe quantity to something you can actually order.
  * Weights and volumes get sensible steps; anything you count gets rounded up,

@@ -137,7 +137,12 @@ const GRAMS_PER_ML: Record<string, number> = {
 /** Longest first, so a specific name beats the general one it contains. */
 const DENSITY_KEYS = Object.keys(GRAMS_PER_ML).sort((a, b) => b.length - a.length);
 
-function densityFor(item: string): { key: string; gramsPerMl: number } | null {
+/**
+ * Exported so the spoon conversion can use the same figures going the other
+ * way. One table, so a density can't be right in one direction and wrong in
+ * the other.
+ */
+export function densityFor(item: string): { key: string; gramsPerMl: number } | null {
   const name = item.toLowerCase();
   for (const key of DENSITY_KEYS) {
     if (name.includes(key)) return { key, gramsPerMl: GRAMS_PER_ML[key] };
