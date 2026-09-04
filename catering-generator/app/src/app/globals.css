@@ -1033,6 +1033,19 @@ td.num {
   font-size: 0.85rem;
 }
 
+/* A caution, not an alarm. The numbers under it are correct totals — they
+   just span two pots — so it reads in the accent rather than the red kept for
+   "don't cook from these numbers". */
+.sheet .split {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.85rem;
+}
+
 .sheet .method {
   margin: 12px 0 0;
   font-size: 0.88rem;
@@ -1637,7 +1650,8 @@ ul.plain li {
   .notice.warn,
   .notice.check,
   .notice.ok,
-  .sheet .broken {
+  .sheet .broken,
+  .sheet .split {
     background: none;
     color: #000;
     border-left: 2pt solid #000;

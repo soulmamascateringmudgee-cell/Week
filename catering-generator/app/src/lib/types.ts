@@ -106,6 +106,12 @@ export interface DishSheet {
    * this sheet can be trusted until the recipe is fixed.
    */
   unscalable?: boolean;
+  /**
+   * Set when the method makes something separately — a sauce, a dressing —
+   * and the ingredient list isn't in parts. The amounts below are then dish
+   * totals spanning two pots, and the recipe doesn't say how they divide.
+   */
+  splitNote?: string | null;
   ingredients: ScaledIngredient[];
   method?: string | null;
   notes?: string | null;
