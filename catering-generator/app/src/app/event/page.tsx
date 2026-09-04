@@ -12,7 +12,6 @@ import {
   BITE_SIZE_CHOICES,
   MENU_WEIGHT_CHOICES,
   PROTEIN_CHOICES,
-  STARCH_CHOICES,
   STYLE_CHOICES,
   VAN_ITEM_CHOICES,
 } from "@/lib/options.ts";
@@ -41,12 +40,6 @@ interface EventForm {
   style: EventInput["style"];
   menuWeight: EventInput["menuWeight"];
   proteins: string[];
-  sidesCount: number;
-  starch: EventInput["starch"];
-  bread: boolean;
-  dessert: EventInput["dessert"];
-  grazing: EventInput["grazing"];
-  canapes: EventInput["canapes"];
   drinksService: boolean;
   hotOrOutdoors: boolean;
   vanItem: NonNullable<EventInput["vanItem"]>;
@@ -65,12 +58,6 @@ const BLANK: EventForm = {
   style: "shared",
   menuWeight: "standard",
   proteins: ["brisket", "chickenThigh"],
-  sidesCount: 3,
-  starch: "potato",
-  bread: true,
-  dessert: "shared",
-  grazing: "none",
-  canapes: "none",
   drinksService: false,
   hotOrOutdoors: false,
   vanItem: "burgers",
@@ -80,6 +67,25 @@ const BLANK: EventForm = {
   biteSize: "standard",
   budget: "",
 };
+
+/**
+ * The menu is the dishes you ticked, full stop.
+ *
+ * There used to be a card of generic menu lines here — a sides count, a
+ * starch, a dessert, grazing and canapé sizes — from before the recipe book
+ * existed. Once your own dishes are on the job those boxes only ever ordered
+ * the same food twice, which is why the page had to warn you about them. The
+ * engine still understands the fields, so the numbers below say plainly that
+ * nothing generic is being asked for.
+ */
+const NO_GENERIC_MENU = {
+  sidesCount: 0,
+  starch: "none",
+  bread: false,
+  dessert: "none",
+  grazing: "none",
+  canapes: "none",
+} as const satisfies Partial<EventInput>;
 
 function EventPlanner() {
   const searchParams = useSearchParams();
@@ -204,12 +210,7 @@ function EventPlanner() {
       style: form.style,
       menuWeight: form.menuWeight,
       proteins: form.proteins,
-      sidesCount: form.sidesCount,
-      starch: form.starch,
-      bread: form.bread,
-      dessert: form.dessert,
-      grazing: form.grazing,
-      canapes: form.canapes,
+      ...NO_GENERIC_MENU,
       drinksService: form.drinksService,
       hotOrOutdoors: form.hotOrOutdoors,
       recipeIds: form.recipeIds,
@@ -362,6 +363,30 @@ function EventPlanner() {
               </select>
             </div>
           </div>
+
+          {/*
+            Not menu decisions — conditions on the day. No recipe knows it is
+            32 degrees in a paddock, and both of these move water, ice and the
+            food-safety warnings, so they sit with the job rather than the food.
+          */}
+          <div className="checks" style={{ marginTop: 14 }}>
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={form.drinksService}
+                onChange={(e) => set("drinksService", e.target.checked)}
+              />
+              We&rsquo;re running drinks and coffee
+            </label>
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={form.hotOrOutdoors}
+                onChange={(e) => set("hotOrOutdoors", e.target.checked)}
+              />
+              Outdoors, or over 28&deg;C
+            </label>
+          </div>
         </div>
 
         <div className="card">
@@ -407,7 +432,8 @@ function EventPlanner() {
               Nothing in your recipe book yet.{" "}
               <Link href="/recipes">Add your dishes</Link> and they&rsquo;ll
               appear here to tick onto a job — your own quantities, scaled to
-              the headcount, instead of the generic side lines below.
+              the headcount. Sides, dessert and grazing all come from here now,
+              so a job with nothing ticked orders proteins and not much else.
             </p>
           ) : (
             <>
@@ -439,116 +465,13 @@ function EventPlanner() {
               </select>
 
               <p className="basis" style={{ marginTop: 14 }}>
-                If your recipes are the whole menu, untick every protein below
-                and set sides to 0 — otherwise you&rsquo;ll get a generic
-                &ldquo;Main&rdquo; line on top of your own dishes.{" "}
+                If your recipes are the whole menu, untick every protein above —
+                otherwise you&rsquo;ll get a generic &ldquo;Main&rdquo; line on
+                top of your own dishes.{" "}
                 <Link href="/recipes">Edit your recipes</Link>
               </p>
             </>
           )}
-        </div>
-
-        <div className="card">
-          <h2>The rest of the menu</h2>
-          <div className="grid">
-            <div>
-              <label htmlFor="sides">Number of sides / salads</label>
-              <input
-                id="sides"
-                type="number"
-                onFocus={(e) => e.target.select()}
-                min={0}
-                max={6}
-                value={form.sidesCount}
-                onChange={(e) => set("sidesCount", Number(e.target.value))}
-              />
-            </div>
-            <div>
-              <label htmlFor="starch">Starch</label>
-              <select
-                id="starch"
-                value={form.starch}
-                onChange={(e) =>
-                  set("starch", e.target.value as EventInput["starch"])
-                }
-              >
-                {STARCH_CHOICES.map((c) => (
-                  <option key={c.key} value={c.key}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="dessert">Dessert</label>
-              <select
-                id="dessert"
-                value={form.dessert}
-                onChange={(e) =>
-                  set("dessert", e.target.value as EventInput["dessert"])
-                }
-              >
-                <option value="none">None</option>
-                <option value="shared">Plated or shared</option>
-                <option value="bites">Sweet bites</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="grazing">Grazing</label>
-              <select
-                id="grazing"
-                value={form.grazing}
-                onChange={(e) =>
-                  set("grazing", e.target.value as EventInput["grazing"])
-                }
-              >
-                <option value="none">None</option>
-                <option value="starter">As a starter</option>
-                <option value="meal">As a light meal</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="canapes">Canapés</label>
-              <select
-                id="canapes"
-                value={form.canapes}
-                onChange={(e) =>
-                  set("canapes", e.target.value as EventInput["canapes"])
-                }
-              >
-                <option value="none">None</option>
-                <option value="predinner">Pre-dinner, 1 hr</option>
-                <option value="meal">Replacing a meal</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="checks" style={{ marginTop: 14 }}>
-            <label className="check">
-              <input
-                type="checkbox"
-                checked={form.bread}
-                onChange={(e) => set("bread", e.target.checked)}
-              />
-              Bread on the table
-            </label>
-            <label className="check">
-              <input
-                type="checkbox"
-                checked={form.drinksService}
-                onChange={(e) => set("drinksService", e.target.checked)}
-              />
-              We&rsquo;re running drinks and coffee
-            </label>
-            <label className="check">
-              <input
-                type="checkbox"
-                checked={form.hotOrOutdoors}
-                onChange={(e) => set("hotOrOutdoors", e.target.checked)}
-              />
-              Outdoors, or over 28&deg;C
-            </label>
-          </div>
         </div>
 
         {form.style === "van" && (
