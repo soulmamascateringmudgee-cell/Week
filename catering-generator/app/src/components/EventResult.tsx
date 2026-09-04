@@ -466,6 +466,21 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                 <div className="prep-task" key={`${task.dish}-${task.task}`}>
                   <strong>{task.dish}</strong> — {task.task}
                   <div className="because">{task.because}</div>
+
+                  {/* The cooking itself, under the day it has to happen. A
+                      prep list that says "prep the pudding" is a reminder; a
+                      cook at 6am needs the steps. */}
+                  {task.steps && task.steps.length > 0 && (
+                    <ol className="prep-steps">
+                      {task.steps.map((step, n) => (
+                        <li key={`${task.dish}-${task.task}-${n}`}>
+                          {step.label && <b>{step.label}</b>}
+                          {step.text}
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+
                   {task.ingredients.length > 0 && (
                     <div className="amounts">
                       {task.ingredients

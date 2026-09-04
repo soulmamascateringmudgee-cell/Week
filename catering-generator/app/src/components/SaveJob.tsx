@@ -6,12 +6,21 @@ import { useRouter } from "next/navigation";
 export default function SaveJob({
   mode,
   input,
+  plan,
   defaultTitle,
   eventDate,
 }: {
   mode: "event" | "service";
   /** The form state, saved verbatim so opening the job restores it exactly. */
   input: unknown;
+  /**
+   * The sheet this form produced, saved with it.
+   *
+   * Kept so opening the job shows the list the food was ordered against.
+   * Regenerating would rebuild it from today's prices, today's recipes and
+   * today's pantry count, and hand back a different sheet without saying so.
+   */
+  plan?: unknown;
   defaultTitle: string;
   eventDate?: string;
 }) {
@@ -29,7 +38,7 @@ export default function SaveJob({
       const response = await fetch("/api/jobs", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ mode, title, eventDate, input }),
+        body: JSON.stringify({ mode, title, eventDate, input, plan }),
       });
       const body = await response.json();
       if (!response.ok) {

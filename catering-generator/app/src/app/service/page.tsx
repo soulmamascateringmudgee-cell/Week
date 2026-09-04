@@ -87,6 +87,10 @@ function ServicePlanner() {
   const [parsing, setParsing] = useState(false);
   const [parseNote, setParseNote] = useState("");
   const [plan, setPlan] = useState<ServicePlan | null>(null);
+
+  // The form as it stood when the plan on screen was built, so a changed box
+  // above an unchanged list gets said rather than silently tolerated.
+  const [savedFrom, setSavedFrom] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [jobStatus, setJobStatus] = useState<
@@ -119,7 +123,15 @@ function ServicePlanner() {
           return;
         }
 
-        setForm({ ...BLANK, ...body.job.input });
+        const restored = { ...BLANK, ...body.job.input };
+        setForm(restored);
+
+        // The saved sheet comes back with the form; rebuilding it would go to
+        // today's prices and today's pantry count instead.
+        if (body.job.plan) {
+          setPlan(body.job.plan as ServicePlan);
+          setSavedFrom(JSON.stringify(restored));
+        }
         setJobStatus({ state: "loaded", title: body.job.title });
       } catch {
         if (!cancelled) {
@@ -187,6 +199,10 @@ function ServicePlanner() {
     }
   }
 
+  // The sheet on screen was built from something other than what is in the
+  // boxes now.
+  const stale = plan !== null && savedFrom !== null && savedFrom !== JSON.stringify(form);
+
   async function submit(formEvent: React.FormEvent) {
     formEvent.preventDefault();
     setBusy(true);
@@ -221,6 +237,7 @@ function ServicePlanner() {
         setPlan(null);
       } else {
         setPlan(body as ServicePlan);
+        setSavedFrom(JSON.stringify(form));
       }
     } catch {
       setError("Couldn't reach the server. Check your connection and try again.");
@@ -533,7 +550,7 @@ function ServicePlanner() {
 
         <div className="actions">
           <button type="submit" disabled={busy}>
-            {busy ? "Working it out…" : "Build the par levels"}
+            {busy ? "Working it out…" : plan ? "Build it again" : "Build the par levels"}
           </button>
           {plan && (
             <>
@@ -547,12 +564,21 @@ function ServicePlanner() {
               <SaveJob
                 mode="service"
                 input={form}
+                plan={plan}
                 defaultTitle={`${VENUE_CHOICES.find((c) => c.key === form.venueType)?.label} — weekly par`}
               />
             </>
           )}
         </div>
       </form>
+
+      {stale && (
+        <p className="notice warn">
+          <strong>You&rsquo;ve changed something since this list was built.</strong>{" "}
+          It still shows what the job was ordered against. Press{" "}
+          <em>Build it again</em> when you want it to catch up.
+        </p>
+      )}
 
       {plan && <ServiceResult plan={plan} />}
     </>

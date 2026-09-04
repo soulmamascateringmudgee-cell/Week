@@ -95,6 +95,11 @@ function EventPlanner() {
   const [library, setLibrary] = useState<RecipeChoice[]>([]);
   const [today, setToday] = useState("");
   const [plan, setPlan] = useState<EventPlan | null>(null);
+
+  // The form as it stood when the plan on screen was built. Anything typed
+  // after that makes the sheet stale, and the page has to say so rather than
+  // let a changed headcount sit above an unchanged order list.
+  const [savedFrom, setSavedFrom] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [jobStatus, setJobStatus] = useState<
@@ -145,7 +150,17 @@ function EventPlanner() {
           return;
         }
 
-        setForm({ ...BLANK, ...body.job.input });
+        const restored = { ...BLANK, ...body.job.input };
+        setForm(restored);
+
+        // The sheet comes back with the form. Rebuilding it instead would go
+        // to today's prices, today's recipes and today's pantry count, and
+        // hand back a list that can differ from the one the food was ordered
+        // against — silently, and after the shopping is done.
+        if (body.job.plan) {
+          setPlan(body.job.plan as EventPlan);
+          setSavedFrom(JSON.stringify(restored));
+        }
         setJobStatus({ state: "loaded", title: body.job.title });
       } catch {
         if (!cancelled) {
@@ -196,6 +211,11 @@ function EventPlanner() {
         : [...current.proteins, key],
     }));
 
+  // True when the sheet on screen was built from something other than what is
+  // in the boxes now. Regenerating is then a decision, not a chore: the list
+  // below is still the one that was ordered against until it is replaced.
+  const stale = plan !== null && savedFrom !== null && savedFrom !== JSON.stringify(form);
+
   async function submit(formEvent: React.FormEvent) {
     formEvent.preventDefault();
     setBusy(true);
@@ -239,6 +259,7 @@ function EventPlanner() {
         setPlan(null);
       } else {
         setPlan(body as EventPlan);
+        setSavedFrom(JSON.stringify(form));
       }
     } catch {
       setError("Couldn't reach the server. Check your connection and try again.");
@@ -557,7 +578,11 @@ function EventPlanner() {
 
         <div className="actions">
           <button type="submit" disabled={busy}>
-            {busy ? "Working it out…" : "Build the order list"}
+            {busy
+              ? "Working it out…"
+              : plan
+                ? "Build it again"
+                : "Build the order list"}
           </button>
           {plan && (
             <>
@@ -571,6 +596,7 @@ function EventPlanner() {
               <SaveJob
                 mode="event"
                 input={form}
+                plan={plan}
                 eventDate={form.eventDate}
                 defaultTitle={`${form.guests} guests, ${form.eventDate}`}
               />
@@ -578,6 +604,20 @@ function EventPlanner() {
           )}
         </div>
       </form>
+
+      {/* The sheet below was built from a form that has since been changed.
+          Said here rather than by rebuilding on its own: this list is what the
+          job was ordered against, and replacing it silently is how a cook ends
+          up shopping from numbers nobody chose. */}
+      {stale && (
+        <p className="notice warn">
+          <strong>
+            You&rsquo;ve changed something since this list was built.
+          </strong>{" "}
+          It still shows what the job was ordered against. Press{" "}
+          <em>Build it again</em> when you want it to catch up.
+        </p>
+      )}
 
       {plan && <EventResult plan={plan} />}
     </>

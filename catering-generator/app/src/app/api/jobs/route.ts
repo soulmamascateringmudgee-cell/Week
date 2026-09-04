@@ -31,7 +31,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   }
 
-  let body: { mode?: unknown; title?: unknown; eventDate?: unknown; input?: unknown };
+  let body: {
+    mode?: unknown;
+    title?: unknown;
+    eventDate?: unknown;
+    input?: unknown;
+    plan?: unknown;
+  };
   try {
     body = await request.json();
   } catch {
@@ -60,10 +66,19 @@ export async function POST(request: Request) {
       ? body.eventDate
       : null;
 
+  // The generated sheet is stored with the form that made it. Opening the job
+  // then shows what was ordered from, rather than rebuilding it from today's
+  // prices, today's recipes and today's pantry count — which can quietly
+  // differ from the list the food was actually bought against.
+  const plan =
+    typeof body.plan === "object" && body.plan !== null && !Array.isArray(body.plan)
+      ? body.plan
+      : null;
+
   const { data, error } = await supabase
     .from("jobs")
     // user_id comes from the verified session, never from the request body.
-    .insert({ user_id: user.id, mode, title, event_date: eventDate, input: body.input })
+    .insert({ user_id: user.id, mode, title, event_date: eventDate, input: body.input, plan })
     .select("id")
     .single();
 

@@ -1,3 +1,5 @@
+import type { MethodStep } from "./method-steps.ts";
+
 export type MenuWeight = "light" | "standard" | "feasting";
 export type ServiceStyle = "shared" | "plated" | "grazing" | "van" | "multiday";
 export type VenueType = "restaurant" | "cafe" | "kiosk" | "canteen";
@@ -135,6 +137,15 @@ export interface PrepTaskLine {
   because: string;
   /** What goes into this dish, at this job's size. */
   ingredients: ScaledIngredient[];
+  /**
+   * The cooking itself, step by step, in the recipe's own words.
+   *
+   * "Prep the sticky date pudding" is a reminder, not a prep list. What a cook
+   * needs at 6am is the work: chop the dates, cover with boiling water, cream
+   * the butter and sugar. These are the method's own steps, unaltered — the
+   * list says when, and the recipe says what.
+   */
+  steps?: MethodStep[];
 }
 
 /** One day of the prep list. `daysOut` counts back from the event. */
