@@ -730,6 +730,16 @@ td.num {
   line-height: 1.5;
 }
 
+/* Which dish the amount goes to, under the item on the order sheet. Quieter
+   than the item and darker than the working: it is read while shopping, so it
+   has to be legible at a glance without competing with the name above it. */
+.goes {
+  color: var(--ink-soft);
+  font-size: 0.81rem;
+  line-height: 1.45;
+  margin-top: 2px;
+}
+
 .tag {
   display: inline-block;
   font-size: 0.7rem;
@@ -1057,6 +1067,39 @@ td.num {
   font-size: 0.88rem;
   color: var(--ink-soft);
   white-space: pre-line;
+}
+
+/* The method a step at a time. The gap between steps is the whole point: it is
+   what lets a cook glance back and find the line they were on, so it is bigger
+   than the gap between lines within a step. */
+.sheet .method-steps {
+  margin: 14px 0 0;
+  padding-left: 22px;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
+.sheet .method-steps li {
+  margin-bottom: 9px;
+  line-height: 1.55;
+  padding-left: 2px;
+}
+
+.sheet .method-steps li:last-child {
+  margin-bottom: 0;
+}
+
+/* The cook's own name for the stage — "PREP", "Crumble topping". The word the
+   eye lands on when it comes back to the page. */
+.sheet .method-steps b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.sheet .method-steps b::after {
+  content: " — ";
+  font-weight: 400;
+  color: var(--muted);
 }
 
 /* The same heading over a saved dish in the recipe book. */
@@ -1661,6 +1704,24 @@ ul.plain li {
   .sheet .lines tr.part th {
     border-top: 1pt solid #000;
     color: #000;
+  }
+
+  /* Where each amount goes, on the paper you shop from. */
+  .goes {
+    color: #000;
+    font-size: 9pt;
+  }
+
+  /* The steps keep their spacing on paper — that gap is what a cook finds
+     their place with — but a step must not break across a page. */
+  .sheet .method-steps {
+    color: #000;
+    font-size: 10pt;
+  }
+
+  .sheet .method-steps li {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .sheet .lines tr.part:first-child th {
