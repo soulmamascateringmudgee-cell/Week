@@ -23,7 +23,7 @@ export async function GET(_request: Request, { params }: Params) {
   // returns nothing rather than someone else's job.
   const { data, error } = await supabase
     .from("jobs")
-    .select("id, mode, title, event_date, input, actuals_note, created_at")
+    .select("id, mode, title, event_date, input, plan, actuals_note, created_at")
     .eq("id", id)
     .maybeSingle();
 

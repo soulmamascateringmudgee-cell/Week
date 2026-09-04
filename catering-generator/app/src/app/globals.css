@@ -1069,6 +1069,38 @@ td.num {
   white-space: pre-line;
 }
 
+/* The cooking steps under a prep day. Same shape as the method on a recipe
+   sheet — the gap between steps is what lets a cook find their place — but
+   tighter, because a prep day stacks several dishes on one page. */
+.prep-task .prep-steps {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.prep-task .prep-steps li {
+  margin-bottom: 6px;
+  line-height: 1.5;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.prep-task .prep-steps li:last-child {
+  margin-bottom: 0;
+}
+
+.prep-task .prep-steps b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.prep-task .prep-steps b::after {
+  content: " — ";
+  font-weight: 400;
+  color: var(--muted);
+}
+
 /* The method a step at a time. The gap between steps is the whole point: it is
    what lets a cook glance back and find the line they were on, so it is bigger
    than the gap between lines within a step. */

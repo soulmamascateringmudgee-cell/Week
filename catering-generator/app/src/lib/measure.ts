@@ -105,7 +105,19 @@ const GRAMS_PER_ML: Record<string, number> = {
   basil: 0.16,
   dill: 0.16,
   // Seeds are not leaves. Longer key, so it wins over "coriander" above.
+  //
+  // Whole seeds sit heavier in the spoon than the same spice ground, and they
+  // are the amounts a sausage-roll or a spice mix is built from. Without a
+  // density a seed line has no way back to a spoon and stays as "13 g", which
+  // is a number you have to fetch a scale for to use.
   "coriander seeds": 0.5,
+  "fennel seeds": 0.4,
+  "cumin seeds": 0.42,
+  "caraway seeds": 0.42,
+  "mustard seeds": 0.66,
+  "sesame seeds": 0.6,
+  "nigella seeds": 0.5,
+  "poppy seeds": 0.56,
   // Processed tomato is nearly twice the density of the chopped fruit, and is
   // what a Mexican menu actually reaches for. Longer keys, so they win.
   "tomato paste": 1.1,
@@ -113,6 +125,28 @@ const GRAMS_PER_ML: Record<string, number> = {
   "tomato passata": 1.05,
   "crushed tomato": 1.0,
   "diced tomato": 1.0,
+
+  // Thick things sold by weight and used by the spoon.
+  //
+  // A jar of Dijon says 215 g on the label, not 200 ml, so an order line
+  // reading "21 ml" is in a unit nothing on the shelf is priced in. These are
+  // all near enough to water that the density is barely an estimate at all —
+  // it is there to get the line into the unit the shop uses.
+  //
+  // Oil and vinegar are deliberately absent: they come in bottles marked in
+  // millilitres, so ml is already the ordering unit and grams would be the
+  // conversion nobody asked for.
+  "dijon": 1.05,
+  "wholegrain mustard": 1.05,
+  "english mustard": 1.1,
+  "american mustard": 1.05,
+  tahini: 1.0,
+  honey: 1.4,
+  "maple syrup": 1.33,
+  "peanut butter": 1.0,
+  miso: 1.25,
+  harissa: 1.05,
+  pesto: 0.95,
 
   // Spices and dried herbs. Roughly 3 g a teaspoon for a powder, 1 g for a
   // dried leaf herb, which is where these numbers come from.
