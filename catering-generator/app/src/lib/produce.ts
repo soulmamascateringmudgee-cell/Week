@@ -205,8 +205,9 @@ const PARTS: Record<string, Part> = {
   "basil sprig": bunched("sprigs", 20),
   "dill sprig": bunched("sprigs", 25),
 
-  // Sold in a rubber band, never singly
+  // Sold in a rubber band or as a whole head, never singly
   "spring onion": bunched("onions", 7),
+  "celery stalk": bunched("stalks", 10),
 };
 
 /**

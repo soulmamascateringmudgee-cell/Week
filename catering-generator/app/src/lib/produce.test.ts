@@ -119,8 +119,9 @@ test("a count of sprigs becomes a count of bunches", () => {
       order({ item: "Rosemary sprigs", qty: 146, unit: "ea" }),
       order({ item: "Garlic cloves", qty: 113, unit: "ea" }),
       order({ item: "Spring onions", qty: 12, unit: "ea" }),
+      order({ item: "Celery stalk", qty: 7, unit: "ea" }),
     ]).map((l) => `${l.qty} ${l.unit}`),
-    ["8 bunches", "12 bulbs", "2 bunches"],
+    ["8 bunches", "12 bulbs", "2 bunches", "1 bunch"],
   );
 });
 

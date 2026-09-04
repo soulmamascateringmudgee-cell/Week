@@ -141,6 +141,23 @@ const SPOONED = [
   "xanthan gum",
   "gelatine powder",
 
+  // Condiments and pastes, which a recipe measures by the spoon and a shop
+  // sells by the jar. Named specifically, never as bare "mustard": mustard
+  // greens are a leafy vegetable and would be a strange thing to ask for in
+  // teaspoons. Past the ceiling these go back to grams, which is what the
+  // label on the jar says.
+  "dijon",
+  "dijon mustard",
+  "wholegrain mustard",
+  "english mustard",
+  "american mustard",
+  "tahini",
+  "honey",
+  "miso",
+  "miso paste",
+  "harissa",
+  "tomato paste",
+
   // Extracts, which are liquid but never bought or measured by the litre.
   "vanilla extract",
   "vanilla essence",

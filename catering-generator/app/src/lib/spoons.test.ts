@@ -38,6 +38,38 @@ test("the plant is not the spice", () => {
   assert.equal(spoonedAs("Dried thyme"), "dried thyme");
 });
 
+test("whole seeds are spooned, and they know what they weigh", () => {
+  // "Fennel seeds — 13 g" was on a real sheet: named as a spice, but with no
+  // density there was no way back to a spoon and the grams stood.
+  const [seeds] = toSpoonMeasures([
+    line({ item: "Fennel seeds", qty: 13, rawQty: 13, unit: "g" }),
+  ]);
+  assert.equal(formatAmount(seeds.qty, seeds.unit), "1¾");
+  assert.equal(seeds.unit, "tbsp");
+});
+
+test("a jar of mustard is spoons at the bench and grams at the shop", () => {
+  const [small] = toSpoonMeasures([
+    line({ item: "Dijon Mustard ((or other non spicy smooth mustard))", qty: 21, unit: "ml" }),
+  ]);
+  assert.equal(small.qty, 1);
+  assert.equal(small.unit, "tbsp");
+
+  // Past the spoon ceiling it goes back to weight, not volume — a jar is
+  // labelled 215 g and priced by the kilo, and nothing on the shelf says ml.
+  const [big] = toSpoonMeasures([
+    line({ item: "Dijon mustard", qty: 400, rawQty: 400, unit: "g" }),
+  ]);
+  assert.equal(big.unit, "g");
+});
+
+test("mustard greens are not mustard", () => {
+  // Bare "mustard" is deliberately not on the list. A leafy green measured in
+  // teaspoons is the same failure as a block of butter measured in them.
+  assert.equal(spoonedAs("Mustard greens"), null);
+  assert.equal(spoonedAs("Dijon mustard"), "dijon mustard");
+});
+
 test("a name is matched by whole words, not by its letters", () => {
   // "salt" inside "salted butter" is the failure this guards: a block of
   // butter measured in teaspoons.
