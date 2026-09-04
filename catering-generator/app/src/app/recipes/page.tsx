@@ -79,6 +79,7 @@ export default function RecipesPage() {
   const [paste, setPaste] = useState("");
   const [link, setLink] = useState("");
   const [importing, setImporting] = useState(false);
+  const [sorting, setSorting] = useState(false);
   const [readingPhoto, setReadingPhoto] = useState(false);
   const [addingPhotos, setAddingPhotos] = useState(false);
   const [photos, setPhotos] = useState<StagedPhoto[]>([]);
@@ -301,6 +302,62 @@ export default function RecipesPage() {
           : "") +
         `. Check the quantities and units before you save — everything scales off them.`,
     );
+  }
+
+  /**
+   * Fill the Part boxes from the method, for the cook to check.
+   *
+   * A recipe written in parts — a filling and a topping, a dry bowl and a wet
+   * one — usually arrives as one flat list, because that is what recipe sites
+   * publish. The parts are sitting in the method; this reads them off it and
+   * puts them in the boxes. It changes no amount and saves nothing: the rows
+   * land in the form exactly as any typed row would, and the cook still has to
+   * look at them and press save.
+   */
+  async function suggestParts() {
+    const filled = rows.filter((row) => row.item.trim() !== "");
+    if (filled.length === 0) {
+      setNote("Add the ingredients first, then ask for parts.");
+      return;
+    }
+
+    setSorting(true);
+    setNote("");
+    try {
+      const response = await fetch("/api/suggest-parts", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name, method, ingredients: filled }),
+      });
+      const body = await response.json();
+
+      if (!response.ok) {
+        setNote(body.error ?? "Couldn't sort that into parts.");
+        return;
+      }
+
+      // The suggestion covers the filled rows in order; blank rows keep what
+      // they had, so a half-typed line at the bottom isn't given a heading.
+      const parts = body.parts as string[];
+      let n = 0;
+      const next = rows.map((row) =>
+        row.item.trim() === "" ? row : { ...row, section: parts[n++] ?? "" },
+      );
+      setRows(next);
+
+      const named = groupBySection(next).filter((p) => p.section !== null);
+      setNote(
+        named.length === 0
+          ? "No parts found — this one reads as a single list, which is how most recipes are. Nothing has been changed."
+          : `Suggested ${named.length} part${named.length === 1 ? "" : "s"}: ${named
+              .map((p) => p.heading)
+              .join(", ")}. Check them and change any that are wrong — nothing is saved until you press save.`,
+      );
+    } catch {
+      setNote("Couldn't reach the server.");
+    } finally {
+      setSorting(false);
+    }
   }
 
   function updateRow(index: number, patch: Partial<RecipeIngredient>) {
@@ -645,6 +702,18 @@ export default function RecipesPage() {
               }
             >
               Add an ingredient
+            </button>
+
+            {/* Filling twelve Part boxes by hand is the reason a recipe stays
+                one flat list. This reads the parts off the method and puts
+                them in the boxes, where they still have to be looked at. */}
+            <button
+              type="button"
+              className="secondary"
+              onClick={suggestParts}
+              disabled={sorting || rows.every((row) => row.item.trim() === "")}
+            >
+              {sorting ? "Reading the method…" : "Suggest parts from the method"}
             </button>
           </div>
 
