@@ -1003,8 +1003,12 @@ td.num {
    Set apart by weight and letter-spacing rather than a rule — the rows
    already carry rules, and a second one under a heading reads as a table
    inside a table. */
+/* A rule above each part, so where one bowl ends and the next begins is
+   visible on paper at arm's length. Uppercase alone reads as emphasis, not as
+   a boundary — and the boundary is the whole point of a part. */
 .sheet .lines tr.part th {
-  padding: 14px 0 4px;
+  padding: 16px 0 4px;
+  border-top: 1px solid var(--line-strong);
   text-align: left;
   font-family: var(--font-display-stack);
   font-size: 0.78rem;
@@ -1014,8 +1018,10 @@ td.num {
   color: var(--ink-soft);
 }
 
+/* No rule above the first part — there is nothing above it to divide from. */
 .sheet .lines tr.part:first-child th {
   padding-top: 4px;
+  border-top: none;
 }
 
 .sheet .lines tr:last-child td {
@@ -1650,6 +1656,17 @@ ul.plain li {
   .notice.warn,
   .notice.check,
   .notice.ok,
+  /* Grey reads as nothing on a printer. The part boundary is the one line on
+     this sheet a cook needs to find at arm's length, so it prints black. */
+  .sheet .lines tr.part th {
+    border-top: 1pt solid #000;
+    color: #000;
+  }
+
+  .sheet .lines tr.part:first-child th {
+    border-top: none;
+  }
+
   .sheet .broken,
   .sheet .split {
     background: none;
