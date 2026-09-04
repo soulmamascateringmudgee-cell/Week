@@ -22,17 +22,56 @@ export interface ImportedRecipe {
   servesAssumed: boolean;
 }
 
-/** Recipe yields come as "4", "Serves 6", "4-6 servings", "makes 12". */
+/**
+ * A yield unit that measures food rather than counting people.
+ *
+ * Salsas, dips, dressings and sauces are published with a volume yield —
+ * "2 cups", "500 ml", "1.5 kg" — because that is the useful thing to say
+ * about them. The number in front of it is not a headcount and must never be
+ * used as one.
+ *
+ * This mattered: a pico de gallo published as "2 cups" was read as serving 2,
+ * so a job for 19 guests scaled it ×11.55 and asked for 35 tomatoes and a
+ * litre of coriander. The recipe makes about two cups; two cups feeds a table.
+ * Nothing downstream can tell a headcount of 2 from two cups, so the only
+ * place to catch it is here, at the point the number is read.
+ */
+const FOOD_QUANTITY_UNIT =
+  /^\s*(?:cups?|ml|millilitres?|milliliters?|l|litres?|liters?|g|grams?|kg|kilos?|kilograms?|oz|ounces?|lbs?|pounds?|tbsp|tablespoons?|tsp|teaspoons?|pints?|quarts?|gallons?)\b/i;
+
+/**
+ * Recipe yields come as "4", "Serves 6", "4-6 servings", "makes 12" — and as
+ * "2 cups", which is not a serving count at all and returns null so the
+ * caller has to ask rather than assume.
+ */
 export function parseYield(raw: unknown): number | null {
-  const text = Array.isArray(raw) ? String(raw[0] ?? "") : String(raw ?? "");
-  // A range means the cook wasn't sure either. Take the lower number: it's the
-  // one that leaves you with enough food rather than not enough.
-  const match = /(\d+(?:\.\d+)?)/.exec(text);
-  if (!match) return null;
-  const value = Number(match[1]);
-  return Number.isFinite(value) && value >= 1 && value <= 10000
-    ? Math.round(value)
-    : null;
+  // schema.org allows a list, and sites use it inconsistently: ["8"],
+  // ["2 cups"], and — the dangerous one — ["2", "2 cups"], where the bare
+  // number on its own looks like a headcount and is nothing of the sort.
+  // Every entry gets a look, and one food measurement condemns the lot.
+  const texts = (Array.isArray(raw) ? raw : [raw])
+    .map((entry) => String(entry ?? ""))
+    .filter((text) => text.trim() !== "");
+
+  let headcount: number | null = null;
+
+  for (const text of texts) {
+    // A range means the cook wasn't sure either. Take the lower number: it's
+    // the one that leaves you with enough food rather than not enough.
+    const match = /(\d+(?:\.\d+)?)/.exec(text);
+    if (!match) continue;
+
+    if (FOOD_QUANTITY_UNIT.test(text.slice(match.index + match[0].length))) {
+      return null;
+    }
+
+    const value = Number(match[1]);
+    if (headcount === null && Number.isFinite(value) && value >= 1 && value <= 10000) {
+      headcount = Math.round(value);
+    }
+  }
+
+  return headcount;
 }
 
 /** Walk the JSON-LD graph for anything that says it's a Recipe. */

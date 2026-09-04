@@ -38,6 +38,7 @@ import { toWholeProduce } from "./produce.ts";
 import {
   hasUnscalableAmounts,
   unscalableLines,
+  suspectYieldWarning,
   unscalableWarning,
 } from "./recipe-health.ts";
 import { costOrders } from "./costing.ts";
@@ -140,6 +141,12 @@ export function planEvent(input: EventInput): EventPlan {
     const broken = new Set(unscalableLines(recipe));
     const unscalable = hasUnscalableAmounts(recipe);
     if (broken.size > 0) warnings.push(unscalableWarning(recipe));
+
+    // A yield read off the page as "2 cups" and stored as "serves 2" makes
+    // every line on this dish the same multiple too big. Say so on the job,
+    // because the recipe was saved long before this sheet was printed.
+    const suspect = suspectYieldWarning(recipe);
+    if (suspect) warnings.push(suspect);
 
     // The same scaled numbers the order lines are built from, kept per dish so
     // a cook can see how much of the shop belongs to which pot.

@@ -228,6 +228,39 @@ test("a range yield takes the smaller number, so you cook enough", () => {
   assert.equal(parseYield("a few"), null);
 });
 
+test("a yield measured in food is not a headcount", () => {
+  // The one that got out. A pico de gallo published as "2 cups" was read as
+  // serving two people, so a job for 19 scaled it ×11.55 and ordered 35
+  // tomatoes. Two cups is what the bowl holds, not who eats it.
+  assert.equal(parseYield("2 cups"), null);
+  assert.equal(parseYield("2.5 cups"), null);
+  assert.equal(parseYield("500 ml"), null);
+  assert.equal(parseYield("1.5 kg"), null);
+  assert.equal(parseYield("8 tbsp"), null);
+
+  // The shape that would have slipped through a check on the first entry
+  // alone: a bare number that turns out to be cups when you read on.
+  assert.equal(parseYield(["2", "2 cups"]), null);
+});
+
+test("a countable yield still reads as a headcount", () => {
+  // Rejecting volumes must not start rejecting the ordinary cases.
+  assert.equal(parseYield("Serves 6"), 6);
+  assert.equal(parseYield("makes 12"), 12);
+  assert.equal(parseYield("12 muffins"), 12);
+  assert.equal(parseYield(["8", "8 servings"]), 8);
+  assert.equal(parseYield("4 people"), 4);
+});
+
+test("a volume yield makes the app ask rather than assume", () => {
+  const html = `<script type="application/ld+json">
+    {"@type":"Recipe","name":"Pico de Gallo","recipeYield":"2 cups",
+     "recipeIngredient":["3 large tomatoes","1/4 cup finely chopped white onion"]}</script>`;
+  const recipe = extractRecipe(html);
+  assert.equal(recipe?.servesAssumed, true, "must be flagged, not trusted");
+  assert.notEqual(recipe?.serves, 2, "two cups is not two people");
+});
+
 test("returns nothing when the page has no readable recipe", () => {
   assert.equal(extractRecipe("<html><body>just a blog</body></html>"), null);
   assert.equal(extractRecipe('<script type="application/ld+json">{bad json</script>'), null);
