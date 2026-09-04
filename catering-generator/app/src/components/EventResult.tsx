@@ -5,6 +5,7 @@ import { Fragment } from "react";
 import PrintButton from "@/components/PrintButton.tsx";
 import Section from "@/components/Section.tsx";
 import { stockedCount } from "@/lib/pantry.ts";
+import { formatAmount } from "@/lib/round.ts";
 import { DISCLAIMER_TEXT } from "@/lib/options.ts";
 import { groupBySection, hasSections } from "@/lib/recipe-sections.ts";
 import type { Category, EventPlan, OrderLine } from "@/lib/types.ts";
@@ -166,11 +167,11 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                       <td className="num">
                         {line.unscalable ? (
                           <span className="broken-qty" title="The recipe's amount is in the ingredient name">
-                            {line.qty} {line.unit}
+                            {formatAmount(line.qty, line.unit)} {line.unit}
                           </span>
                         ) : (
                           <>
-                            {line.qty} {line.unit}
+                            {formatAmount(line.qty, line.unit)} {line.unit}
                           </>
                         )}
                         {/* The order stays at what the job needs. What the
@@ -433,7 +434,7 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                   {task.ingredients.length > 0 && (
                     <div className="amounts">
                       {task.ingredients
-                        .map((i) => `${i.qty} ${i.unit} ${i.item}`)
+                        .map((i) => `${formatAmount(i.qty, i.unit)} ${i.unit} ${i.item}`)
                         .join(" · ")}
                     </div>
                   )}
@@ -488,7 +489,7 @@ export default function EventResult({ plan }: { plan: EventPlan }) {
                         <tr key={`${dish.name}-${p}-${line.item}-${i}`}>
                           <td>{line.item}</td>
                           <td className="num">
-                            {dish.unscalable ? "—" : `${line.qty} ${line.unit}`}
+                            {dish.unscalable ? "—" : `${formatAmount(line.qty, line.unit)} ${line.unit}`}
                           </td>
                         </tr>
                       ))}

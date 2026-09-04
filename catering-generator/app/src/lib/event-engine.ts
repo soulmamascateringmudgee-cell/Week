@@ -35,6 +35,7 @@ import { combineOrders } from "./combine.ts";
 import { scaledToOrderUnits, toOrderUnits } from "./measure.ts";
 import { applyStock } from "./pantry.ts";
 import { toWholeProduce } from "./produce.ts";
+import { scaledToSpoonMeasures, toSpoonMeasures } from "./spoons.ts";
 import {
   hasUnscalableAmounts,
   unscalableLines,
@@ -158,7 +159,11 @@ export function planEvent(input: EventInput): EventPlan {
       // The cook's own sheet gets the same treatment as the order sheet. At
       // this scale "41.8 cup" is no more useful standing at the bench than it
       // is standing at the greengrocer.
-      ingredients: scaledToOrderUnits(
+      // Spices come back to spoons here too, and matter more here than on the
+      // order sheet: this is the sheet somebody works from with a spoon in
+      // their hand.
+      ingredients: scaledToSpoonMeasures(
+        scaledToOrderUnits(
         recipe.ingredients
           .filter((i) => Number.isFinite(i.qty) && i.qty > 0)
           .map((i) => ({
@@ -172,6 +177,7 @@ export function planEvent(input: EventInput): EventPlan {
             ...(i.section ? { section: i.section } : {}),
             ...(broken.has(i.item) ? { unscalable: true } : {}),
           })),
+        ),
       ),
       method: recipe.method ?? null,
       notes: recipe.notes ?? null,
@@ -598,8 +604,14 @@ export function planEvent(input: EventInput): EventPlan {
   // This marks lines; it never reduces them. The order still says what the job
   // needs, because a stock count is a memory of a Tuesday and by Friday
   // somebody has used the tomatoes for staff lunch.
+  // Spices go back into spoons at the very end, for the same reasons the
+  // produce count runs late. After combining, because a paprika used in three
+  // dishes has to be totalled in millilitres — spoons from three dishes can't
+  // be added while they're in different sizes. After costing, because a price
+  // is quoted per kilo. And after the produce count, which is looking for
+  // weights and would find nothing on a row already turned into teaspoons.
   const shoppingOrders = applyStock(
-    toWholeProduce(combinedOrders),
+    toSpoonMeasures(toWholeProduce(combinedOrders)),
     input.stock ?? [],
   );
 
