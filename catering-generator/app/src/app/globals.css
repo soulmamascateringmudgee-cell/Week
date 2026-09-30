@@ -66,6 +66,34 @@
   --warn: #99281f;
   --warn-soft: #fbebe9;
 
+  /* The surface a value is typed onto: inputs, selects, chips. Paler than
+     the card it sits on, so an empty field still reads as a field. */
+  --field: #fff;
+
+  /* The two colours that are *on* a filled control rather than behind it.
+     Split from the fills because a palette can invert — white on sage is
+     right, white on a wattle-gold button is unreadable — and the answer
+     belongs with the palette, not with the button. */
+  --on-primary: #fff;
+  --on-accent: #fff;
+
+  /* Sage where it is read rather than seen. Same colour here; a dark
+     palette needs a lighter tint for text than it does for a button fill,
+     and this is where that difference gets to live. */
+  --primary-ink: var(--primary);
+  --primary-ink-strong: var(--primary-bright);
+
+  /* The two soft washes behind the page, and the rule around a chosen
+     card. Decorative, and the first things a different palette rewrites. */
+  --glow-a: #fdf6e9;
+  --glow-b: #eef2ea;
+  --chosen-line: #eddfd2;
+
+  /* The sticky header sits over the page, so it is the card colour with a
+     little of the page showing through. Translucent, which means a palette
+     has to restate it rather than inherit a surface. */
+  --header-veil: rgba(255, 252, 247, 0.88);
+
   --radius-sm: 8px;
   --radius: 12px;
   --radius-lg: 18px;
@@ -78,6 +106,159 @@
     "Palatino Linotype", serif;
   --font-text-stack: var(--font-text), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ---- Soul Mamas -----------------------------------------------------------
+ *
+ * One operator's own branding, switched on from their profile and never
+ * shipped to anyone else's login.
+ *
+ * Four colours off the brand sheet, used as the sheet uses them:
+ *
+ *   Charcoal       #292725
+ *   Warm cream     #f4ebdd
+ *   Soul burgundy  #762f32
+ *   Golden ochre   #d6a13b
+ *
+ * The brand runs two ways — the wordmark on charcoal and the wordmark on
+ * cream — so both are here and the operator picks. Only the tokens change;
+ * nothing below this block knows which palette is running, which is the
+ * point. A second business is another block of thirty lines rather than a
+ * second stylesheet to keep in step.
+ *
+ * The one thing that had to be measured rather than eyeballed:
+ *
+ * Burgundy on charcoal is 1.58:1. Not "a bit low" — invisible. It is a fill
+ * colour, and under cream it reads at 8:1, which is a good button. As text
+ * on the dark ground it cannot be used at all, so `--primary-ink` carries a
+ * lighter tint of it (5.3:1 on the page, 4.7:1 on a card) and the fill keeps
+ * the brand's own burgundy. Ochre is the reverse: 6.4:1 on charcoal and fine
+ * to read, but 2:1 on cream, so the light palette reads it in a deeper
+ * shade and keeps the true ochre for fills.
+ *
+ * Print is untouched by either. The order sheet and the prep list come out
+ * ink on white, because a dark stylesheet sent to a laser printer is a black
+ * page, and these get printed and taken to the bench.
+ *
+ * Both palettes also switch the typefaces to the brand's own: Playfair
+ * Display and Montserrat.
+ */
+html[data-brand="soul-mamas"] {
+  --ink: #f4ebdd;
+  --ink-soft: #cfc5b6;
+  --muted: #a79e92;
+
+  --paper: #292725;
+  --paper-warm: #2e2b28;
+  --card: #332f2c;
+  --line: #3f3a36;
+  --line-strong: #514a45;
+
+  /* Burgundy. Seen as a fill, read as the lighter tint — see above. */
+  --primary: #762f32;
+  --primary-bright: #8e3a3e;
+  --primary-soft: #3a2528;
+  --primary-ink: #d8818a;
+  --primary-ink-strong: #e29199;
+  --on-primary: #f4ebdd;
+
+  /* Ochre. Charcoal ink on it, the one place this palette goes dark-on-light. */
+  --accent: #d6a13b;
+  --accent-ink: #d6a13b;
+  --accent-deep: #e0b054;
+  --accent-soft: #3b2f16;
+  --on-accent: #292725;
+
+  --good: #9bbf63;
+  --good-soft: #23301b;
+
+  --gold: #e0b054;
+  --gold-soft: #3b2f16;
+
+  --warn: #e28074;
+  --warn-soft: #3a211c;
+
+  --field: #3b3633;
+  --chosen-line: #4a3a2a;
+  --header-veil: rgba(41, 39, 37, 0.93);
+
+  /* Barely there. On charcoal these read as warmth in the top corners
+     rather than as two coloured blobs. */
+  --glow-a: #332722;
+  --glow-b: #2b302c;
+
+  /* Shadows do nothing on a dark ground but muddy the edges. What separates
+     a card from the page here is its own lighter surface and its rule. */
+  --shadow-sm: none;
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.38);
+  --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.48);
+
+  --font-display-stack: var(--font-brand-display), ui-serif, Georgia, serif;
+  --font-text-stack: var(--font-brand-text), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  color-scheme: dark;
+}
+
+/* The same brand the other way up: the wordmark on warm cream. Closer to
+   what comes out of the printer, and easier in a bright kitchen. */
+html[data-brand="soul-mamas-light"] {
+  --ink: #292725;
+  --ink-soft: #4a443c;
+  --muted: #6b6459;
+
+  --paper: #f4ebdd;
+  --paper-warm: #faf4ea;
+  --card: #fffbf3;
+  --line: #e0d5c2;
+  --line-strong: #cbbfa8;
+
+  --primary: #762f32;
+  --primary-bright: #5f2528;
+  --primary-soft: #f3e2e2;
+  --primary-ink: #762f32;
+  --primary-ink-strong: #5f2528;
+  --on-primary: #f4ebdd;
+
+  /* Ochre is a fill here and a deeper shade where it's read: the true ochre
+     on cream is 2:1, which is a highlighter, not a label. */
+  --accent: #d6a13b;
+  --accent-ink: #8c5a14;
+  --accent-deep: #6f470f;
+  --accent-soft: #fbefd8;
+  --on-accent: #292725;
+
+  --good: #3f6b33;
+  --good-soft: #e8efe3;
+
+  --gold: #8a6410;
+  --gold-soft: #fbefd8;
+
+  --warn: #99281f;
+  --warn-soft: #fbe9e6;
+
+  --field: #fffdf8;
+  --chosen-line: #e6d3b8;
+  --header-veil: rgba(255, 251, 243, 0.9);
+
+  --glow-a: #fbf0dc;
+  --glow-b: #f6ece0;
+
+  --shadow-sm: 0 1px 2px rgba(41, 39, 37, 0.05), 0 1px 3px rgba(41, 39, 37, 0.04);
+  --shadow-md: 0 2px 4px rgba(41, 39, 37, 0.04), 0 8px 20px rgba(41, 39, 37, 0.07);
+  --shadow-lg: 0 4px 8px rgba(41, 39, 37, 0.05), 0 16px 40px rgba(41, 39, 37, 0.1);
+
+  --font-display-stack: var(--font-brand-display), ui-serif, Georgia, serif;
+  --font-text-stack: var(--font-brand-text), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  color-scheme: light;
+}
+
+/* Playfair's terminals are already sharp; the SOFT axis the default face
+   uses does nothing here but can be passed through as an unknown axis. */
+html[data-brand^="soul-mamas"] header.site a.brand {
+  font-variation-settings: normal;
 }
 
 * {
@@ -120,8 +301,8 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(900px 500px at 15% -120px, #fdf6e9 0%, transparent 65%),
-    radial-gradient(900px 500px at 90% -160px, #eef2ea 0%, transparent 60%);
+    radial-gradient(900px 500px at 15% -120px, var(--glow-a) 0%, transparent 65%),
+    radial-gradient(900px 500px at 90% -160px, var(--glow-b) 0%, transparent 60%);
 }
 
 .wrap {
@@ -137,7 +318,7 @@ header.site {
   top: 0;
   z-index: 20;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 252, 247, 0.88);
+  background: var(--header-veil);
   backdrop-filter: saturate(180%) blur(10px);
   -webkit-backdrop-filter: saturate(180%) blur(10px);
 }
@@ -165,11 +346,11 @@ header.site a.brand {
   letter-spacing: -0.015em;
   font-variation-settings: "SOFT" 30;
   white-space: nowrap;
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 header.site a.brand:hover {
-  color: var(--primary-bright);
+  color: var(--primary-ink-strong);
 }
 
 /* The nav scrolls sideways instead of wrapping. Seven links across a phone
@@ -208,14 +389,14 @@ nav.modes button.linklike {
 
 nav.modes a:hover,
 nav.modes button.linklike:hover {
-  color: var(--primary);
+  color: var(--primary-ink);
   background: var(--primary-soft);
 }
 
 /* Where you are. Set from the URL in NavLink, so it survives a reload and a
    link opened in a new tab — a highlight held in component state would not. */
 nav.modes a.active {
-  color: var(--primary);
+  color: var(--primary-ink);
   background: var(--primary-soft);
   font-weight: 600;
 }
@@ -236,7 +417,7 @@ footer.site a {
 }
 
 footer.site a:hover {
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 /* Long URLs — a signup link an admin needs to copy — must wrap on a phone
@@ -465,7 +646,7 @@ textarea {
   padding: 11px 12px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
-  background: #fff;
+  background: var(--field);
   color: inherit;
   font: inherit;
   font-size: 0.95rem;
@@ -558,7 +739,7 @@ button {
   border-radius: var(--radius-sm);
   border: 1px solid var(--primary);
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   transition: background-color 0.12s ease, box-shadow 0.12s ease,
@@ -593,14 +774,14 @@ button:disabled {
 
 button.secondary {
   background: transparent;
-  color: var(--primary);
+  color: var(--primary-ink);
   box-shadow: none;
 }
 
 button.secondary:hover:not(:disabled) {
   background: var(--primary-soft);
   border-color: var(--primary);
-  color: var(--primary);
+  color: var(--primary-ink);
   box-shadow: none;
 }
 
@@ -621,7 +802,7 @@ button.linklike {
 
 button.linklike:hover {
   background: none;
-  color: var(--primary);
+  color: var(--primary-ink);
   box-shadow: none;
 }
 
@@ -640,7 +821,7 @@ a.btn {
   border-radius: var(--radius-sm);
   border: 1px solid var(--primary);
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   text-decoration: none;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
@@ -650,19 +831,19 @@ a.btn {
 a.btn:hover {
   background: var(--primary-bright);
   border-color: var(--primary-bright);
-  color: #fff;
+  color: var(--on-primary);
   box-shadow: var(--shadow-md);
 }
 
 a.btn.secondary {
   background: transparent;
-  color: var(--primary);
+  color: var(--primary-ink);
   box-shadow: none;
 }
 
 a.btn.secondary:hover {
   background: var(--primary-soft);
-  color: var(--primary);
+  color: var(--primary-ink);
   box-shadow: none;
 }
 
@@ -867,7 +1048,7 @@ td.num {
 }
 
 .courses summary:hover {
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 .courses summary:hover::before {
@@ -880,7 +1061,7 @@ td.num {
 
 .chosen {
   background: var(--primary-soft);
-  border: 1px solid #eddfd2;
+  border: 1px solid var(--chosen-line);
   border-radius: var(--radius-sm);
   padding: 13px 15px;
   margin-bottom: 4px;
@@ -911,16 +1092,16 @@ td.num {
   font-weight: 500;
   padding: 7px 13px;
   border-radius: 999px;
-  background: #fff;
+  background: var(--field);
   color: inherit;
   border: 1px solid var(--line-strong);
   box-shadow: none;
 }
 
 .chip:hover:not(:disabled) {
-  background: #fff;
+  background: var(--field);
   border-color: var(--primary);
-  color: var(--primary);
+  color: var(--primary-ink);
   box-shadow: none;
 }
 
@@ -1261,7 +1442,7 @@ ul.plain li {
   border-radius: 999px;
   border: 1px solid var(--primary);
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 0.88rem;
   font-weight: 600;
   transition: background-color 0.14s ease, color 0.14s ease;
@@ -1283,13 +1464,13 @@ ul.plain li {
 .choice .go.alt {
   background: var(--accent-ink);
   border-color: var(--accent-ink);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .choice:hover .go.alt {
   background: var(--accent-deep);
   border-color: var(--accent-deep);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .choice .go::after {
@@ -1408,7 +1589,7 @@ ul.plain li {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--on-primary);
   margin-right: 7px;
   vertical-align: 1px;
   animation: rec-pulse 1.4s ease-in-out infinite;
@@ -1460,7 +1641,7 @@ ul.plain li {
 }
 
 .section > summary:hover .section-title {
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 /* Sits at the right-hand end of the heading and turns over when the section
@@ -1536,7 +1717,7 @@ ul.plain li {
 }
 
 .subsection > summary:hover .subsection-title {
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 .subsection-title {
@@ -1605,12 +1786,297 @@ ul.plain li {
   margin-top: 3px;
 }
 
+/* ---- The crew ------------------------------------------------------------
+   A roster read on a phone, usually one-handed, often outdoors. Tap targets
+   stay large, the yes/no pair is the widest thing on the card, and the
+   counts are legible at arm's length without being read word by word. */
+
+.tabrow {
+  display: flex;
+  gap: 6px;
+  margin: 18px 0 14px;
+}
+
+.tabbtn {
+  flex: 1;
+  background: var(--field);
+  color: var(--ink-soft);
+  border: 1px solid var(--line-strong);
+  box-shadow: none;
+  font-weight: 600;
+}
+
+.tabbtn.on {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+
+.shift-head h2 {
+  margin-bottom: 2px;
+}
+
+/* Three numbers, side by side. Colour says which is which, and so does the
+   word under it — a kitchen is not a place to rely on green meaning yes. */
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.count {
+  flex: 1 1 90px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.count strong {
+  display: block;
+  font-family: var(--font-display-stack);
+  font-size: 1.5rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.count.yes {
+  background: var(--good-soft);
+  border-color: var(--good);
+  color: var(--good);
+}
+
+.count.no {
+  background: var(--warn-soft);
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.count.waiting {
+  background: var(--gold-soft);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+ul.answers li {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+ul.answers li:last-child {
+  border-bottom: none;
+}
+
+ul.answers li em {
+  color: var(--muted);
+}
+
+/* One row of controls that becomes a stack when the screen is narrow,
+   rather than a row of boxes too small to hit. */
+.rosterline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.rosterline select,
+.rosterline input {
+  width: auto;
+  flex: 1 1 110px;
+  min-width: 0;
+}
+
+.rosterline button {
+  flex: 0 0 auto;
+}
+
+/* The whole point of the crew page: two targets, both big, neither one the
+   obvious default. Saying no has to be as easy as saying yes or the yeses
+   stop meaning anything. */
+.yesno {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.yesno button {
+  flex: 1;
+  padding: 16px 12px;
+  font-size: 1rem;
+}
+
+.yesno .yes {
+  background: var(--good-soft);
+  border-color: var(--good);
+  color: var(--good);
+}
+
+.yesno .no {
+  background: var(--warn-soft);
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.yesno .yes.on {
+  background: var(--good);
+  color: var(--on-primary);
+}
+
+.yesno .no.on {
+  background: var(--warn);
+  color: var(--on-primary);
+}
+
+.card.person.left {
+  opacity: 0.6;
+}
+
+label.inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+label.inline input {
+  width: auto;
+}
+
+.pack {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.pack h4 {
+  margin: 14px 0 6px;
+}
+
+.pack h5 {
+  margin: 12px 0 4px;
+}
+
+.pack .prep-steps {
+  margin: 4px 0 8px 18px;
+  color: var(--ink-soft);
+}
+
+/* ---- Picking a palette ----------------------------------------------------
+   Full-width rows rather than swatches. The choice is "which of these do I
+   want", and the honest preview is the page itself once it's picked, not a
+   circle of colour. */
+.brand-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.brand-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 13px 15px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--field);
+  color: inherit;
+  font-weight: 400;
+  box-shadow: none;
+}
+
+.brand-option:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--field);
+}
+
+.brand-option.on {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.brand-name {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.brand-note {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.brand-on {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--primary-ink);
+}
+
 /* ---- Print --------------------------------------------------------------
    Everything above is stripped back to ink on paper. The order sheet and
    the prep list get printed and worked from, and a printer renders tinted
    panels and drop shadows as grey smudge. */
 
 @media print {
+  /* A branded palette prints as the plain one.
+
+     This is not tidiness. The dark palette sets --ink to cream, and the
+     rule below only repaints the body white — so an order sheet printed
+     from a branded login would come out cream ink on white paper, which is
+     to say blank, and the first anyone would know is a cook holding an
+     empty page. Every token the dark block touches is put back here.
+
+     Scoped to [data-brand] so the default look prints exactly as it always
+     has; this block can only affect a page that chose a palette. */
+  html[data-brand] {
+    --ink: #292b29;
+    --ink-soft: #4a4d49;
+    --muted: #706d67;
+    --paper: #f7f3ec;
+    --paper-warm: #fdfbf5;
+    --card: #fffcf7;
+    --line: #d9ddd5;
+    --line-strong: #c2c8bd;
+    --primary: #526b5a;
+    --primary-bright: #43594a;
+    --primary-soft: #eaefe7;
+    --primary-ink: #526b5a;
+    --primary-ink-strong: #43594a;
+    --on-primary: #fff;
+    --accent: #c9785c;
+    --accent-ink: #a85436;
+    --accent-deep: #8f4429;
+    --accent-soft: #f9ece5;
+    --on-accent: #fff;
+    --good: #46644a;
+    --good-soft: #e8efe6;
+    --gold: #7d6416;
+    --gold-soft: #f6efd9;
+    --warn: #99281f;
+    --warn-soft: #fbebe9;
+    --field: #fff;
+    --chosen-line: #eddfd2;
+    --header-veil: #fff;
+    --glow-a: #fdf6e9;
+    --glow-b: #eef2ea;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    color-scheme: light;
+  }
+
+  /* The brand's own faces stay on paper — they are the operator's letterhead
+     as much as their screen. Only the colours go back. */
+
   body {
     background: #fff;
     font-size: 11pt;

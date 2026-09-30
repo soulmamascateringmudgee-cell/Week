@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 
+import {
+  BRANDS,
+  DEFAULT_BRAND_LABEL,
+  DEFAULT_BRAND_NOTE,
+} from "@/lib/brand.ts";
 import { MIN_PASSWORD, passwordProblem } from "@/lib/signup-rules.ts";
 import { createClient } from "@/lib/supabase/client.ts";
 
@@ -20,6 +25,9 @@ export default function AccountPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const [brand, setBrand] = useState<string | null>(null);
+  const [brandBusy, setBrandBusy] = useState(false);
+  const [brandError, setBrandError] = useState("");
 
   useEffect(() => {
     void (async () => {
@@ -29,6 +37,44 @@ export default function AccountPage() {
       setEmail(user?.email ?? "");
     })();
   }, []);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const response = await fetch("/api/profile");
+        if (!response.ok) return;
+        const body = await response.json();
+        setBrand(typeof body.brand === "string" ? body.brand : null);
+      } catch {
+        // The colours are already on the page. Failing to read back which
+        // one is showing is not worth an error message.
+      }
+    })();
+  }, []);
+
+  async function chooseBrand(next: string | null) {
+    setBrandBusy(true);
+    setBrandError("");
+    try {
+      const response = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ brand: next }),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        setBrandError(body.error ?? "Couldn't save that.");
+        setBrandBusy(false);
+        return;
+      }
+      // The palette is set on the html element by the server, so the page
+      // has to come back from the server to wear it.
+      window.location.reload();
+    } catch {
+      setBrandError("Couldn't reach the server.");
+      setBrandBusy(false);
+    }
+  }
 
   const problem = next === "" ? null : passwordProblem(next, email);
   const sameAsOld = next !== "" && next === current;
@@ -139,6 +185,48 @@ export default function AccountPage() {
           </div>
         </div>
       </form>
+
+      <div className="card">
+        <h2>Your colours</h2>
+        <p className="hint" style={{ marginBottom: 12 }}>
+          How the app looks on your screens. Nobody else&rsquo;s login is
+          affected, and printed sheets come out the same either way — ink on
+          white paper.
+        </p>
+
+        <div className="brand-pick">
+          <button
+            type="button"
+            className={`brand-option${brand === null ? " on" : ""}`}
+            disabled={brandBusy}
+            onClick={() => void chooseBrand(null)}
+          >
+            <span className="brand-name">{DEFAULT_BRAND_LABEL}</span>
+            <span className="brand-note">{DEFAULT_BRAND_NOTE}</span>
+            {brand === null && <span className="brand-on">In use</span>}
+          </button>
+
+          {BRANDS.map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              className={`brand-option${brand === option.key ? " on" : ""}`}
+              disabled={brandBusy}
+              onClick={() => void chooseBrand(option.key)}
+            >
+              <span className="brand-name">{option.label}</span>
+              <span className="brand-note">{option.note}</span>
+              {brand === option.key && <span className="brand-on">In use</span>}
+            </button>
+          ))}
+        </div>
+
+        {brandError && (
+          <p className="notice warn" style={{ marginTop: 12 }}>
+            <strong>{brandError}</strong>
+          </p>
+        )}
+      </div>
 
       <div className="card">
         <h2>Your recipes</h2>

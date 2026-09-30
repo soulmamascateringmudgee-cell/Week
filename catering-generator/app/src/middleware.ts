@@ -13,7 +13,25 @@ import { isInvited } from "@/lib/access.ts";
  */
 const PUBLIC_PATHS = ["/", "/login", "/signup", "/auth", "/no-access", "/privacy"];
 
+/**
+ * The crew's own pages, which belong to people who have no account here.
+ *
+ * Casual staff are not operators. They don't pay, they aren't on the invite
+ * list, and they sign in with a name and four digits against their own
+ * employer's crew code — so the checks below would bounce every one of them
+ * to a login page for an account that will never exist.
+ *
+ * Only the sub-paths are open. `/crew` with nothing after it is the
+ * operator's own roster page and stays behind the ordinary login, and the
+ * routes under `/api/crew` do their own check: every one of them reads the
+ * crew session first and answers 401 without it.
+ */
+function isCrewPath(pathname: string): boolean {
+  return pathname.startsWith("/crew/") || pathname.startsWith("/api/crew/");
+}
+
 function isPublic(pathname: string): boolean {
+  if (isCrewPath(pathname)) return true;
   return PUBLIC_PATHS.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
   );

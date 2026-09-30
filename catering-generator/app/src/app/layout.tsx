@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Fraunces, Inter, Montserrat, Playfair_Display } from "next/font/google";
 import Link from "next/link";
 
 import NavLink from "@/components/NavLink.tsx";
 import SignOutButton from "@/components/SignOutButton.tsx";
 import { isAdmin } from "@/lib/access.ts";
+import { brandKey } from "@/lib/brand.ts";
 import { createClient } from "@/lib/supabase/server.ts";
 import "./globals.css";
 
@@ -38,6 +39,28 @@ const text = Inter({
   display: "swap",
 });
 
+/**
+ * The brand's own pair, for an operator running their own colours.
+ *
+ * Playfair Display and Montserrat are what the Soul Mamas brand sheet
+ * specifies, and a palette that gets the colours right and the letterforms
+ * wrong still doesn't look like the business. Loaded here rather than under
+ * the palette because next/font has to see the call at build time; the
+ * stylesheet decides whether they are used, and a login on the plain look
+ * never references either variable.
+ */
+const brandDisplay = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-brand-display",
+  display: "swap",
+});
+
+const brandText = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-brand-text",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Prep & Ordering",
   description:
@@ -55,8 +78,28 @@ export default async function RootLayout({
   } = await supabase.auth.getUser();
   const owner = user ? await isAdmin(supabase) : false;
 
+  /**
+   * The operator's own colours, if they've chosen any.
+   *
+   * Read here rather than in a client component so the palette is in the
+   * first byte of HTML. Fetched client-side it would paint the plain look
+   * and then repaint — a flash of someone else's branding on every page,
+   * which is worse than not having the feature.
+   *
+   * A profile that can't be read is not an error worth showing anyone: the
+   * app has a look of its own, and it falls back to it.
+   */
+  const { data: profile } = user
+    ? await supabase.from("profiles").select("brand").eq("id", user.id).maybeSingle()
+    : { data: null };
+  const brand = brandKey(profile?.brand);
+
   return (
-    <html lang="en-AU" className={`${display.variable} ${text.variable}`}>
+    <html
+      lang="en-AU"
+      className={`${display.variable} ${text.variable} ${brandDisplay.variable} ${brandText.variable}`}
+      {...(brand ? { "data-brand": brand } : {})}
+    >
       <body>
         <header className="site">
           <div className="wrap">
@@ -76,6 +119,7 @@ export default async function RootLayout({
                   <NavLink href="/prices">Prices</NavLink>
                   <NavLink href="/stock">Stock</NavLink>
                   <NavLink href="/jobs">Saved jobs</NavLink>
+                  <NavLink href="/crew">Crew</NavLink>
                   {owner && (
                     <NavLink href="/admin">Who&rsquo;s allowed in</NavLink>
                   )}
