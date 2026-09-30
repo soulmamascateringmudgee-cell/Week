@@ -27,8 +27,13 @@ export interface Brand {
 export const BRANDS: Brand[] = [
   {
     key: "soul-mamas",
-    label: "Soul Mamas",
-    note: "Charcoal, gold and wine — the logo colours. Dark on screen.",
+    label: "Soul Mamas — dark",
+    note: "Charcoal, burgundy and ochre, with Playfair and Montserrat. The wordmark on black.",
+  },
+  {
+    key: "soul-mamas-light",
+    label: "Soul Mamas — cream",
+    note: "The same brand the other way up: warm cream, burgundy and ochre. Easier in a bright kitchen.",
   },
 ];
 

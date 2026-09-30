@@ -111,76 +111,154 @@
 /* ---- Soul Mamas -----------------------------------------------------------
  *
  * One operator's own branding, switched on from their profile and never
- * shipped to anyone else's login. Charcoal, gold and wine, off the logo.
+ * shipped to anyone else's login.
  *
- * Only the tokens change. Nothing below this block knows which palette is
- * running, which is the whole point — a second business gets another block
- * of twenty lines rather than a second stylesheet to keep in step.
+ * Four colours off the brand sheet, used as the sheet uses them:
  *
- * Two things were checked rather than eyeballed, because a dark palette
- * fails quietly where a light one fails obviously:
+ *   Charcoal       #292725
+ *   Warm cream     #f4ebdd
+ *   Soul burgundy  #762f32
+ *   Golden ochre   #d6a13b
  *
- * The wine is a fill colour, not a text colour. #9b3343 under cream text
- * reads at 5.9:1, which is fine on a button. The same wine AS text on the
- * charcoal is 2.4:1 — worse than grey, and unreadable in a kitchen at arm's
- * length. So `--primary-ink` carries a lighter tint of it (4.7:1 on a card,
- * 5.4:1 on the page) and the fill keeps the logo's own wine.
+ * The brand runs two ways — the wordmark on charcoal and the wordmark on
+ * cream — so both are here and the operator picks. Only the tokens change;
+ * nothing below this block knows which palette is running, which is the
+ * point. A second business is another block of thirty lines rather than a
+ * second stylesheet to keep in step.
  *
- * Print is untouched. The order sheet and the prep list still come out ink
- * on white, because a dark stylesheet sent to a laser printer is a black
+ * The one thing that had to be measured rather than eyeballed:
+ *
+ * Burgundy on charcoal is 1.58:1. Not "a bit low" — invisible. It is a fill
+ * colour, and under cream it reads at 8:1, which is a good button. As text
+ * on the dark ground it cannot be used at all, so `--primary-ink` carries a
+ * lighter tint of it (5.3:1 on the page, 4.7:1 on a card) and the fill keeps
+ * the brand's own burgundy. Ochre is the reverse: 6.4:1 on charcoal and fine
+ * to read, but 2:1 on cream, so the light palette reads it in a deeper
+ * shade and keeps the true ochre for fills.
+ *
+ * Print is untouched by either. The order sheet and the prep list come out
+ * ink on white, because a dark stylesheet sent to a laser printer is a black
  * page, and these get printed and taken to the bench.
+ *
+ * Both palettes also switch the typefaces to the brand's own: Playfair
+ * Display and Montserrat.
  */
 html[data-brand="soul-mamas"] {
-  --ink: #f2e9e0;
-  --ink-soft: #cfc4ba;
-  --muted: #a79a91;
+  --ink: #f4ebdd;
+  --ink-soft: #cfc5b6;
+  --muted: #a79e92;
 
-  --paper: #211d1a;
-  --paper-warm: #262120;
-  --card: #2d2725;
-  --line: #3c3431;
-  --line-strong: #4c423d;
+  --paper: #292725;
+  --paper-warm: #2e2b28;
+  --card: #332f2c;
+  --line: #3f3a36;
+  --line-strong: #514a45;
 
-  /* Wine. Seen as a fill, read as the lighter tint. */
-  --primary: #9b3343;
-  --primary-bright: #b03c4f;
-  --primary-soft: #3a2028;
-  --primary-ink: #dc7180;
-  --primary-ink-strong: #e0808e;
-  --on-primary: #f7f1ea;
+  /* Burgundy. Seen as a fill, read as the lighter tint — see above. */
+  --primary: #762f32;
+  --primary-bright: #8e3a3e;
+  --primary-soft: #3a2528;
+  --primary-ink: #d8818a;
+  --primary-ink-strong: #e29199;
+  --on-primary: #f4ebdd;
 
-  /* Gold. Dark ink on it, the one place this palette goes light-on-dark. */
-  --accent: #cf9634;
-  --accent-ink: #cf9634;
-  --accent-deep: #dda648;
-  --accent-soft: #3a2e14;
-  --on-accent: #211d1a;
+  /* Ochre. Charcoal ink on it, the one place this palette goes dark-on-light. */
+  --accent: #d6a13b;
+  --accent-ink: #d6a13b;
+  --accent-deep: #e0b054;
+  --accent-soft: #3b2f16;
+  --on-accent: #292725;
 
-  --good: #98c65e;
-  --good-soft: #21301a;
+  --good: #9bbf63;
+  --good-soft: #23301b;
 
-  --gold: #dda648;
-  --gold-soft: #3a2e14;
+  --gold: #e0b054;
+  --gold-soft: #3b2f16;
 
-  --warn: #e8776a;
-  --warn-soft: #3a1e17;
+  --warn: #e28074;
+  --warn-soft: #3a211c;
 
-  --field: #322b28;
+  --field: #3b3633;
   --chosen-line: #4a3a2a;
-  --header-veil: rgba(38, 33, 32, 0.92);
+  --header-veil: rgba(41, 39, 37, 0.93);
 
-  /* Barely there. On charcoal these read as a warmth in the top corners
+  /* Barely there. On charcoal these read as warmth in the top corners
      rather than as two coloured blobs. */
-  --glow-a: #2c231c;
-  --glow-b: #232a26;
+  --glow-a: #332722;
+  --glow-b: #2b302c;
 
   /* Shadows do nothing on a dark ground but muddy the edges. What separates
      a card from the page here is its own lighter surface and its rule. */
   --shadow-sm: none;
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.38);
+  --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.48);
+
+  --font-display-stack: var(--font-brand-display), ui-serif, Georgia, serif;
+  --font-text-stack: var(--font-brand-text), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
   color-scheme: dark;
+}
+
+/* The same brand the other way up: the wordmark on warm cream. Closer to
+   what comes out of the printer, and easier in a bright kitchen. */
+html[data-brand="soul-mamas-light"] {
+  --ink: #292725;
+  --ink-soft: #4a443c;
+  --muted: #6b6459;
+
+  --paper: #f4ebdd;
+  --paper-warm: #faf4ea;
+  --card: #fffbf3;
+  --line: #e0d5c2;
+  --line-strong: #cbbfa8;
+
+  --primary: #762f32;
+  --primary-bright: #5f2528;
+  --primary-soft: #f3e2e2;
+  --primary-ink: #762f32;
+  --primary-ink-strong: #5f2528;
+  --on-primary: #f4ebdd;
+
+  /* Ochre is a fill here and a deeper shade where it's read: the true ochre
+     on cream is 2:1, which is a highlighter, not a label. */
+  --accent: #d6a13b;
+  --accent-ink: #8c5a14;
+  --accent-deep: #6f470f;
+  --accent-soft: #fbefd8;
+  --on-accent: #292725;
+
+  --good: #3f6b33;
+  --good-soft: #e8efe3;
+
+  --gold: #8a6410;
+  --gold-soft: #fbefd8;
+
+  --warn: #99281f;
+  --warn-soft: #fbe9e6;
+
+  --field: #fffdf8;
+  --chosen-line: #e6d3b8;
+  --header-veil: rgba(255, 251, 243, 0.9);
+
+  --glow-a: #fbf0dc;
+  --glow-b: #f6ece0;
+
+  --shadow-sm: 0 1px 2px rgba(41, 39, 37, 0.05), 0 1px 3px rgba(41, 39, 37, 0.04);
+  --shadow-md: 0 2px 4px rgba(41, 39, 37, 0.04), 0 8px 20px rgba(41, 39, 37, 0.07);
+  --shadow-lg: 0 4px 8px rgba(41, 39, 37, 0.05), 0 16px 40px rgba(41, 39, 37, 0.1);
+
+  --font-display-stack: var(--font-brand-display), ui-serif, Georgia, serif;
+  --font-text-stack: var(--font-brand-text), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  color-scheme: light;
+}
+
+/* Playfair's terminals are already sharp; the SOFT axis the default face
+   uses does nothing here but can be passed through as an unknown axis. */
+html[data-brand^="soul-mamas"] header.site a.brand {
+  font-variation-settings: normal;
 }
 
 * {
@@ -1995,6 +2073,9 @@ label.inline input {
     --shadow-lg: none;
     color-scheme: light;
   }
+
+  /* The brand's own faces stay on paper — they are the operator's letterhead
+     as much as their screen. Only the colours go back. */
 
   body {
     background: #fff;

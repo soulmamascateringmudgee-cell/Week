@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Fraunces, Inter, Montserrat, Playfair_Display } from "next/font/google";
 import Link from "next/link";
 
 import NavLink from "@/components/NavLink.tsx";
@@ -39,6 +39,28 @@ const text = Inter({
   display: "swap",
 });
 
+/**
+ * The brand's own pair, for an operator running their own colours.
+ *
+ * Playfair Display and Montserrat are what the Soul Mamas brand sheet
+ * specifies, and a palette that gets the colours right and the letterforms
+ * wrong still doesn't look like the business. Loaded here rather than under
+ * the palette because next/font has to see the call at build time; the
+ * stylesheet decides whether they are used, and a login on the plain look
+ * never references either variable.
+ */
+const brandDisplay = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-brand-display",
+  display: "swap",
+});
+
+const brandText = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-brand-text",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Prep & Ordering",
   description:
@@ -75,7 +97,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en-AU"
-      className={`${display.variable} ${text.variable}`}
+      className={`${display.variable} ${text.variable} ${brandDisplay.variable} ${brandText.variable}`}
       {...(brand ? { "data-brand": brand } : {})}
     >
       <body>

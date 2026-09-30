@@ -100,20 +100,29 @@ test("print puts every palette back to ink on paper", () => {
 
 test("nothing outside a palette block names a colour directly", () => {
   // The whole scheme rests on this: if a rule hardcodes a colour, no palette
-  // can reach it. Print is exempt — it is deliberately black on white.
+  // can reach it. Print is exempt — it is deliberately black on white, and
+  // so are the palette blocks themselves, which is where colour lives.
   const screen = CSS.slice(0, CSS.indexOf("@media print {"));
-  const afterTokens = screen.slice(screen.indexOf("html[data-brand=\"soul-mamas\"]"));
-  const body = afterTokens.slice(afterTokens.indexOf("\n}"));
+  const body = screen
+    .replace(/:root\s*\{[\s\S]*?\n\}/, "")
+    .replace(/html\[data-brand[^\]]*\]\s*\{[\s\S]*?\n\}/g, "")
+    // Comments quote hexes to explain a choice; they style nothing.
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+
   const literals = [
     ...body.matchAll(/(?<!var\(|-)(#[0-9a-fA-F]{3,8}\b|rgba?\([^)]*\))/g),
-  ]
-    .map((m) => m[0])
-    // Comments explain colour choices by quoting hexes; they style nothing.
-    .filter((hit) => {
-      const at = body.indexOf(hit);
-      const line = body.lastIndexOf("\n", at);
-      const text = body.slice(line, at);
-      return !text.includes("*") && !text.includes("//");
-    });
+  ].map((match) => match[0]);
+
   assert.deepEqual(literals, [], `hardcoded: ${literals.join(", ")}`);
+});
+
+test("every palette in the code has a block in the stylesheet", () => {
+  // A brand offered in Account with no CSS behind it is a choice that
+  // changes nothing, which reads as the setting not saving.
+  for (const brand of BRANDS) {
+    assert.ok(
+      CSS.includes(`html[data-brand="${brand.key}"]`),
+      `no stylesheet block for ${brand.key}`,
+    );
+  }
 });
