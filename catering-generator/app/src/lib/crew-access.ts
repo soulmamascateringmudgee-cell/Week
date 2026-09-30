@@ -23,26 +23,10 @@ import { randomBytes, createHash, scryptSync, timingSafeEqual } from "node:crypt
  * standing in a kitchen at 6am.
  */
 
-export const PIN_LENGTH = 4;
+export { PIN_LENGTH, pinProblem, pinConfirmProblem } from "./pin-rules.ts";
+
 export const MAX_ATTEMPTS = 5;
 export const LOCK_MINUTES = 15;
-
-/** PINs that are the first thing anyone tries. */
-const OBVIOUS = new Set([
-  "0000", "1111", "2222", "3333", "4444", "5555", "6666", "7777", "8888",
-  "9999", "1234", "4321", "0123", "3210", "1212", "2121",
-]);
-
-/** Null when the PIN is fine, otherwise what's wrong with it, in plain words. */
-export function pinProblem(pin: unknown): string | null {
-  if (typeof pin !== "string") return "Type a PIN.";
-  const trimmed = pin.trim();
-  if (trimmed === "") return "Type a PIN.";
-  if (!/^\d+$/.test(trimmed)) return "Numbers only.";
-  if (trimmed.length !== PIN_LENGTH) return `It needs to be ${PIN_LENGTH} digits.`;
-  if (OBVIOUS.has(trimmed)) return "Pick something less guessable than that.";
-  return null;
-}
 
 /**
  * scrypt, with its own salt, stored as one string.

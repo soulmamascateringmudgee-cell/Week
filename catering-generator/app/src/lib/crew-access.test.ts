@@ -9,6 +9,7 @@ import {
   lockFor,
   minutesUntil,
   normaliseCrewCode,
+  pinConfirmProblem,
   pinMatches,
   pinProblem,
   newSessionToken,
@@ -36,6 +37,38 @@ test("the PINs everyone tries first are refused", () => {
   for (const pin of ["0000", "1234", "1111", "4321"]) {
     assert.ok(pinProblem(pin), pin);
   }
+});
+
+// --- Choosing one for the first time -----------------------------------------
+
+test("both boxes matching is the only way through", () => {
+  assert.equal(pinConfirmProblem("8412", "8412"), null);
+  assert.equal(pinConfirmProblem("8412", "8413"), "Those two don't match.");
+});
+
+test("the second box is not optional", () => {
+  // Nobody is standing next to a casual to check they typed it right, and a
+  // mistyped PIN is someone locked out of the roster on the morning of a job.
+  assert.equal(
+    pinConfirmProblem("8412", ""),
+    "Type it a second time so we know it's right.",
+  );
+  assert.equal(
+    pinConfirmProblem("8412", undefined),
+    "Type it a second time so we know it's right.",
+  );
+});
+
+test("a bad PIN is reported before the two are compared", () => {
+  // "Those two don't match" when the real problem is that it's three digits
+  // sends someone off retyping the wrong thing.
+  assert.equal(pinConfirmProblem("123", "123"), "It needs to be 4 digits.");
+  assert.equal(pinConfirmProblem("1234", "1234"), "Pick something less guessable than that.");
+  assert.equal(pinConfirmProblem("", ""), "Type a PIN.");
+});
+
+test("stray spaces around a confirmation don't fail it", () => {
+  assert.equal(pinConfirmProblem("8412", " 8412 "), null);
 });
 
 test("a hash is not the PIN", () => {
