@@ -66,6 +66,34 @@
   --warn: #99281f;
   --warn-soft: #fbebe9;
 
+  /* The surface a value is typed onto: inputs, selects, chips. Paler than
+     the card it sits on, so an empty field still reads as a field. */
+  --field: #fff;
+
+  /* The two colours that are *on* a filled control rather than behind it.
+     Split from the fills because a palette can invert — white on sage is
+     right, white on a wattle-gold button is unreadable — and the answer
+     belongs with the palette, not with the button. */
+  --on-primary: #fff;
+  --on-accent: #fff;
+
+  /* Sage where it is read rather than seen. Same colour here; a dark
+     palette needs a lighter tint for text than it does for a button fill,
+     and this is where that difference gets to live. */
+  --primary-ink: var(--primary);
+  --primary-ink-strong: var(--primary-bright);
+
+  /* The two soft washes behind the page, and the rule around a chosen
+     card. Decorative, and the first things a different palette rewrites. */
+  --glow-a: #fdf6e9;
+  --glow-b: #eef2ea;
+  --chosen-line: #eddfd2;
+
+  /* The sticky header sits over the page, so it is the card colour with a
+     little of the page showing through. Translucent, which means a palette
+     has to restate it rather than inherit a surface. */
+  --header-veil: rgba(255, 252, 247, 0.88);
+
   --radius-sm: 8px;
   --radius: 12px;
   --radius-lg: 18px;
@@ -78,6 +106,81 @@
     "Palatino Linotype", serif;
   --font-text-stack: var(--font-text), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ---- Soul Mamas -----------------------------------------------------------
+ *
+ * One operator's own branding, switched on from their profile and never
+ * shipped to anyone else's login. Charcoal, gold and wine, off the logo.
+ *
+ * Only the tokens change. Nothing below this block knows which palette is
+ * running, which is the whole point — a second business gets another block
+ * of twenty lines rather than a second stylesheet to keep in step.
+ *
+ * Two things were checked rather than eyeballed, because a dark palette
+ * fails quietly where a light one fails obviously:
+ *
+ * The wine is a fill colour, not a text colour. #9b3343 under cream text
+ * reads at 5.9:1, which is fine on a button. The same wine AS text on the
+ * charcoal is 2.4:1 — worse than grey, and unreadable in a kitchen at arm's
+ * length. So `--primary-ink` carries a lighter tint of it (4.7:1 on a card,
+ * 5.4:1 on the page) and the fill keeps the logo's own wine.
+ *
+ * Print is untouched. The order sheet and the prep list still come out ink
+ * on white, because a dark stylesheet sent to a laser printer is a black
+ * page, and these get printed and taken to the bench.
+ */
+html[data-brand="soul-mamas"] {
+  --ink: #f2e9e0;
+  --ink-soft: #cfc4ba;
+  --muted: #a79a91;
+
+  --paper: #211d1a;
+  --paper-warm: #262120;
+  --card: #2d2725;
+  --line: #3c3431;
+  --line-strong: #4c423d;
+
+  /* Wine. Seen as a fill, read as the lighter tint. */
+  --primary: #9b3343;
+  --primary-bright: #b03c4f;
+  --primary-soft: #3a2028;
+  --primary-ink: #dc7180;
+  --primary-ink-strong: #e0808e;
+  --on-primary: #f7f1ea;
+
+  /* Gold. Dark ink on it, the one place this palette goes light-on-dark. */
+  --accent: #cf9634;
+  --accent-ink: #cf9634;
+  --accent-deep: #dda648;
+  --accent-soft: #3a2e14;
+  --on-accent: #211d1a;
+
+  --good: #98c65e;
+  --good-soft: #21301a;
+
+  --gold: #dda648;
+  --gold-soft: #3a2e14;
+
+  --warn: #e8776a;
+  --warn-soft: #3a1e17;
+
+  --field: #322b28;
+  --chosen-line: #4a3a2a;
+  --header-veil: rgba(38, 33, 32, 0.92);
+
+  /* Barely there. On charcoal these read as a warmth in the top corners
+     rather than as two coloured blobs. */
+  --glow-a: #2c231c;
+  --glow-b: #232a26;
+
+  /* Shadows do nothing on a dark ground but muddy the edges. What separates
+     a card from the page here is its own lighter surface and its rule. */
+  --shadow-sm: none;
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.45);
+
+  color-scheme: dark;
 }
 
 * {
@@ -120,8 +223,8 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(900px 500px at 15% -120px, #fdf6e9 0%, transparent 65%),
-    radial-gradient(900px 500px at 90% -160px, #eef2ea 0%, transparent 60%);
+    radial-gradient(900px 500px at 15% -120px, var(--glow-a) 0%, transparent 65%),
+    radial-gradient(900px 500px at 90% -160px, var(--glow-b) 0%, transparent 60%);
 }
 
 .wrap {
@@ -137,7 +240,7 @@ header.site {
   top: 0;
   z-index: 20;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 252, 247, 0.88);
+  background: var(--header-veil);
   backdrop-filter: saturate(180%) blur(10px);
   -webkit-backdrop-filter: saturate(180%) blur(10px);
 }
@@ -165,11 +268,11 @@ header.site a.brand {
   letter-spacing: -0.015em;
   font-variation-settings: "SOFT" 30;
   white-space: nowrap;
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 header.site a.brand:hover {
-  color: var(--primary-bright);
+  color: var(--primary-ink-strong);
 }
 
 /* The nav scrolls sideways instead of wrapping. Seven links across a phone
@@ -208,14 +311,14 @@ nav.modes button.linklike {
 
 nav.modes a:hover,
 nav.modes button.linklike:hover {
-  color: var(--primary);
+  color: var(--primary-ink);
   background: var(--primary-soft);
 }
 
 /* Where you are. Set from the URL in NavLink, so it survives a reload and a
    link opened in a new tab — a highlight held in component state would not. */
 nav.modes a.active {
-  color: var(--primary);
+  color: var(--primary-ink);
   background: var(--primary-soft);
   font-weight: 600;
 }
@@ -236,7 +339,7 @@ footer.site a {
 }
 
 footer.site a:hover {
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 /* Long URLs — a signup link an admin needs to copy — must wrap on a phone
@@ -465,7 +568,7 @@ textarea {
   padding: 11px 12px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
-  background: #fff;
+  background: var(--field);
   color: inherit;
   font: inherit;
   font-size: 0.95rem;
@@ -558,7 +661,7 @@ button {
   border-radius: var(--radius-sm);
   border: 1px solid var(--primary);
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   transition: background-color 0.12s ease, box-shadow 0.12s ease,
@@ -593,14 +696,14 @@ button:disabled {
 
 button.secondary {
   background: transparent;
-  color: var(--primary);
+  color: var(--primary-ink);
   box-shadow: none;
 }
 
 button.secondary:hover:not(:disabled) {
   background: var(--primary-soft);
   border-color: var(--primary);
-  color: var(--primary);
+  color: var(--primary-ink);
   box-shadow: none;
 }
 
@@ -621,7 +724,7 @@ button.linklike {
 
 button.linklike:hover {
   background: none;
-  color: var(--primary);
+  color: var(--primary-ink);
   box-shadow: none;
 }
 
@@ -640,7 +743,7 @@ a.btn {
   border-radius: var(--radius-sm);
   border: 1px solid var(--primary);
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   text-decoration: none;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
@@ -650,19 +753,19 @@ a.btn {
 a.btn:hover {
   background: var(--primary-bright);
   border-color: var(--primary-bright);
-  color: #fff;
+  color: var(--on-primary);
   box-shadow: var(--shadow-md);
 }
 
 a.btn.secondary {
   background: transparent;
-  color: var(--primary);
+  color: var(--primary-ink);
   box-shadow: none;
 }
 
 a.btn.secondary:hover {
   background: var(--primary-soft);
-  color: var(--primary);
+  color: var(--primary-ink);
   box-shadow: none;
 }
 
@@ -867,7 +970,7 @@ td.num {
 }
 
 .courses summary:hover {
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 .courses summary:hover::before {
@@ -880,7 +983,7 @@ td.num {
 
 .chosen {
   background: var(--primary-soft);
-  border: 1px solid #eddfd2;
+  border: 1px solid var(--chosen-line);
   border-radius: var(--radius-sm);
   padding: 13px 15px;
   margin-bottom: 4px;
@@ -911,16 +1014,16 @@ td.num {
   font-weight: 500;
   padding: 7px 13px;
   border-radius: 999px;
-  background: #fff;
+  background: var(--field);
   color: inherit;
   border: 1px solid var(--line-strong);
   box-shadow: none;
 }
 
 .chip:hover:not(:disabled) {
-  background: #fff;
+  background: var(--field);
   border-color: var(--primary);
-  color: var(--primary);
+  color: var(--primary-ink);
   box-shadow: none;
 }
 
@@ -1261,7 +1364,7 @@ ul.plain li {
   border-radius: 999px;
   border: 1px solid var(--primary);
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 0.88rem;
   font-weight: 600;
   transition: background-color 0.14s ease, color 0.14s ease;
@@ -1283,13 +1386,13 @@ ul.plain li {
 .choice .go.alt {
   background: var(--accent-ink);
   border-color: var(--accent-ink);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .choice:hover .go.alt {
   background: var(--accent-deep);
   border-color: var(--accent-deep);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .choice .go::after {
@@ -1408,7 +1511,7 @@ ul.plain li {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--on-primary);
   margin-right: 7px;
   vertical-align: 1px;
   animation: rec-pulse 1.4s ease-in-out infinite;
@@ -1460,7 +1563,7 @@ ul.plain li {
 }
 
 .section > summary:hover .section-title {
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 /* Sits at the right-hand end of the heading and turns over when the section
@@ -1536,7 +1639,7 @@ ul.plain li {
 }
 
 .subsection > summary:hover .subsection-title {
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 .subsection-title {
@@ -1605,12 +1708,115 @@ ul.plain li {
   margin-top: 3px;
 }
 
+/* ---- Picking a palette ----------------------------------------------------
+   Full-width rows rather than swatches. The choice is "which of these do I
+   want", and the honest preview is the page itself once it's picked, not a
+   circle of colour. */
+.brand-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.brand-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 13px 15px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--field);
+  color: inherit;
+  font-weight: 400;
+  box-shadow: none;
+}
+
+.brand-option:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--field);
+}
+
+.brand-option.on {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.brand-name {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.brand-note {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.brand-on {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--primary-ink);
+}
+
 /* ---- Print --------------------------------------------------------------
    Everything above is stripped back to ink on paper. The order sheet and
    the prep list get printed and worked from, and a printer renders tinted
    panels and drop shadows as grey smudge. */
 
 @media print {
+  /* A branded palette prints as the plain one.
+
+     This is not tidiness. The dark palette sets --ink to cream, and the
+     rule below only repaints the body white — so an order sheet printed
+     from a branded login would come out cream ink on white paper, which is
+     to say blank, and the first anyone would know is a cook holding an
+     empty page. Every token the dark block touches is put back here.
+
+     Scoped to [data-brand] so the default look prints exactly as it always
+     has; this block can only affect a page that chose a palette. */
+  html[data-brand] {
+    --ink: #292b29;
+    --ink-soft: #4a4d49;
+    --muted: #706d67;
+    --paper: #f7f3ec;
+    --paper-warm: #fdfbf5;
+    --card: #fffcf7;
+    --line: #d9ddd5;
+    --line-strong: #c2c8bd;
+    --primary: #526b5a;
+    --primary-bright: #43594a;
+    --primary-soft: #eaefe7;
+    --primary-ink: #526b5a;
+    --primary-ink-strong: #43594a;
+    --on-primary: #fff;
+    --accent: #c9785c;
+    --accent-ink: #a85436;
+    --accent-deep: #8f4429;
+    --accent-soft: #f9ece5;
+    --on-accent: #fff;
+    --good: #46644a;
+    --good-soft: #e8efe6;
+    --gold: #7d6416;
+    --gold-soft: #f6efd9;
+    --warn: #99281f;
+    --warn-soft: #fbebe9;
+    --field: #fff;
+    --chosen-line: #eddfd2;
+    --header-veil: #fff;
+    --glow-a: #fdf6e9;
+    --glow-b: #eef2ea;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    color-scheme: light;
+  }
+
   body {
     background: #fff;
     font-size: 11pt;

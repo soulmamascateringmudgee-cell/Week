@@ -5,6 +5,7 @@ import Link from "next/link";
 import NavLink from "@/components/NavLink.tsx";
 import SignOutButton from "@/components/SignOutButton.tsx";
 import { isAdmin } from "@/lib/access.ts";
+import { brandKey } from "@/lib/brand.ts";
 import { createClient } from "@/lib/supabase/server.ts";
 import "./globals.css";
 
@@ -55,8 +56,28 @@ export default async function RootLayout({
   } = await supabase.auth.getUser();
   const owner = user ? await isAdmin(supabase) : false;
 
+  /**
+   * The operator's own colours, if they've chosen any.
+   *
+   * Read here rather than in a client component so the palette is in the
+   * first byte of HTML. Fetched client-side it would paint the plain look
+   * and then repaint — a flash of someone else's branding on every page,
+   * which is worse than not having the feature.
+   *
+   * A profile that can't be read is not an error worth showing anyone: the
+   * app has a look of its own, and it falls back to it.
+   */
+  const { data: profile } = user
+    ? await supabase.from("profiles").select("brand").eq("id", user.id).maybeSingle()
+    : { data: null };
+  const brand = brandKey(profile?.brand);
+
   return (
-    <html lang="en-AU" className={`${display.variable} ${text.variable}`}>
+    <html
+      lang="en-AU"
+      className={`${display.variable} ${text.variable}`}
+      {...(brand ? { "data-brand": brand } : {})}
+    >
       <body>
         <header className="site">
           <div className="wrap">
