@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Inter, Montserrat, Playfair_Display } from "next/font/google";
 import Link from "next/link";
 
+import BrandMark from "@/components/BrandMark.tsx";
 import NavLink from "@/components/NavLink.tsx";
 import SignOutButton from "@/components/SignOutButton.tsx";
 import { isAdmin } from "@/lib/access.ts";
@@ -104,7 +105,7 @@ export default async function RootLayout({
         <header className="site">
           <div className="wrap">
             <Link href="/" className="brand">
-              Prep&nbsp;&amp;&nbsp;Ordering
+              <BrandMark brand={brand} />
             </Link>
             {/* Seven links don't fit across a phone. Rather than wrap them
                 into a block that shoves the page down, the row scrolls

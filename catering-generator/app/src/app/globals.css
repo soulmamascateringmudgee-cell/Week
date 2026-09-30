@@ -261,6 +261,27 @@ html[data-brand^="soul-mamas"] header.site a.brand {
   font-variation-settings: normal;
 }
 
+/* The operator's wordmark, drawn as SVG so it stays sharp and takes its
+   colours from whichever palette is running.
+
+   Height rather than width, because the header is a fixed-height bar and
+   the nav beside it needs whatever is left. `flex: none` stops the mark
+   being squeezed by a long nav on a narrow phone — the nav scrolls, the
+   logo doesn't shrink. */
+.wordmark {
+  display: block;
+  height: 34px;
+  width: auto;
+  flex: none;
+  overflow: visible;
+}
+
+@media (max-width: 480px) {
+  .wordmark {
+    height: 28px;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
