@@ -51,6 +51,23 @@ export const COURSE_CHOICES = [
 
 export const OTHER_COURSE = "Other";
 
+/**
+ * The dietary boxes the event form offers.
+ *
+ * Lives here rather than in the page because the brief reader has to know
+ * exactly which requirements the form can hold — anything else it finds gets
+ * shown separately instead of being rounded to the nearest tickbox. Two lists
+ * that drifted apart would silently lose a requirement, which is the one kind
+ * of bug on this screen that can hurt somebody.
+ */
+export const DIETARY_LABELS = [
+  "Gluten free",
+  "Dairy free",
+  "Vegetarian",
+  "Vegan",
+  "Nut allergy",
+] as const;
+
 export const BITE_SIZE_CHOICES = [
   { key: "smaller", label: "Smaller bites — one or two mouthfuls each" },
   { key: "standard", label: "Standard — as your recipes are written" },

@@ -10,20 +10,13 @@ import type { RecipeChoice } from "@/components/RecipePicker.tsx";
 import SaveJob from "@/components/SaveJob.tsx";
 import {
   BITE_SIZE_CHOICES,
+  DIETARY_LABELS,
   MENU_WEIGHT_CHOICES,
   PROTEIN_CHOICES,
   STYLE_CHOICES,
   VAN_ITEM_CHOICES,
 } from "@/lib/options.ts";
 import type { EventInput, EventPlan } from "@/lib/types.ts";
-
-const DIETARY_LABELS = [
-  "Gluten free",
-  "Dairy free",
-  "Vegetarian",
-  "Vegan",
-  "Nut allergy",
-];
 
 /** Element ids can't contain spaces, and a broken id breaks its label. */
 const fieldId = (label: string) =>

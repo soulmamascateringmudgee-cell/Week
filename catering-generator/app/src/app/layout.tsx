@@ -114,6 +114,7 @@ export default async function RootLayout({
             <nav className="modes">
               {user ? (
                 <>
+                  <NavLink href="/brief">From a brief</NavLink>
                   <NavLink href="/event">Event</NavLink>
                   <NavLink href="/service">Weekly service</NavLink>
                   <NavLink href="/recipes">Recipes</NavLink>
