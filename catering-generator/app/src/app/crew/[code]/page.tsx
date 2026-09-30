@@ -2,6 +2,7 @@
 
 import { use, useCallback, useEffect, useState } from "react";
 
+import { pinConfirmProblem } from "@/lib/pin-rules.ts";
 import { asHours, minutesWorked } from "@/lib/roster.ts";
 
 /**
@@ -155,13 +156,21 @@ export default function CrewSignIn({ params }: { params: Promise<{ code: string 
 // ------------------------------------------------------------------ signing in
 
 function SignInForm({ code, onIn }: { code: string; onIn: () => Promise<void> }) {
-  const [people, setPeople] = useState<{ id: string; name: string }[]>([]);
+  const [people, setPeople] = useState<{ id: string; name: string; hasPin: boolean }[]>([]);
   const [crew, setCrew] = useState("");
   const [staffId, setStaffId] = useState("");
   const [pin, setPin] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [unknown, setUnknown] = useState(false);
+
+  // Someone who has never signed in chooses their own PIN, typed twice.
+  // Nobody is standing next to them to check it, and a mistyped PIN is a
+  // cook locked out of the roster at 6am on the day.
+  const chosen = people.find((person) => person.id === staffId) ?? null;
+  const firstTime = chosen !== null && !chosen.hasPin;
+  const problem = firstTime && pin !== "" ? pinConfirmProblem(pin, confirm) : null;
 
   useEffect(() => {
     void (async () => {
@@ -199,12 +208,17 @@ function SignInForm({ code, onIn }: { code: string; onIn: () => Promise<void> })
         const response = await fetch("/api/crew/login", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ code, staffId, pin }),
+          body: JSON.stringify({ code, staffId, pin, confirm }),
         });
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
           setError(body.error ?? "Couldn't sign you in.");
-          setPin("");
+          // Keep what they typed when it's a first-time PIN being set up:
+          // clearing it makes a "those two don't match" mean starting over.
+          if (!body.needsPin) {
+            setPin("");
+            setConfirm("");
+          }
           setBusy(false);
           return;
         }
@@ -216,17 +230,33 @@ function SignInForm({ code, onIn }: { code: string; onIn: () => Promise<void> })
       <p className="lede">Sign in to see your shifts.</p>
 
       <label htmlFor="who">Your name</label>
-      <select id="who" required value={staffId} onChange={(e) => setStaffId(e.target.value)}>
+      <select
+        id="who"
+        required
+        value={staffId}
+        onChange={(e) => {
+          setStaffId(e.target.value);
+          setPin("");
+          setConfirm("");
+          setError("");
+        }}
+      >
         <option value="">Choose your name…</option>
         {people.map((person) => (
           <option key={person.id} value={person.id}>
             {person.name}
+            {person.hasPin ? "" : " — first time"}
           </option>
         ))}
       </select>
 
       <label htmlFor="pin" style={{ marginTop: 12 }}>
-        Your PIN
+        {firstTime ? "Choose a PIN" : "Your PIN"}
+        {firstTime && (
+          <span className="hint">
+            4 digits, yours to remember. You&rsquo;ll use it every time.
+          </span>
+        )}
       </label>
       <input
         id="pin"
@@ -237,6 +267,24 @@ function SignInForm({ code, onIn }: { code: string; onIn: () => Promise<void> })
         onChange={(e) => setPin(e.target.value)}
       />
 
+      {firstTime && (
+        <>
+          <label htmlFor="confirm" style={{ marginTop: 12 }}>
+            Type it again
+          </label>
+          <input
+            id="confirm"
+            inputMode="numeric"
+            autoComplete="off"
+            required
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+          />
+        </>
+      )}
+
+      {problem && <p className="basis">{problem}</p>}
+
       {error && (
         <p className="notice warn" style={{ marginTop: 12 }}>
           <strong>{error}</strong>
@@ -245,14 +293,22 @@ function SignInForm({ code, onIn }: { code: string; onIn: () => Promise<void> })
 
       {people.length === 0 && !error && (
         <p className="basis" style={{ marginTop: 12 }}>
-          Nobody on this crew has a PIN yet. Ask whoever runs the roster to
-          set yours.
+          Nobody is on this crew yet. Ask whoever runs the roster to add you.
         </p>
       )}
 
       <div className="actions">
-        <button type="submit" disabled={busy || staffId === "" || pin === ""}>
-          {busy ? "Checking…" : "Sign in"}
+        <button
+          type="submit"
+          disabled={
+            busy ||
+            staffId === "" ||
+            pin === "" ||
+            problem !== null ||
+            (firstTime && confirm === "")
+          }
+        >
+          {busy ? "Checking…" : firstTime ? "Set my PIN and sign in" : "Sign in"}
         </button>
       </div>
     </form>

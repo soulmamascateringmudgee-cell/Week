@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { onButSaidNo, splitByDate, tally, willingButNotOn } from "@/lib/roster.ts";
-import { PIN_LENGTH, pinProblem } from "@/lib/crew-access.ts";
+import { PIN_LENGTH, pinProblem } from "@/lib/pin-rules.ts";
 
 /**
  * The operator's side of the roster: who works for you, what's going, who

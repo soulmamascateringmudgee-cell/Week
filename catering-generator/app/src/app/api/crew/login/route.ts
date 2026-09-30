@@ -4,12 +4,14 @@ import { NextResponse } from "next/server";
 import {
   LOCK_MINUTES,
   MAX_ATTEMPTS,
+  hashPin,
   hashToken,
   isLocked,
   lockFor,
   minutesUntil,
   newSessionToken,
   normaliseCrewCode,
+  pinConfirmProblem,
   pinMatches,
   sessionExpiry,
 } from "@/lib/crew-access.ts";
@@ -71,15 +73,20 @@ export async function GET(request: Request) {
 
   const { data } = await admin
     .from("staff")
-    .select("id, name")
+    .select("id, name, pin_hash")
     .eq("owner_id", profile.id)
     .eq("active", true)
-    .not("pin_hash", "is", null)
     .order("name");
 
+  // Everyone active, with a flag for who hasn't chosen a PIN yet, so the
+  // page can ask them to set one instead of showing an empty list. The hash
+  // itself never leaves the server.
   return NextResponse.json({
     crew: profile.business_name ?? "Crew",
-    people: data ?? [],
+    people: (data ?? []).map(({ pin_hash, ...rest }) => ({
+      ...rest,
+      hasPin: Boolean(pin_hash),
+    })),
   });
 }
 
@@ -119,11 +126,45 @@ export async function POST(request: Request) {
     .eq("owner_id", profile.id)
     .maybeSingle();
 
-  if (!person || !person.active || !person.pin_hash) {
+  if (!person || !person.active) {
     return NextResponse.json({ error: VAGUE }, { status: 401 });
   }
 
   const now = new Date();
+
+  /**
+   * Nobody has a PIN until they choose one.
+   *
+   * Setting thirty-nine PINs by hand and reading each one down the phone is
+   * how a roster never gets used, so the first person to open the
+   * link under their own name picks their own. It is a real trade: until a name is
+   * claimed, anyone holding the link could claim it. The window is short,
+   * the link goes to the crew, and the operator can see on the Crew tab
+   * exactly who has signed in — but it is a trade, not a free win.
+   *
+   * The update is conditional on the PIN still being unset, so two people
+   * racing for the same name cannot both win: the second one updates no
+   * rows and is turned away with the same message as a wrong PIN.
+   */
+  if (!person.pin_hash) {
+    const problem = pinConfirmProblem(pin, body.confirm);
+    if (problem) {
+      return NextResponse.json({ error: problem, needsPin: true }, { status: 400 });
+    }
+
+    const { data: claimed } = await admin
+      .from("staff")
+      .update({ pin_hash: hashPin(pin), pin_attempts: 0, pin_locked_until: null })
+      .eq("id", person.id)
+      .is("pin_hash", null)
+      .select("id");
+
+    if (!claimed || claimed.length === 0) {
+      return NextResponse.json({ error: VAGUE }, { status: 401 });
+    }
+    return signedIn(admin, person.id, profile.id, person.name, now);
+  }
+
   if (isLocked(person.pin_locked_until, now)) {
     return NextResponse.json(
       { error: shutFor(minutesUntil(person.pin_locked_until as string, now)) },
@@ -156,19 +197,30 @@ export async function POST(request: Request) {
     .update({ pin_attempts: 0, pin_locked_until: null })
     .eq("id", person.id);
 
+  return signedIn(admin, person.id, profile.id, person.name, now);
+}
+
+/** Issue the session cookie. Shared by signing in and by claiming a name. */
+async function signedIn(
+  admin: ReturnType<typeof createAdminClient>,
+  staffId: string,
+  ownerId: string,
+  name: string,
+  now: Date,
+) {
   const token = newSessionToken();
   const expires = sessionExpiry(now);
   const { error } = await admin.from("crew_sessions").insert({
     token_hash: hashToken(token),
-    staff_id: person.id,
-    owner_id: profile.id,
+    staff_id: staffId,
+    owner_id: ownerId,
     expires_at: expires.toISOString(),
   });
   if (error) {
     return NextResponse.json({ error: "Couldn't sign you in just now." }, { status: 500 });
   }
 
-  const response = NextResponse.json({ name: person.name });
+  const response = NextResponse.json({ name });
   response.cookies.set(CREW_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
