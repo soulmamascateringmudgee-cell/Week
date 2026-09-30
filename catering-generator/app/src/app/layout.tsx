@@ -97,6 +97,7 @@ export default async function RootLayout({
                   <NavLink href="/prices">Prices</NavLink>
                   <NavLink href="/stock">Stock</NavLink>
                   <NavLink href="/jobs">Saved jobs</NavLink>
+                  <NavLink href="/crew">Crew</NavLink>
                   {owner && (
                     <NavLink href="/admin">Who&rsquo;s allowed in</NavLink>
                   )}

@@ -1708,6 +1708,185 @@ ul.plain li {
   margin-top: 3px;
 }
 
+/* ---- The crew ------------------------------------------------------------
+   A roster read on a phone, usually one-handed, often outdoors. Tap targets
+   stay large, the yes/no pair is the widest thing on the card, and the
+   counts are legible at arm's length without being read word by word. */
+
+.tabrow {
+  display: flex;
+  gap: 6px;
+  margin: 18px 0 14px;
+}
+
+.tabbtn {
+  flex: 1;
+  background: var(--field);
+  color: var(--ink-soft);
+  border: 1px solid var(--line-strong);
+  box-shadow: none;
+  font-weight: 600;
+}
+
+.tabbtn.on {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+
+.shift-head h2 {
+  margin-bottom: 2px;
+}
+
+/* Three numbers, side by side. Colour says which is which, and so does the
+   word under it — a kitchen is not a place to rely on green meaning yes. */
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.count {
+  flex: 1 1 90px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.count strong {
+  display: block;
+  font-family: var(--font-display-stack);
+  font-size: 1.5rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.count.yes {
+  background: var(--good-soft);
+  border-color: var(--good);
+  color: var(--good);
+}
+
+.count.no {
+  background: var(--warn-soft);
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.count.waiting {
+  background: var(--gold-soft);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+ul.answers li {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+ul.answers li:last-child {
+  border-bottom: none;
+}
+
+ul.answers li em {
+  color: var(--muted);
+}
+
+/* One row of controls that becomes a stack when the screen is narrow,
+   rather than a row of boxes too small to hit. */
+.rosterline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.rosterline select,
+.rosterline input {
+  width: auto;
+  flex: 1 1 110px;
+  min-width: 0;
+}
+
+.rosterline button {
+  flex: 0 0 auto;
+}
+
+/* The whole point of the crew page: two targets, both big, neither one the
+   obvious default. Saying no has to be as easy as saying yes or the yeses
+   stop meaning anything. */
+.yesno {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.yesno button {
+  flex: 1;
+  padding: 16px 12px;
+  font-size: 1rem;
+}
+
+.yesno .yes {
+  background: var(--good-soft);
+  border-color: var(--good);
+  color: var(--good);
+}
+
+.yesno .no {
+  background: var(--warn-soft);
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.yesno .yes.on {
+  background: var(--good);
+  color: var(--on-primary);
+}
+
+.yesno .no.on {
+  background: var(--warn);
+  color: var(--on-primary);
+}
+
+.card.person.left {
+  opacity: 0.6;
+}
+
+label.inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+label.inline input {
+  width: auto;
+}
+
+.pack {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.pack h4 {
+  margin: 14px 0 6px;
+}
+
+.pack h5 {
+  margin: 12px 0 4px;
+}
+
+.pack .prep-steps {
+  margin: 4px 0 8px 18px;
+  color: var(--ink-soft);
+}
+
 /* ---- Picking a palette ----------------------------------------------------
    Full-width rows rather than swatches. The choice is "which of these do I
    want", and the honest preview is the page itself once it's picked, not a
