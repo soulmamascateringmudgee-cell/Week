@@ -43,6 +43,13 @@ interface EventForm {
   biteSize: EventInput["biteSize"];
   /** Kept as a string — an empty box means "no budget", not zero. */
   budget: string;
+  /**
+   * Only on a job read in from a brief: what the brief asked for that this
+   * form has no box for — dishes not in the recipe book yet, and dietaries
+   * outside the five labels. Kept on the form, not just shown once, so it
+   * survives the job being built and saved again.
+   */
+  fromBrief?: { dishesNotInBook: string[]; otherDietaries: string[] };
 }
 
 const BLANK: EventForm = {
@@ -278,6 +285,37 @@ function EventPlanner() {
           and build it again — saving makes a new job rather than overwriting
           this one.
         </p>
+      )}
+
+      {/*
+        What the brief asked for that the boxes below can't hold. Without this
+        a brief whose menu wasn't in the recipe book opens as a job with no
+        food on it and no sign there was ever a menu — which reads as the
+        brief having been lost, and would be ordered as if it had.
+      */}
+      {form.fromBrief && form.fromBrief.dishesNotInBook.length > 0 && (
+        <div className="notice warn">
+          <strong>
+            {form.fromBrief.dishesNotInBook.length === 1
+              ? "1 dish from the brief isn't on this job"
+              : `${form.fromBrief.dishesNotInBook.length} dishes from the brief aren't on this job`}
+          </strong>{" "}
+          — they&rsquo;re not in your recipe book, so nothing below orders them:
+          <ul>
+            {form.fromBrief.dishesNotInBook.map((dish) => (
+              <li key={dish}>{dish}</li>
+            ))}
+          </ul>
+          <Link href="/recipes">Write them up</Link> and tick them under Your dishes, or tick
+          the nearest recipe you already have.
+        </div>
+      )}
+      {form.fromBrief && form.fromBrief.otherDietaries.length > 0 && (
+        <div className="notice warn">
+          <strong>Dietaries from the brief with no box here:</strong>{" "}
+          {form.fromBrief.otherDietaries.join("; ")}. They&rsquo;re on the notes of the
+          on-site shifts. Count any that belong under the boxes below yourself.
+        </div>
       )}
 
       <form onSubmit={submit}>

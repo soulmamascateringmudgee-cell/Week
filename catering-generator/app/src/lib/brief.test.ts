@@ -5,6 +5,7 @@ import {
   blankBrief,
   dishesNotInBook,
   isRealDate,
+  jobInputFor,
   jobTitleFor,
   missingFromBrief,
   readBrief,
@@ -358,4 +359,46 @@ test("rubbish in gives a blank brief out, not a crash", () => {
     assert.deepEqual(brief.shifts, []);
     assert.equal(brief.guests, null);
   }
+});
+
+/**
+ * Both of these came off the first real brief read in — a 105-guest wedding
+ * whose menu wasn't in the recipe book yet. The job opened with no food on it,
+ * no sign there had been a menu, and brisket and chicken thigh ticked because
+ * that's what a blank planner starts with.
+ */
+test("a job from a brief never inherits the planner's default proteins", () => {
+  const brief = readBrief({ guests: 105, dishes: [{ asWritten: "Roast topside" }] }, BOOK);
+  assert.deepEqual(jobInputFor(brief, []).proteins, []);
+});
+
+test("dishes not in the book and unboxed dietaries reach the planner", () => {
+  const brief = readBrief(
+    {
+      guests: 105,
+      dishes: [
+        { asWritten: "Roast topside with jus" },
+        { asWritten: "Apple crumble", recipe: "Apple crumble" },
+      ],
+      otherDietaries: ["1 pescatarian", "coeliac"],
+    },
+    BOOK,
+  );
+  const input = jobInputFor(brief, ["crumble-id"]);
+  assert.deepEqual(input.recipeIds, ["crumble-id"]);
+  assert.deepEqual(input.fromBrief, {
+    dishesNotInBook: ["Roast topside with jus"],
+    otherDietaries: ["1 pescatarian", "coeliac"],
+  });
+});
+
+test("a brief with nothing left over carries no fromBrief, and unstated fields stay out", () => {
+  const brief = readBrief(
+    { dishes: [{ asWritten: "Apple crumble", recipe: "Apple crumble" }] },
+    BOOK,
+  );
+  const input = jobInputFor(brief, ["crumble-id"]);
+  assert.equal("fromBrief" in input, false);
+  assert.equal("guests" in input, false);
+  assert.equal("style" in input, false);
 });

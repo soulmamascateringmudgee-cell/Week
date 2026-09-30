@@ -7,6 +7,7 @@ import {
   dishesNotInBook,
   jobTitleFor,
   missingFromBrief,
+  jobInputFor,
   recipeIdsFor,
   shiftDetail,
   shiftWhen,
@@ -248,29 +249,7 @@ export default function BriefPage() {
     setSaving(true);
 
     try {
-      // Only what the brief actually stated. Everything else is left out of
-      // the input entirely, so the planner's own defaults stand — visible, in
-      // boxes she can see — rather than a blank being saved as a decision.
-      const input: Record<string, unknown> = {
-        recipeIds,
-        ...(brief.guests !== null ? { guests: brief.guests } : {}),
-        ...(brief.eventDate !== null ? { eventDate: brief.eventDate } : {}),
-        ...(brief.style !== null ? { style: brief.style } : {}),
-        ...(brief.menuWeight !== null ? { menuWeight: brief.menuWeight } : {}),
-        ...(brief.serviceWindowHours !== null
-          ? { serviceWindowHours: brief.serviceWindowHours }
-          : {}),
-        ...(brief.budget !== null ? { budget: String(brief.budget) } : {}),
-        ...(brief.drinksService !== null ? { drinksService: brief.drinksService } : {}),
-        ...(brief.hotOrOutdoors !== null ? { hotOrOutdoors: brief.hotOrOutdoors } : {}),
-        ...(brief.dietaries.length > 0
-          ? {
-              dietaries: Object.fromEntries(
-                brief.dietaries.filter((diet) => diet.count > 0).map((d) => [d.label, d.count]),
-              ),
-            }
-          : {}),
-      };
+      const input = jobInputFor(brief, recipeIds);
 
       const jobResponse = await fetch("/api/jobs", {
         method: "POST",

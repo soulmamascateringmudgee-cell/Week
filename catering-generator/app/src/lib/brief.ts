@@ -375,6 +375,56 @@ export function recipeIdsFor(
   return ids;
 }
 
+/**
+ * What the brief hands the planner: the saved job's form input.
+ *
+ * Only what the brief actually stated goes in. Everything else is left out
+ * entirely, so the planner's own defaults stand — visible, in boxes she can
+ * see — rather than a blank being saved as a decision.
+ *
+ * With two exceptions, both found on the first real brief she read in.
+ *
+ * **Proteins are always saved empty.** The planner's blank form ticks brisket
+ * and chicken thigh, so leaving them out meant a wedding brief that never
+ * mentioned brisket opened with 105 serves of it queued on top of the menu.
+ * The brief's food arrives as dishes; a generic protein line is something she
+ * ticks on purpose or not at all.
+ *
+ * **What the planner has no box for rides along in `fromBrief`.** The dishes
+ * that aren't in her recipe book yet and the dietaries outside the form's five
+ * labels. On that first brief none of the menu was in the book, so the job
+ * opened with no dishes and no sign there had ever been a menu — which reads
+ * as the brief having been lost, and would have been ordered as if it had.
+ * The planner shows these above the form until they're dealt with.
+ */
+export function jobInputFor(brief: Brief, recipeIds: string[]): Record<string, unknown> {
+  const notInBook = dishesNotInBook(brief);
+  return {
+    recipeIds,
+    proteins: [],
+    ...(brief.guests !== null ? { guests: brief.guests } : {}),
+    ...(brief.eventDate !== null ? { eventDate: brief.eventDate } : {}),
+    ...(brief.style !== null ? { style: brief.style } : {}),
+    ...(brief.menuWeight !== null ? { menuWeight: brief.menuWeight } : {}),
+    ...(brief.serviceWindowHours !== null
+      ? { serviceWindowHours: brief.serviceWindowHours }
+      : {}),
+    ...(brief.budget !== null ? { budget: String(brief.budget) } : {}),
+    ...(brief.drinksService !== null ? { drinksService: brief.drinksService } : {}),
+    ...(brief.hotOrOutdoors !== null ? { hotOrOutdoors: brief.hotOrOutdoors } : {}),
+    ...(brief.dietaries.some((diet) => diet.count > 0)
+      ? {
+          dietaries: Object.fromEntries(
+            brief.dietaries.filter((diet) => diet.count > 0).map((d) => [d.label, d.count]),
+          ),
+        }
+      : {}),
+    ...(notInBook.length > 0 || brief.otherDietaries.length > 0
+      ? { fromBrief: { dishesNotInBook: notInBook, otherDietaries: brief.otherDietaries } }
+      : {}),
+  };
+}
+
 /** When a shift runs, in words, for a list. "no time given" when the brief didn't say. */
 export function shiftWhen(shift: BriefShift): string {
   if (shift.startTime === "" && shift.endTime === "") return "no time given";
