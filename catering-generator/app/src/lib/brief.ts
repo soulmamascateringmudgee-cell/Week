@@ -228,7 +228,10 @@ export function readBrief(raw: unknown, recipeNames: string[]): Brief {
   brief.unclear = strings(row.unclear, 300, 20);
   brief.otherDietaries = strings(row.otherDietaries, 200, 20);
 
-  brief.dietaries = readDietaries(row.dietaries);
+  brief.dietaries = countKnownEquivalents(
+    readDietaries(row.dietaries),
+    brief.otherDietaries,
+  );
   brief.dishes = readDishes(row.dishes, recipeNames);
   brief.shifts = readShifts(row.shifts);
 
@@ -247,6 +250,48 @@ function readDietaries(raw: unknown): { label: string; count: number }[] {
     if (!(DIETARY_LABELS as readonly string[]).includes(label)) continue;
     const count = wholePositive(row.count, 5000) ?? 0;
     counts.set(label, (counts.get(label) ?? 0) + count);
+  }
+  return [...counts].map(([label, count]) => ({ label, count }));
+}
+
+/**
+ * Requirements she has said are the same instruction as a box on the form.
+ *
+ * Her call, not the reader's: coeliac is cooked as gluten free, and lactose
+ * intolerance as dairy free. Everything else outside the five labels still
+ * stays verbatim and uncounted, because nobody has said what it's the same as.
+ */
+const SAME_AS_A_BOX: { pattern: RegExp; label: (typeof DIETARY_LABELS)[number] }[] = [
+  { pattern: /co?eliac/i, label: "Gluten free" },
+  { pattern: /lactose/i, label: "Dairy free" },
+];
+
+/**
+ * Count the requirements that belong under a box, and keep their wording.
+ *
+ * The entry stays in `otherDietaries` as well, so "coeliac" still reaches the
+ * crew's shift note word for word — a coeliac guest needs the cross-contact
+ * care that a gluten-free preference doesn't, and the box alone wouldn't say
+ * so.
+ *
+ * The number comes from the entry itself ("2 coeliac", "coeliac x2"). With no
+ * number the box is marked as named but left at zero rather than guessed at
+ * one — the same rule as everywhere else here, and the planner's notice tells
+ * her to count it. Where a brief gives "3 GF" and also "1 coeliac", the two are
+ * added: it may be the same guest counted twice, but over-catering one plate
+ * is the mistake that's safe to make with an allergy.
+ */
+function countKnownEquivalents(
+  dietaries: { label: string; count: number }[],
+  others: string[],
+): { label: string; count: number }[] {
+  const counts = new Map(dietaries.map((diet) => [diet.label, diet.count]));
+  for (const entry of others) {
+    const match = SAME_AS_A_BOX.find(({ pattern }) => pattern.test(entry));
+    if (!match) continue;
+    const stated = entry.match(/\d{1,4}/);
+    const count = stated ? Number(stated[0]) : 0;
+    counts.set(match.label, (counts.get(match.label) ?? 0) + count);
   }
   return [...counts].map(([label, count]) => ({ label, count }));
 }

@@ -314,7 +314,9 @@ function EventPlanner() {
         <div className="notice warn">
           <strong>Dietaries from the brief with no box here:</strong>{" "}
           {form.fromBrief.otherDietaries.join("; ")}. They&rsquo;re on the notes of the
-          on-site shifts. Count any that belong under the boxes below yourself.
+          on-site shifts. Coeliac and lactose intolerance are already counted under
+          Gluten free and Dairy free where the brief gave a number — check those, and
+          count any of the rest that belong under a box yourself.
         </div>
       )}
 

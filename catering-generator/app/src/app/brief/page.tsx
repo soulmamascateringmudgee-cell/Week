@@ -439,9 +439,10 @@ export default function BriefPage() {
                   <li key={diet}>{diet}</li>
                 ))}
               </ul>
-              These are written into the note on every on-site shift below, so the crew read them
-              on the day. They are <strong>not</strong> stored on the job itself — the planner
-              only holds the five tickboxes — so handle them yourself as well.
+              These are written word for word into the note on every on-site shift below, so the
+              crew read them on the day, and shown above the planner when the job opens. Coeliac
+              and lactose intolerance are also counted under Gluten free and Dairy free where the
+              brief gave a number; the rest aren&rsquo;t counted anywhere, so handle them yourself.
             </div>
           )}
 

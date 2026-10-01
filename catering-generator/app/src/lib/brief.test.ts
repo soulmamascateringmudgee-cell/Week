@@ -402,3 +402,33 @@ test("a brief with nothing left over carries no fromBrief, and unstated fields s
   assert.equal("guests" in input, false);
   assert.equal("style" in input, false);
 });
+
+/**
+ * Her rule: coeliac is cooked as gluten free, lactose intolerance as dairy
+ * free. Counted under the box, and still kept word for word for the crew.
+ */
+test("coeliac counts as gluten free and lactose as dairy free, wording kept", () => {
+  const brief = readBrief(
+    {
+      dietaries: [{ label: "Gluten free", count: 3 }],
+      otherDietaries: ["2 coeliac", "Celiac x1", "lactose intolerance", "1 pescatarian"],
+    },
+    BOOK,
+  );
+  const count = (label: string) => brief.dietaries.find((d) => d.label === label)?.count;
+  assert.equal(count("Gluten free"), 6);
+  // Named without a number: on the job as a requirement, but not guessed at one.
+  assert.equal(count("Dairy free"), 0);
+  assert.equal(count("Vegetarian"), undefined);
+  assert.deepEqual(brief.otherDietaries, [
+    "2 coeliac",
+    "Celiac x1",
+    "lactose intolerance",
+    "1 pescatarian",
+  ]);
+});
+
+test("a lactose count reaches the dairy free box on the saved job", () => {
+  const brief = readBrief({ otherDietaries: ["Lactose intolerant (2)"] }, BOOK);
+  assert.deepEqual(jobInputFor(brief, []).dietaries, { "Dairy free": 2 });
+});
